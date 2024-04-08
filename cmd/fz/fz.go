@@ -16,6 +16,8 @@ type task struct {
 	Args      []string
 	Frequency int
 	Timeout   int
+	Running   bool
+	State     int
 }
 type Tasks struct {
 	Task []task
@@ -75,8 +77,24 @@ func (t task) hash() uint32 {
 }
 
 func (t task) Run() bool {
+	if t.Running {
+		fmt.Println("task %s is still running: ", t.Command)
+		return false
+	}
+
 	fmt.Println("Running command: %s", t.Command)
+	t.Running = true
+
 	cmd := exec.Command(t.Command, t.Args...)
-	err := cmd.Run()
-	return err == nil
+	if err := cmd.Start(); err != nil {
+		log.Fatalf("cmd.Start: %v", err)
+	}
+
+	if err := cmd.Wait(); err != nil {
+		exiterr, _ := err.(*exec.ExitError)
+		t.State = exiterr.ExitCode()
+	}
+
+	t.Running = false
+	return true
 }

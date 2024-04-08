@@ -9,3 +9,9 @@ command = "ping"
 args = [ "-A", "-c3", "127.0.0.1" ]
 frequency = 3
 timeout = 1
+
+[[task]]
+command = "sleep"
+args = [ "4" ]
+frequency = 1
+timeout = 1
