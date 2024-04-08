@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"time"
 
+	"git.altos/flamingzombies/db"
+
 	"github.com/BurntSushi/toml"
 )
 
@@ -22,9 +24,15 @@ type Tasks struct {
 	Task []task
 }
 
-var RunningTasks = []uint32{}
-
 func main() {
+	defer db.DB.Close()
+
+	// set a key
+	err := db.DB.Put([]byte("name"), []byte("rosedb"))
+	if err != nil {
+		panic(err)
+	}
+
 	taskToml, err := ioutil.ReadFile("tasks.toml") // the file is inside the local directory
 	if err != nil {
 		fmt.Println("Err: %s", err)
@@ -80,27 +88,4 @@ func (t task) hash() uint32 {
 	h := fnv.New32a()
 	h.Write([]byte(s))
 	return h.Sum32()
-}
-
-func taskStarted(t *task) {
-	RunningTasks = append(RunningTasks, t.hash())
-}
-
-func taskStopped(t *task) {
-	newTasks := []uint32{}
-	for _, x := range RunningTasks {
-		if x != t.hash() {
-			newTasks = append(newTasks, x)
-		}
-	}
-	RunningTasks = newTasks
-}
-
-func taskRunning(t *task) bool {
-	for _, x := range RunningTasks {
-		if x == t.hash() {
-			return true
-		}
-	}
-	return false
 }
