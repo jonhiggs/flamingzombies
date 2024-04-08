@@ -16,12 +16,13 @@ type task struct {
 	Args      []string
 	Frequency int
 	Timeout   int
-	Running   bool
 	State     int
 }
 type Tasks struct {
 	Task []task
 }
+
+var RunningTasks = []uint32{}
 
 func main() {
 	taskToml, err := ioutil.ReadFile("tasks.toml") // the file is inside the local directory
@@ -36,18 +37,10 @@ func main() {
 
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
-	done := make(chan bool)
-	go func() {
-		time.Sleep(10 * time.Second)
-		done <- true
-	}()
+
 	for {
 		select {
-		case <-done:
-			fmt.Println("Done!")
-			return
 		case ts := <-ticker.C:
-			run(ts)
 			for _, t := range tasks.Task {
 				if t.Ready(ts) {
 					go t.Run()
@@ -57,12 +50,25 @@ func main() {
 	}
 }
 
-func run(t time.Time) {
-	fmt.Println("Current time: ", t)
-}
-
 func (t task) Ready(ts time.Time) bool {
 	return (uint32(ts.Second())+t.hash())%uint32(t.Frequency) == 0
+}
+
+func (t *task) Run() *task {
+	if taskRunning(t) {
+		return t
+	}
+	fmt.Printf("Running command: %s\n", t.Command)
+
+	taskStarted(t)
+	cmd := exec.Command(t.Command, t.Args...)
+	//err := cmd.Run()
+	cmd.Run()
+	//exiterr, _ := err.(*exec.ExitError)
+	//t.State = exiterr.ExitCode()
+
+	taskStopped(t)
+	return t
 }
 
 func (t task) hash() uint32 {
@@ -76,25 +82,25 @@ func (t task) hash() uint32 {
 	return h.Sum32()
 }
 
-func (t task) Run() bool {
-	if t.Running {
-		fmt.Println("task %s is still running: ", t.Command)
-		return false
+func taskStarted(t *task) {
+	RunningTasks = append(RunningTasks, t.hash())
+}
+
+func taskStopped(t *task) {
+	newTasks := []uint32{}
+	for _, x := range RunningTasks {
+		if x != t.hash() {
+			newTasks = append(newTasks, x)
+		}
 	}
+	RunningTasks = newTasks
+}
 
-	fmt.Println("Running command: %s", t.Command)
-	t.Running = true
-
-	cmd := exec.Command(t.Command, t.Args...)
-	if err := cmd.Start(); err != nil {
-		log.Fatalf("cmd.Start: %v", err)
+func taskRunning(t *task) bool {
+	for _, x := range RunningTasks {
+		if x == t.hash() {
+			return true
+		}
 	}
-
-	if err := cmd.Wait(); err != nil {
-		exiterr, _ := err.(*exec.ExitError)
-		t.State = exiterr.ExitCode()
-	}
-
-	t.Running = false
-	return true
+	return false
 }
