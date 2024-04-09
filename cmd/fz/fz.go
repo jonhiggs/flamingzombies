@@ -24,6 +24,7 @@ func main() {
 				if t.Ready(ts) {
 					fmt.Println("running command ", t.Command, t.Hash())
 					go t.Run()
+					fmt.Println(t.Retries)
 				}
 			}
 		}

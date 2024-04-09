@@ -17,6 +17,7 @@ type Task struct {
 	Timeout   int
 	State     int
 	Notifier  string
+	Retries   int
 }
 
 func (t Task) Hash() uint32 {

@@ -7,7 +7,17 @@ import (
 	"github.com/pelletier/go-toml"
 )
 
+const DEFAULT_RETRIES = 5
+const DEFAULT_TIMEOUT = 5
+
+type Defaults struct {
+	Notifier string
+	Retries  int
+	Timeout  int
+}
+
 type Config struct {
+	Defaults  Defaults
 	Notifiers []Notifier `toml:"notifier"`
 	Tasks     []Task     `toml:"task"`
 }
@@ -29,6 +39,29 @@ func ReadConfig() Config {
 	err = toml.Unmarshal(b, &config)
 	if err != nil {
 		panic(err)
+	}
+
+	// set the default defaults
+	if config.Defaults.Retries == 0 {
+		config.Defaults.Retries = DEFAULT_RETRIES
+	}
+	if config.Defaults.Timeout == 0 {
+		config.Defaults.Timeout = DEFAULT_TIMEOUT
+	}
+
+	// fill in the defaults
+	for i, t := range config.Tasks {
+		if len(t.Notifier) == 0 && len(config.Defaults.Notifier) != 0 {
+			t.Notifier = config.Defaults.Notifier
+		}
+
+		if t.Retries == 0 {
+			config.Tasks[i].Retries = config.Defaults.Retries
+		}
+
+		if t.Timeout == 0 {
+			config.Tasks[i].Timeout = config.Defaults.Timeout
+		}
 	}
 
 	return config
