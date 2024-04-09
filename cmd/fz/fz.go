@@ -27,6 +27,8 @@ type Tasks struct {
 func main() {
 	db.Start()
 
+	db.LockCh <- db.Lock{1223, true}
+
 	taskToml, err := ioutil.ReadFile("tasks.toml") // the file is inside the local directory
 	if err != nil {
 		fmt.Println("Err: %s", err)
