@@ -16,9 +16,6 @@ type Task struct {
 	Timeout   int
 	State     int
 }
-type Tasks struct {
-	Task []Task
-}
 
 func (t Task) Hash() uint32 {
 	s := t.Command
