@@ -27,8 +27,6 @@ type Tasks struct {
 func main() {
 	db.Start()
 
-	db.LockCh <- db.Lock{1223, true}
-
 	taskToml, err := ioutil.ReadFile("tasks.toml") // the file is inside the local directory
 	if err != nil {
 		fmt.Println("Err: %s", err)
@@ -47,6 +45,7 @@ func main() {
 		case ts := <-ticker.C:
 			for _, t := range tasks.Task {
 				if t.Ready(ts) {
+					fmt.Println("running command ", t.Command, t.hash())
 					go t.Run()
 				}
 			}
@@ -58,15 +57,19 @@ func (t task) Ready(ts time.Time) bool {
 	return (uint32(ts.Second())+t.hash())%uint32(t.Frequency) == 0
 }
 
-func (t *task) Run() bool {
-	//if val {
-	//	return t
-	//}
+func (t task) Run() bool {
+	if db.IsLocked(t.hash()) {
+		fmt.Println("waiting for lock to release")
+		return true
+	}
+
 	fmt.Printf("Running command: %s\n", t.Command)
 
+	db.LockCh <- db.Lock{t.hash(), true}
 	cmd := exec.Command(t.Command, t.Args...)
 	//err := cmd.Run()
 	cmd.Run()
+	db.LockCh <- db.Lock{t.hash(), false}
 	//exiterr, _ := err.(*exec.ExitError)
 	//t.State = exiterr.ExitCode()
 
