@@ -36,17 +36,31 @@ func (t Task) Ready(ts time.Time) bool {
 }
 
 func (t Task) Run() bool {
-	if db.IsLocked(t.Hash()) {
+	if t.isLocked() {
 		fmt.Println("waiting for lock to release")
 		return true
 	}
 
 	fmt.Printf("Running command: %s\n", t.Command)
 
-	db.LockCh <- db.Lock{t.Hash(), true}
+	t.lock()
 	cmd := exec.Command(t.Command, t.Args...)
 	cmd.Run()
-	db.LockCh <- db.Lock{t.Hash(), false}
+	t.unlock()
 
+	return true
+}
+
+func (t Task) isLocked() bool {
+	return db.IsLocked(t.Hash())
+}
+
+func (t Task) lock() bool {
+	db.LockCh <- db.Lock{t.Hash(), true}
+	return true
+}
+
+func (t Task) unlock() bool {
+	db.LockCh <- db.Lock{t.Hash(), false}
 	return true
 }

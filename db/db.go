@@ -26,22 +26,23 @@ func Start() {
 				fmt.Println(l)
 				if l.Locked {
 					fmt.Println("Locking ", l.Hash)
-					saveLock(l.Hash)
+					lock(l.Hash)
 				} else {
 					fmt.Println("Unlocking ", l.Hash)
-					deleteLock(l.Hash)
+					unlock(l.Hash)
 				}
 			}
 		}
 	}()
 }
 
-func saveLock(hash uint32) {
-	deleteLock(hash)
+func lock(hash uint32) bool {
+	unlock(hash)
 	taskLocks = append(taskLocks, hash)
+	return true
 }
 
-func deleteLock(hash uint32) {
+func unlock(hash uint32) bool {
 	newLocks := []uint32{}
 	for _, h := range taskLocks {
 		if h != hash {
@@ -50,6 +51,7 @@ func deleteLock(hash uint32) {
 	}
 
 	taskLocks = newLocks
+	return true
 }
 
 func IsLocked(hash uint32) bool {
