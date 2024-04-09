@@ -25,13 +25,7 @@ type Tasks struct {
 }
 
 func main() {
-	defer db.DB.Close()
-
-	// set a key
-	err := db.DB.Put([]byte("name"), []byte("rosedb"))
-	if err != nil {
-		panic(err)
-	}
+	db.Start()
 
 	taskToml, err := ioutil.ReadFile("tasks.toml") // the file is inside the local directory
 	if err != nil {
@@ -62,21 +56,19 @@ func (t task) Ready(ts time.Time) bool {
 	return (uint32(ts.Second())+t.hash())%uint32(t.Frequency) == 0
 }
 
-func (t *task) Run() *task {
-	if taskRunning(t) {
-		return t
-	}
+func (t *task) Run() bool {
+	//if val {
+	//	return t
+	//}
 	fmt.Printf("Running command: %s\n", t.Command)
 
-	taskStarted(t)
 	cmd := exec.Command(t.Command, t.Args...)
 	//err := cmd.Run()
 	cmd.Run()
 	//exiterr, _ := err.(*exec.ExitError)
 	//t.State = exiterr.ExitCode()
 
-	taskStopped(t)
-	return t
+	return true
 }
 
 func (t task) hash() uint32 {

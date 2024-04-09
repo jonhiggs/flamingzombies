@@ -1,40 +1,46 @@
 package db
 
-import "github.com/rosedblabs/rosedb/v2"
+type Lock struct {
+	Hash   uint32
+	Locked bool
+}
 
-var DB *rosedb.DB
+type State struct {
+	Hash  uint32
+	State int
+}
 
-func init() {
-	// specify the options
-	options := rosedb.DefaultOptions
-	options.DirPath = "/tmp/rosedb_basic"
+var taskStates []int
+var taskLocks []uint32
 
-	// open a database
-	var err error
-	DB, err = rosedb.Open(options)
-	if err != nil {
-		panic(err)
+var LockCh = make(chan Lock)
+var StateCh = make(chan State)
+
+func Start() {
+	go func() {
+		select {
+		case l := <-LockCh:
+			if l.Locked {
+				saveLock(l.Hash)
+			} else {
+				deleteLock(l.Hash)
+			}
+		}
+	}()
+}
+
+func saveLock(hash uint32) {
+	deleteLock(hash)
+	taskLocks = append(taskLocks, hash)
+}
+
+func deleteLock(hash uint32) {
+	newLocks := []uint32{}
+	for _, h := range taskLocks {
+		if h != hash {
+			newLocks = append(newLocks, h)
+		}
 	}
-	//defer func() {
-	//	_ = DB.Close()
-	//}()
 
-	//// set a key
-	//err = DB.Put([]byte("name"), []byte("rosedb"))
-	//if err != nil {
-	//	panic(err)
-	//}
-
-	//// get a key
-	//val, err := DB.Get([]byte("name"))
-	//if err != nil {
-	//	panic(err)
-	//}
-	//println(string(val))
-
-	//// delete a key
-	//err = DB.Delete([]byte("name"))
-	//if err != nil {
-	//	panic(err)
-	//}
+	taskLocks = newLocks
 }
