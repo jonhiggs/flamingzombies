@@ -10,11 +10,13 @@ import (
 )
 
 type Task struct {
+	Name      string
 	Command   string
 	Args      []string
 	Frequency int
 	Timeout   int
 	State     int
+	Notifier  string
 }
 
 func (t Task) Hash() uint32 {

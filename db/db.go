@@ -1,7 +1,5 @@
 package db
 
-import "fmt"
-
 type Lock struct {
 	Hash   uint32
 	Locked bool
@@ -23,12 +21,9 @@ func Start() {
 		for {
 			select {
 			case l := <-LockCh:
-				fmt.Println(l)
 				if l.Locked {
-					fmt.Println("Locking ", l.Hash)
 					lock(l.Hash)
 				} else {
-					fmt.Println("Unlocking ", l.Hash)
 					unlock(l.Hash)
 				}
 			}

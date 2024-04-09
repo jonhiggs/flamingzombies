@@ -9,8 +9,10 @@ import (
 )
 
 func main() {
-	db.Start()
 	config := fz.ReadConfig()
+
+	db.Start()
+	fz.ProcessNotifications()
 
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()

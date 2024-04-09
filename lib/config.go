@@ -8,7 +8,8 @@ import (
 )
 
 type Config struct {
-	Tasks []Task `toml:"task"`
+	Notifiers []Notifier `toml:"notifier"`
+	Tasks     []Task     `toml:"task"`
 }
 
 func ReadConfig() Config {

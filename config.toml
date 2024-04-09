@@ -1,17 +1,28 @@
 [[task]]
+name = "whoami"
 command = "whoami"
 args = ["--help"]
 frequency = 3
 timeout = 1
+notifier = "echo"
 
 [[task]]
+name = "ping.localhost"
 command = "ping"
 args = [ "-A", "-c3", "127.0.0.1" ]
 frequency = 3
 timeout = 1
+notifier = "echo"
 
 [[task]]
+name = "sleep"
 command = "sleep"
 args = [ "4" ]
 frequency = 1
 timeout = 1
+notifier = "echo"
+
+[[notifier]]
+name = "echo"
+command = "echo"
+args = []
