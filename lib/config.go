@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/pelletier/go-toml"
+	log "github.com/sirupsen/logrus"
 )
 
 const DEFAULT_RETRIES = 5
@@ -66,6 +67,15 @@ func ReadConfig() Config {
 
 		// start the history in an unknown state
 		config.Tasks[i].History = 0b10
+
+		// validate the inputs
+		if config.Tasks[i].Retries > 32 {
+			log.WithFields(log.Fields{
+				"file":      "lib/config.go",
+				"task_name": t.Name,
+				"task_hash": t.Hash(),
+			}).Fatal("cannot retry more than 32 times")
+		}
 	}
 
 	return config
