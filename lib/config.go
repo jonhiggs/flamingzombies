@@ -18,6 +18,7 @@ type Defaults struct {
 
 type Config struct {
 	Defaults  Defaults
+	LogLevel  string     `toml:"log_level"`
 	Notifiers []Notifier `toml:"notifiers"`
 	Tasks     []Task     `toml:"task"`
 }

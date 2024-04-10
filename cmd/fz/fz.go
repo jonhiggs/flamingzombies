@@ -7,13 +7,17 @@ import (
 	fz "git.altos/flamingzombies/lib"
 )
 
-func main() {
-	config := fz.ReadConfig()
+var config fz.Config
 
+func init() {
+	config = fz.ReadConfig()
+	fz.StartLogger(config.LogLevel)
 	db.Start()
 	fz.ProcessNotifications()
 	fz.RecordStates()
+}
 
+func main() {
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 
