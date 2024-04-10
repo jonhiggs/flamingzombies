@@ -3,10 +3,13 @@ package fz
 import (
 	"hash/fnv"
 	"os/exec"
+	"sync"
 	"time"
-
-	"git.altos/flamingzombies/db"
 )
+
+// list of task hashes that are locked
+var taskLocks []uint32
+var unlockLock sync.Mutex // ensure two unlocks don't run concurrently
 
 type Task struct {
 	Name      string
@@ -55,15 +58,32 @@ func (t Task) Run() bool {
 }
 
 func (t Task) isLocked() bool {
-	return db.IsLocked(t.Hash())
+	for _, h := range taskLocks {
+		if h == t.Hash() {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (t Task) lock() bool {
-	db.LockCh <- db.Lock{t.Hash(), true}
+	if !t.isLocked() {
+		taskLocks = append(taskLocks, t.Hash())
+	}
+
 	return true
 }
 
 func (t Task) unlock() bool {
-	db.LockCh <- db.Lock{t.Hash(), false}
+	unlockLock.Lock()
+	defer unlockLock.Unlock()
+	newLocks := []uint32{}
+	for _, h := range taskLocks {
+		if h != t.Hash() {
+			newLocks = append(newLocks, h)
+		}
+	}
+	taskLocks = newLocks
 	return true
 }
