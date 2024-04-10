@@ -22,9 +22,9 @@ func main() {
 	for {
 		select {
 		case ts := <-ticker.C:
-			for _, t := range config.Tasks {
+			for i, t := range config.Tasks {
 				if t.Ready(ts) {
-					go t.Run()
+					go config.Tasks[i].Run()
 				}
 			}
 		}

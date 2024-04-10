@@ -12,27 +12,27 @@ priority = 3
 name = "whoami"
 command = "whoami"
 args = ["--help"]
-frequency = 3
-
-[[task]]
-name = "ping.localhost"
-command = "ping"
-args = [ "-A", "-c3", "127.0.0.1" ]
-frequency = 3
-
-[[task]]
-name = "sleep"
-command = "sleep"
-args = [ "4" ]
 frequency = 1
 
-[[task]]
-name = "false"
-command = "false"
-args = []
-frequency = 1
-
-[[notifier]]
-name = "echo"
-command = "contrib/notifier/echo"
-args = []
+#[[task]]
+#name = "ping.localhost"
+#command = "ping"
+#args = [ "-A", "-c3", "127.0.0.1" ]
+#frequency = 3
+#
+#[[task]]
+#name = "sleep"
+#command = "sleep"
+#args = [ "4" ]
+#frequency = 1
+#
+#[[task]]
+#name = "false"
+#command = "false"
+#args = []
+#frequency = 1
+#
+#[[notifier]]
+#name = "echo"
+#command = "contrib/notifier/echo"
+#args = []

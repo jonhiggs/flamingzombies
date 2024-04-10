@@ -1,6 +1,7 @@
 package fz
 
 import (
+	"fmt"
 	"hash/fnv"
 	"os/exec"
 	"sync"
@@ -22,6 +23,7 @@ type Task struct {
 	State     int
 	Notifiers []string
 	Retries   int
+	History   uint32 // represented in binary. sucessess are high
 }
 
 func (t Task) Hash() uint32 {
@@ -39,26 +41,53 @@ func (t Task) Ready(ts time.Time) bool {
 	return (uint32(ts.Second())+t.Hash())%uint32(t.Frequency) == 0
 }
 
-func (t Task) Run() bool {
+func (t *Task) Run() bool {
 	if t.isLocked() {
-		log.Info("aborting task ", t.Name, " because it is locked")
+		log.WithFields(log.Fields{
+			"file":      "lib/task.go",
+			"task_name": t.Name,
+			"task_hash": t.Hash(),
+		}).Info("aborting task because it is locked")
 		return true
 	}
 
-	log.Info("executing task ", t.Name)
+	log.WithFields(log.Fields{
+		"file":      "lib/task.go",
+		"task_name": t.Name,
+		"task_hash": t.Hash(),
+	}).Info("executing task")
 	cmd := exec.Command(t.Command, t.Args...)
 	t.lock()
+	defer t.unlock()
 
 	err := cmd.Run()
-	t.unlock()
 
 	if _, ok := err.(*exec.ExitError); ok {
-		StateRecordCh <- StateRecord{t.Hash(), false}
+		t.RecordStatus(false)
 		return false
 	}
 
-	StateRecordCh <- StateRecord{t.Hash(), true}
+	t.RecordStatus(true)
 	return true
+}
+
+func (t *Task) RecordStatus(b bool) {
+	log.WithFields(log.Fields{
+		"file":      "lib/task.go",
+		"task_name": t.Name,
+		"task_hash": t.Hash(),
+	}).Info("recording status")
+
+	t.History = t.History << 1
+	if b {
+		t.History += 1
+	}
+
+	log.WithFields(log.Fields{
+		"file":      "lib/task.go",
+		"task_name": t.Name,
+		"task_hash": t.Hash(),
+	}).Trace(fmt.Sprintf("history is %b", t.History))
 }
 
 func (t Task) isLocked() bool {
@@ -72,7 +101,11 @@ func (t Task) isLocked() bool {
 }
 
 func (t Task) lock() bool {
-	log.Trace("locking ", t.Name)
+	log.WithFields(log.Fields{
+		"file":      "lib/task.go",
+		"task_name": t.Name,
+		"task_hash": t.Hash(),
+	}).Info("locking")
 	if !t.isLocked() {
 		taskLocks = append(taskLocks, t.Hash())
 	}
@@ -81,7 +114,11 @@ func (t Task) lock() bool {
 }
 
 func (t Task) unlock() bool {
-	log.Trace("unlocking ", t.Name)
+	log.WithFields(log.Fields{
+		"file":      "lib/task.go",
+		"task_name": t.Name,
+		"task_hash": t.Hash(),
+	}).Info("unlocking")
 	unlockLock.Lock()
 	defer unlockLock.Unlock()
 	newLocks := []uint32{}
