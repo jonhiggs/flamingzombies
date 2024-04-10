@@ -5,6 +5,8 @@ import (
 	"os/exec"
 	"sync"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // list of task hashes that are locked
@@ -39,9 +41,11 @@ func (t Task) Ready(ts time.Time) bool {
 
 func (t Task) Run() bool {
 	if t.isLocked() {
+		log.Info("aborting task ", t.Name, " because it is locked")
 		return true
 	}
 
+	log.Info("executing task ", t.Name)
 	cmd := exec.Command(t.Command, t.Args...)
 	t.lock()
 
@@ -68,6 +72,7 @@ func (t Task) isLocked() bool {
 }
 
 func (t Task) lock() bool {
+	log.Trace("locking ", t.Name)
 	if !t.isLocked() {
 		taskLocks = append(taskLocks, t.Hash())
 	}
@@ -76,6 +81,7 @@ func (t Task) lock() bool {
 }
 
 func (t Task) unlock() bool {
+	log.Trace("unlocking ", t.Name)
 	unlockLock.Lock()
 	defer unlockLock.Unlock()
 	newLocks := []uint32{}
