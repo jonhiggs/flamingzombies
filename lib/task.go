@@ -43,11 +43,18 @@ func (t Task) Run() bool {
 
 	fmt.Printf("Running command: %s\n", t.Command)
 
-	t.lock()
 	cmd := exec.Command(t.Command, t.Args...)
-	cmd.Run()
+	t.lock()
+
+	err := cmd.Run()
 	t.unlock()
 
+	if _, ok := err.(*exec.ExitError); ok {
+		StateRecordCh <- StateRecord{t.Hash(), false}
+		return false
+	}
+
+	StateRecordCh <- StateRecord{t.Hash(), true}
 	return true
 }
 

@@ -62,6 +62,9 @@ func ReadConfig() Config {
 		if t.Timeout == 0 {
 			config.Tasks[i].Timeout = config.Defaults.Timeout
 		}
+
+		// prepare to receive state signals
+		States = append(States, State{t.Hash(), t.Retries, 0})
 	}
 
 	return config

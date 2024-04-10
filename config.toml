@@ -24,6 +24,12 @@ command = "sleep"
 args = [ "4" ]
 frequency = 1
 
+[[task]]
+name = "false"
+command = "false"
+args = []
+frequency = 1
+
 [[notifier]]
 name = "echo"
 command = "contrib/notifier/echo"

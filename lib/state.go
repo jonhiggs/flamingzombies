@@ -2,24 +2,41 @@ package fz
 
 import "fmt"
 
+type StateRecord struct {
+	Hash   uint32
+	Status bool
+}
+
 type State struct {
 	Hash    uint32
 	Retries int
 	History uint32
 }
 
-var states []State
-var StateCh = make(chan State, 100)
+var States []State
+var StateRecordCh = make(chan StateRecord, 100)
 
 func RecordStates() {
 	go func() {
 		for {
 			select {
-			case s := <-StateCh:
-				fmt.Println(s)
+			case r := <-StateRecordCh:
+				st := FindState(r.Hash)
+				st.Append(r.Status)
+				fmt.Printf("%d, %b\n", st.Hash, st.History)
 			}
 		}
 	}()
+}
+
+func FindState(hash uint32) *State {
+	for i, st := range States {
+		if st.Hash == hash {
+			return &States[i]
+		}
+	}
+
+	return nil
 }
 
 func (st *State) Append(b bool) {
@@ -34,7 +51,6 @@ func (st *State) Append(b bool) {
 //	-1: unknown
 //	 0: down
 //	 1: up
-
 func (st State) Status() int {
 	var mask uint32
 	for i := 0; i < st.Retries; i++ {

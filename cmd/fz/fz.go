@@ -13,6 +13,7 @@ func main() {
 
 	db.Start()
 	fz.ProcessNotifications()
+	fz.RecordStates()
 
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()

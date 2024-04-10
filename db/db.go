@@ -8,14 +8,6 @@ type Lock struct {
 var taskLocks []uint32
 var LockCh = make(chan Lock, 100)
 
-type State struct {
-	Hash  uint32
-	State uint32
-}
-
-var states []State
-var StateCh = make(chan State, 100)
-
 func Start() {
 	go func() {
 		for {
@@ -26,8 +18,6 @@ func Start() {
 				} else {
 					unlock(l.Hash)
 				}
-			case s := <-StateCh:
-				appendState(s.Hash, s.State)
 			}
 		}
 	}()
@@ -60,29 +50,3 @@ func IsLocked(hash uint32) bool {
 
 	return false
 }
-
-func appendState(hash uint32, state uint32) {
-	//st := curState(hash)
-	//st = st << 1
-	//if state > 0 {
-	//	st += 1
-	//}
-
-	//if curState == nil {
-	//	curState = st
-	//} else {
-	//	curState.State = curState.State << 1
-	//	if st.State < 0 {
-	//		curState.State += 1
-	//	}
-	//}
-}
-
-//func currentState(hash uint32) uint32 {
-//	for _, s := range states {
-//		if s.Hash() == hash {
-//			return s.State
-//		}
-//	}
-//	return 0
-//}
