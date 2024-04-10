@@ -1,7 +1,6 @@
 package fz
 
 import (
-	"fmt"
 	"hash/fnv"
 	"os/exec"
 	"time"
@@ -37,11 +36,8 @@ func (t Task) Ready(ts time.Time) bool {
 
 func (t Task) Run() bool {
 	if t.isLocked() {
-		fmt.Println("waiting for lock to release")
 		return true
 	}
-
-	fmt.Printf("Running command: %s\n", t.Command)
 
 	cmd := exec.Command(t.Command, t.Args...)
 	t.lock()

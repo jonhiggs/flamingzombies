@@ -1,7 +1,5 @@
 package fz
 
-import "fmt"
-
 type StateRecord struct {
 	Hash   uint32
 	Status bool
@@ -23,7 +21,6 @@ func RecordStates() {
 			case r := <-StateRecordCh:
 				st := FindState(r.Hash)
 				st.Append(r.Status)
-				fmt.Printf("%d, %b\n", st.Hash, st.History)
 			}
 		}
 	}()
@@ -36,7 +33,7 @@ func FindState(hash uint32) *State {
 		}
 	}
 
-	return nil
+	panic("state could not be found")
 }
 
 func (st *State) Append(b bool) {

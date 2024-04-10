@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"git.altos/flamingzombies/db"
@@ -23,9 +22,7 @@ func main() {
 		case ts := <-ticker.C:
 			for _, t := range config.Tasks {
 				if t.Ready(ts) {
-					fmt.Println("running command ", t.Command, t.Hash())
 					go t.Run()
-					fmt.Println(t.Retries)
 				}
 			}
 		}
