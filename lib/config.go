@@ -55,7 +55,7 @@ func ReadConfig() Config {
 	// fill in the defaults
 	for i, t := range config.Tasks {
 		if len(t.Notifiers) == 0 && len(config.Defaults.Notifiers) != 0 {
-			t.Notifiers = config.Defaults.Notifiers
+			t.NotifierStr = config.Defaults.Notifiers
 		}
 
 		if t.Retries == 0 {
@@ -64,6 +64,11 @@ func ReadConfig() Config {
 
 		if t.Timeout == 0 {
 			config.Tasks[i].Timeout = time.Duration(config.Defaults.Timeout) * time.Second
+		}
+
+		// construct the Task.Notifiers
+		for _, ns := range config.Tasks[i].NotifierStr {
+			config.Tasks[i].Notifiers = append(config.Tasks[i].Notifiers, config.FindNotifier(ns))
 		}
 
 		// start the history in an unknown state
@@ -80,4 +85,18 @@ func ReadConfig() Config {
 	}
 
 	return config
+}
+
+func (c Config) FindNotifier(s string) *Notifier {
+	for i, _ := range c.Notifiers {
+		if s == c.Notifiers[i].Name {
+			return &c.Notifiers[i]
+		}
+	}
+
+	log.WithFields(log.Fields{
+		"file":          "lib/config.go",
+		"notifier_name": s,
+	}).Fatal("unknown notifier")
+	return nil
 }

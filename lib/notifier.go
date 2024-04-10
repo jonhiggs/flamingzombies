@@ -10,7 +10,7 @@ type Notifier struct {
 }
 
 type Notification struct {
-	Notifier Notifier
+	Notifier *Notifier
 	Subject  string
 	Body     string
 }

@@ -13,16 +13,17 @@ import (
 var unlockLock sync.Mutex // ensure two unlocks don't run concurrently
 
 type Task struct {
-	Name       string        // friendly name
-	Command    string        // command
-	Args       []string      // command aruments
-	Frequency  int           // how often to run
-	Timeout    time.Duration // how long an execution may run
-	LockTimout time.Duration // how long to wait for a lock
-	Notifiers  []string      // notifiers to trigger upon state change
-	Retries    int           // historic values used to determine the status
-	History    uint32        // represented in binary. sucessess are high
-	Mutex      sync.Mutex    // lock to ensure one task runs at a time
+	Name        string        // friendly name
+	Command     string        // command
+	Args        []string      // command aruments
+	Frequency   int           // how often to run
+	Timeout     time.Duration // how long an execution may run
+	LockTimout  time.Duration // how long to wait for a lock
+	NotifierStr []string      // notifiers to trigger upon state change
+	Notifiers   []*Notifier   // notifiers to trigger upon state change
+	Retries     int           // historic values used to determine the status
+	History     uint32        // represented in binary. sucessess are high
+	Mutex       sync.Mutex    // lock to ensure one task runs at a time
 }
 
 func (t Task) Hash() uint32 {
@@ -59,7 +60,19 @@ func (t *Task) Run() bool {
 		return false
 	}
 
+	originalState := t.State()
 	t.RecordStatus(true)
+	newState := t.State()
+
+	if newState != originalState {
+		for _, n := range t.Notifiers {
+			NotifyCh <- Notification{
+				Notifier: n,
+				Subject:  fmt.Sprintf("command %s changed from %d to %d", t.Name, originalState, newState),
+				Body:     "blah, blah, blah",
+			}
+		}
+	}
 	return true
 }
 
