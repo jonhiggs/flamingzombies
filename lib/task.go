@@ -13,16 +13,16 @@ import (
 var unlockLock sync.Mutex // ensure two unlocks don't run concurrently
 
 type Task struct {
-	Name       string   // friendly name
-	Command    string   // command
-	Args       []string // command aruments
-	Frequency  int      // how often to run
-	Timeout    int      // how long an execution may run
-	LockTimout int      // how long to wait for a lock
-	Notifiers  []string
-	Retries    int
-	History    uint32     // represented in binary. sucessess are high
-	Mutex      sync.Mutex // lock to ensure one task runs at a time
+	Name       string        // friendly name
+	Command    string        // command
+	Args       []string      // command aruments
+	Frequency  int           // how often to run
+	Timeout    time.Duration // how long an execution may run
+	LockTimout time.Duration // how long to wait for a lock
+	Notifiers  []string      // notifiers to trigger upon state change
+	Retries    int           // historic values used to determine the status
+	History    uint32        // represented in binary. sucessess are high
+	Mutex      sync.Mutex    // lock to ensure one task runs at a time
 }
 
 func (t Task) Hash() uint32 {
@@ -83,6 +83,27 @@ func (t *Task) RecordStatus(b bool) {
 }
 
 // extract the current state from the History
+// the returned values are:
+//
+//	-1: unknown
+//	 0: down
+//	 1: up
 func (t *Task) State() int {
+	var mask uint32
+	for i := 0; i < t.Retries; i++ {
+		mask = mask << 1
+		mask += 1
+	}
+
+	v := t.History & mask
+
+	if v == 0 {
+		return 0
+	}
+
+	if v == mask {
+		return 1
+	}
+
 	return -1
 }

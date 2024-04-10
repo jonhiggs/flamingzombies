@@ -3,6 +3,7 @@ package fz
 import (
 	"io"
 	"os"
+	"time"
 
 	"github.com/pelletier/go-toml"
 	log "github.com/sirupsen/logrus"
@@ -62,7 +63,7 @@ func ReadConfig() Config {
 		}
 
 		if t.Timeout == 0 {
-			config.Tasks[i].Timeout = config.Defaults.Timeout
+			config.Tasks[i].Timeout = time.Duration(config.Defaults.Timeout) * time.Second
 		}
 
 		// start the history in an unknown state
