@@ -3,9 +3,10 @@ package fz
 import "fmt"
 
 type Notifier struct {
-	Name    string
-	Command string
-	Args    []string
+	Name        string
+	Command     string
+	Args        []string
+	MinPriority int
 }
 
 type Notification struct {

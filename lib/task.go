@@ -16,7 +16,7 @@ type Task struct {
 	Frequency int
 	Timeout   int
 	State     int
-	Notifier  string
+	Notifiers []string
 	Retries   int
 }
 

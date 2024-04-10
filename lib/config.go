@@ -11,14 +11,14 @@ const DEFAULT_RETRIES = 5
 const DEFAULT_TIMEOUT = 5
 
 type Defaults struct {
-	Notifier string
-	Retries  int
-	Timeout  int
+	Notifiers []string
+	Retries   int
+	Timeout   int
 }
 
 type Config struct {
 	Defaults  Defaults
-	Notifiers []Notifier `toml:"notifier"`
+	Notifiers []Notifier `toml:"notifiers"`
 	Tasks     []Task     `toml:"task"`
 }
 
@@ -51,8 +51,8 @@ func ReadConfig() Config {
 
 	// fill in the defaults
 	for i, t := range config.Tasks {
-		if len(t.Notifier) == 0 && len(config.Defaults.Notifier) != 0 {
-			t.Notifier = config.Defaults.Notifier
+		if len(t.Notifiers) == 0 && len(config.Defaults.Notifiers) != 0 {
+			t.Notifiers = config.Defaults.Notifiers
 		}
 
 		if t.Retries == 0 {

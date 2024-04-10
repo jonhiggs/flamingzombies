@@ -1,7 +1,10 @@
 [defaults]
 retries = 5
 timeout = 1
-notifier = "echo"
+notifiers = [
+    "echo"
+]
+priority = 3
 
 [[task]]
 name = "whoami"
@@ -23,5 +26,5 @@ frequency = 1
 
 [[notifier]]
 name = "echo"
-command = "echo"
+command = "contrib/notifier/echo"
 args = []
