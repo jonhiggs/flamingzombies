@@ -10,8 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// list of task hashes that are locked
-var taskLocks []uint32
 var unlockLock sync.Mutex // ensure two unlocks don't run concurrently
 
 type Task struct {
@@ -53,8 +51,6 @@ func (t *Task) Run() bool {
 		"task_hash": t.Hash(),
 	}).Info("executing task")
 	cmd := exec.Command(t.Command, t.Args...)
-	t.lock()
-	defer t.unlock()
 
 	err := cmd.Run()
 
@@ -88,46 +84,5 @@ func (t *Task) RecordStatus(b bool) {
 
 // extract the current state from the History
 func (t *Task) State() int {
-	// TODO
-}
-
-func (t Task) isLocked() bool {
-	for _, h := range taskLocks {
-		if h == t.Hash() {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (t Task) lock() bool {
-	log.WithFields(log.Fields{
-		"file":      "lib/task.go",
-		"task_name": t.Name,
-		"task_hash": t.Hash(),
-	}).Info("locking")
-	if !t.isLocked() {
-		taskLocks = append(taskLocks, t.Hash())
-	}
-
-	return true
-}
-
-func (t Task) unlock() bool {
-	log.WithFields(log.Fields{
-		"file":      "lib/task.go",
-		"task_name": t.Name,
-		"task_hash": t.Hash(),
-	}).Info("unlocking")
-	unlockLock.Lock()
-	defer unlockLock.Unlock()
-	newLocks := []uint32{}
-	for _, h := range taskLocks {
-		if h != t.Hash() {
-			newLocks = append(newLocks, h)
-		}
-	}
-	taskLocks = newLocks
-	return true
+	return -1
 }

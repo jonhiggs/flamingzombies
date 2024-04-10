@@ -64,8 +64,8 @@ func ReadConfig() Config {
 			config.Tasks[i].Timeout = config.Defaults.Timeout
 		}
 
-		// prepare to receive state signals
-		States = append(States, State{t.Hash(), t.Retries, 0b10})
+		// start the history in an unknown state
+		config.Tasks[i].History = 0b10
 	}
 
 	return config

@@ -12,7 +12,6 @@ func init() {
 	config = fz.ReadConfig()
 	fz.StartLogger(config.LogLevel)
 	fz.ProcessNotifications()
-	fz.RecordStates()
 }
 
 func main() {
