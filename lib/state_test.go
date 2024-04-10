@@ -44,6 +44,7 @@ func TestStateStatus(t *testing.T) {
 	}{
 		{State{0, 5, 0b11111}, 1},  // up
 		{State{0, 5, 0b00000}, 0},  // down
+		{State{0, 5, 0b10111}, -1}, // unknown
 		{State{0, 5, 0b01000}, -1}, // unknown
 	}
 

@@ -1,5 +1,7 @@
 package fz
 
+import "fmt"
+
 type StateRecord struct {
 	Hash   uint32
 	Status bool
@@ -20,7 +22,22 @@ func RecordStates() {
 			select {
 			case r := <-StateRecordCh:
 				st := FindState(r.Hash)
+				statusA := st.Status()
 				st.Append(r.Status)
+				st = FindState(r.Hash)
+				statusB := st.Status()
+
+				fmt.Printf("recording status of %d: %b: %b -> %b\n", st.Hash, st.History, statusA, statusB)
+
+				if statusA != statusB {
+					// TODO: signal the notification channel
+					fmt.Printf(
+						"status of %d has changed from %d to %d\n",
+						st.Hash,
+						statusA,
+						statusB,
+					)
+				}
 			}
 		}
 	}()

@@ -64,7 +64,7 @@ func ReadConfig() Config {
 		}
 
 		// prepare to receive state signals
-		States = append(States, State{t.Hash(), t.Retries, 0})
+		States = append(States, State{t.Hash(), t.Retries, 0b10})
 	}
 
 	return config
