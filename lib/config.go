@@ -15,7 +15,7 @@ const DEFAULT_TIMEOUT = 5
 type Defaults struct {
 	Notifiers []string
 	Retries   int
-	Timeout   int
+	Timeout   int // better to put the timeout into the commmand
 }
 
 type Config struct {
@@ -64,6 +64,14 @@ func ReadConfig() Config {
 
 		if t.Timeout == 0 {
 			config.Tasks[i].Timeout = time.Duration(config.Defaults.Timeout) * time.Second
+		} else if t.Timeout > 0 {
+			config.Tasks[i].Timeout = time.Duration(t.Timeout) * time.Second
+		}
+
+		if t.Frequency == 0 {
+			config.Tasks[i].Frequency = time.Duration(config.Defaults.Timeout) * time.Second
+		} else if t.Frequency > 0 {
+			config.Tasks[i].Frequency = time.Duration(t.Frequency) * time.Second
 		}
 
 		// construct the Task.Notifiers
@@ -81,6 +89,14 @@ func ReadConfig() Config {
 				"task_name": t.Name,
 				"task_hash": t.Hash(),
 			}).Fatal("cannot retry more than 32 times")
+		}
+
+		if config.Tasks[i].Timeout >= config.Tasks[i].Frequency {
+			log.WithFields(log.Fields{
+				"file":      "lib/config.go",
+				"task_name": t.Name,
+				"task_hash": t.Hash(),
+			}).Fatal("frequency must be shorter than the timeout")
 		}
 	}
 

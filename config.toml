@@ -25,6 +25,7 @@ name = "sleep"
 command = "sleep"
 args = [ "4" ]
 frequency = 1
+timeout = 5
 
 [[task]]
 name = "false"

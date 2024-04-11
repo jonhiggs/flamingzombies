@@ -1,6 +1,7 @@
 package fz
 
 import (
+	"context"
 	"fmt"
 	"hash/fnv"
 	"os/exec"
@@ -16,7 +17,7 @@ type Task struct {
 	Name        string        // friendly name
 	Command     string        // command
 	Args        []string      // command aruments
-	Frequency   int           // how often to run
+	Frequency   time.Duration // how often to run
 	Timeout     time.Duration // how long an execution may run
 	LockTimout  time.Duration // how long to wait for a lock
 	NotifierStr []string      // notifiers to trigger upon state change
@@ -51,14 +52,23 @@ func (t *Task) Run() bool {
 		"task_name": t.Name,
 		"task_hash": t.Hash(),
 	}).Info("executing task")
-	cmd := exec.Command(t.Command, t.Args...)
 
-	err := cmd.Run()
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, t.Command, t.Args...)
 
-	if _, ok := err.(*exec.ExitError); ok {
+	if err := cmd.Run(); err != nil {
+		log.WithFields(log.Fields{
+			"file":      "lib/task.go",
+			"task_name": t.Name,
+			"task_hash": t.Hash(),
+		}).Error("command failed or timed out")
+
 		t.RecordStatus(false)
 		return false
 	}
+
+	return false
 
 	originalState := t.State()
 	t.RecordStatus(true)
