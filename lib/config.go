@@ -1,6 +1,7 @@
 package fz
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"time"
@@ -10,12 +11,14 @@ import (
 )
 
 const DEFAULT_RETRIES = 5
-const DEFAULT_TIMEOUT = 5
+const DEFAULT_TIMEOUT_SECONDS = 5
+const DEFAULT_FREQUENCY_SECONDS = 300
 
 type Defaults struct {
-	Notifiers []string
-	Retries   int
-	Timeout   int // better to put the timeout into the commmand
+	Notifiers        []string `toml:"notifiers"`
+	Retries          int      `toml:"retries"`
+	FrequencySeconds int      `toml:"frequency_seconds"`
+	TimeoutSeconds   int      `toml:"timeout_seconds"` // better to put the timeout into the commmand
 }
 
 type Config struct {
@@ -48,12 +51,17 @@ func ReadConfig() Config {
 	if config.Defaults.Retries == 0 {
 		config.Defaults.Retries = DEFAULT_RETRIES
 	}
-	if config.Defaults.Timeout == 0 {
-		config.Defaults.Timeout = DEFAULT_TIMEOUT
+
+	if config.Defaults.TimeoutSeconds == 0 {
+		config.Defaults.TimeoutSeconds = DEFAULT_TIMEOUT_SECONDS
 	}
 
-	// fill in the defaults
+	if config.Defaults.FrequencySeconds == 0 {
+		config.Defaults.FrequencySeconds = DEFAULT_FREQUENCY_SECONDS
+	}
+
 	for i, t := range config.Tasks {
+		// fill in the defaults
 		if len(t.Notifiers) == 0 && len(config.Defaults.Notifiers) != 0 {
 			t.NotifierStr = config.Defaults.Notifiers
 		}
@@ -62,17 +70,17 @@ func ReadConfig() Config {
 			config.Tasks[i].Retries = config.Defaults.Retries
 		}
 
-		if t.Timeout == 0 {
-			config.Tasks[i].Timeout = time.Duration(config.Defaults.Timeout) * time.Second
-		} else if t.Timeout > 0 {
-			config.Tasks[i].Timeout = time.Duration(t.Timeout) * time.Second
+		if t.TimeoutSeconds == 0 {
+			config.Tasks[i].TimeoutSeconds = config.Defaults.TimeoutSeconds
 		}
 
-		if t.Frequency == 0 {
-			config.Tasks[i].Frequency = time.Duration(config.Defaults.Timeout) * time.Second
-		} else if t.Frequency > 0 {
-			config.Tasks[i].Frequency = time.Duration(t.Frequency) * time.Second
+		if t.FrequencySeconds == 0 {
+			config.Tasks[i].FrequencySeconds = config.Defaults.FrequencySeconds
 		}
+
+		// create the duration from the *_seconds settings
+		config.Tasks[i].Frequency = time.Duration(config.Tasks[i].FrequencySeconds) * time.Second
+		config.Tasks[i].Timeout = time.Duration(config.Tasks[i].TimeoutSeconds) * time.Second
 
 		// construct the Task.Notifiers
 		for _, ns := range config.Tasks[i].NotifierStr {
@@ -91,12 +99,20 @@ func ReadConfig() Config {
 			}).Fatal("cannot retry more than 32 times")
 		}
 
-		if config.Tasks[i].Timeout >= config.Tasks[i].Frequency {
+		if config.Tasks[i].FrequencySeconds < 1 {
 			log.WithFields(log.Fields{
 				"file":      "lib/config.go",
 				"task_name": t.Name,
 				"task_hash": t.Hash(),
-			}).Fatal("frequency must be shorter than the timeout")
+			}).Fatal("frequency_seconds must be greater than 1")
+		}
+
+		if config.Tasks[i].Timeout > config.Tasks[i].Frequency {
+			log.WithFields(log.Fields{
+				"file":      "lib/config.go",
+				"task_name": t.Name,
+				"task_hash": t.Hash(),
+			}).Fatal(fmt.Sprintf("frequency_seconds (%d) must be shorter than the timeout_seconds (%d)", config.Tasks[i].FrequencySeconds, config.Tasks[i].TimeoutSeconds))
 		}
 	}
 

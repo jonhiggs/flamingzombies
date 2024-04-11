@@ -14,17 +14,20 @@ import (
 var unlockLock sync.Mutex // ensure two unlocks don't run concurrently
 
 type Task struct {
-	Name        string        // friendly name
-	Command     string        // command
-	Args        []string      // command aruments
-	Frequency   time.Duration // how often to run
-	Timeout     time.Duration // how long an execution may run
-	LockTimout  time.Duration // how long to wait for a lock
-	NotifierStr []string      // notifiers to trigger upon state change
-	Notifiers   []*Notifier   // notifiers to trigger upon state change
-	Retries     int           // historic values used to determine the status
-	History     uint32        // represented in binary. sucessess are high
-	Mutex       sync.Mutex    // lock to ensure one task runs at a time
+	Name               string        // friendly name
+	Command            string        // command
+	Args               []string      // command aruments
+	FrequencySeconds   int           `toml:"frequency_seconds"` // how often to run (user inteface)
+	Frequency          time.Duration // how often to run (for system)
+	TimeoutSeconds     int           `toml:"timeout_seconds"` // how long an execution may run (user interface)
+	Timeout            time.Duration // how long an execution may run (for system)
+	LockTimeoutSeconds int           `toml:"lock_timeout_seconds"`
+	LockTimout         time.Duration // how long to wait for a lock
+	NotifierStr        []string      // notifiers to trigger upon state change
+	Notifiers          []*Notifier   // notifiers to trigger upon state change
+	Retries            int           // historic values used to determine the status
+	History            uint32        // represented in binary. sucessess are high
+	Mutex              sync.Mutex    // lock to ensure one task runs at a time
 }
 
 func (t Task) Hash() uint32 {

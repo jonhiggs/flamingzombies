@@ -2,7 +2,7 @@ log_level = "trace"
 
 [defaults]
 retries = 5
-timeout = 1
+timeout_seconds = 1
 notifiers = [
     "echo"
 ]
@@ -12,26 +12,26 @@ priority = 3
 name = "whoami"
 command = "whoami"
 args = ["--help"]
-frequency = 1
+frequency_seconds = 1
 
 [[task]]
 name = "ping.localhost"
 command = "ping"
 args = [ "-A", "-c3", "127.0.0.1" ]
-frequency = 3
+frequency_seconds = 3
 
 [[task]]
 name = "sleep"
 command = "sleep"
 args = [ "4" ]
-frequency = 1
-timeout = 5
+frequency_seconds = 1
+timeout_seconds = 1
 
 [[task]]
 name = "false"
 command = "false"
 args = []
-frequency = 1
+frequency_seconds = 1
 
 [[notifier]]
 name = "echo"
