@@ -26,11 +26,10 @@ type Task struct {
 	TimeoutSeconds        int      `toml:"timeout_seconds"`         // how long an execution may run
 	LockTimeoutSeconds    int      `toml:"lock_timeout_seconds"`    // how long to wait for a lock
 	Retries               int      `toml:"retries"`                 // number of retries before changing the state
+	NotifierNames         []string `toml:"notifiers"`               // notifiers to trigger upon state change
 
-	NotifierStr []string    // notifiers to trigger upon state change
-	Notifiers   []*Notifier // notifiers to trigger upon state change
-	history     uint32      // represented in binary. sucessess are high
-	mutex       sync.Mutex  // lock to ensure one task runs at a time
+	history uint32     // represented in binary. sucessess are high
+	mutex   sync.Mutex // lock to ensure one task runs at a time
 }
 
 func (t Task) Hash() uint32 {
@@ -104,7 +103,7 @@ func (t *Task) Run() bool {
 	newState := t.State()
 
 	if newState != originalState {
-		for _, n := range t.Notifiers {
+		for _, n := range t.notifiers() {
 			NotifyCh <- Notification{
 				Notifier: n,
 				Subject:  fmt.Sprintf("command %s changed from %d to %d", t.Name, originalState, newState),
@@ -170,4 +169,27 @@ func (t Task) lockTimeout() time.Duration {
 
 func (t Task) retryFrequency() time.Duration {
 	return time.Duration(t.RetryFrequencySeconds) * time.Second
+}
+
+func (t Task) notifiers() []*Notifier {
+	var not []*Notifier
+	for _, nName := range t.NotifierNames {
+		found := false
+		for i, _ := range config.Notifiers {
+			if nName == config.Notifiers[i].Name {
+				not = append(not, &config.Notifiers[i])
+				found = true
+			}
+		}
+
+		if !found {
+			log.WithFields(log.Fields{
+				"file":      "lib/task.go",
+				"task_name": t.Name,
+				"task_hash": t.Hash(),
+			}).Fatal(fmt.Sprintf("unknown notifier '%s'", nName))
+		}
+	}
+
+	return not
 }

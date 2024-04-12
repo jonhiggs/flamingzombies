@@ -15,7 +15,7 @@ const DEFAULT_FREQUENCY_SECONDS = 300
 
 type Defaults struct {
 	FrequencySeconds      int      `toml:"frequency_seconds"`
-	Notifiers             []string `toml:"notifiers"`
+	NotifierNames         []string `toml:"notifiers"`
 	Retries               int      `toml:"retries"`
 	RetryFrequencySeconds int      `toml:"retry_frequency_seconds"`
 	TimeoutSeconds        int      `toml:"timeout_seconds"` // better to put the timeout into the commmand
@@ -24,9 +24,11 @@ type Defaults struct {
 type Config struct {
 	Defaults  Defaults
 	LogLevel  string     `toml:"log_level"`
-	Notifiers []Notifier `toml:"notifiers"`
+	Notifiers []Notifier `toml:"notifier"`
 	Tasks     []Task     `toml:"task"`
 }
+
+var config Config
 
 func ReadConfig() Config {
 	file, err := os.Open("config.toml")
@@ -34,8 +36,6 @@ func ReadConfig() Config {
 		panic(err)
 	}
 	defer file.Close()
-
-	var config Config
 
 	b, err := io.ReadAll(file)
 	if err != nil {
@@ -48,10 +48,6 @@ func ReadConfig() Config {
 	}
 
 	for i, t := range config.Tasks {
-		if len(t.Notifiers) == 0 && len(config.Defaults.Notifiers) != 0 {
-			t.NotifierStr = config.Defaults.Notifiers
-		}
-
 		if t.Retries == 0 {
 			if config.Defaults.Retries == 0 {
 				config.Tasks[i].Retries = DEFAULT_RETRIES
@@ -84,9 +80,8 @@ func ReadConfig() Config {
 			}
 		}
 
-		// construct the Task.Notifiers
-		for _, ns := range config.Tasks[i].NotifierStr {
-			config.Tasks[i].Notifiers = append(config.Tasks[i].Notifiers, config.FindNotifier(ns))
+		if len(t.NotifierNames) == 0 {
+			config.Tasks[i].NotifierNames = config.Defaults.NotifierNames
 		}
 
 		// start the history in an unknown state
@@ -116,21 +111,10 @@ func ReadConfig() Config {
 				"task_hash": t.Hash(),
 			}).Fatal(fmt.Sprintf("frequency_seconds (%d) must be shorter than the timeout_seconds (%d)", config.Tasks[i].FrequencySeconds, config.Tasks[i].TimeoutSeconds))
 		}
+
+		// hit the notifiers() method to check that all specified notifiers exist
+		config.Tasks[i].notifiers()
 	}
 
 	return config
-}
-
-func (c Config) FindNotifier(s string) *Notifier {
-	for i, _ := range c.Notifiers {
-		if s == c.Notifiers[i].Name {
-			return &c.Notifiers[i]
-		}
-	}
-
-	log.WithFields(log.Fields{
-		"file":          "lib/config.go",
-		"notifier_name": s,
-	}).Fatal("unknown notifier")
-	return nil
 }
