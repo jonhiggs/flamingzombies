@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
+date >> /tmp/out.log
 echo "${SUBJECT}" >> /tmp/out.log
 cat >> /tmp/out.log

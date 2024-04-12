@@ -104,6 +104,8 @@ func (t *Task) Run() bool {
 		for _, n := range t.notifications() {
 			NotifyCh <- n
 		}
+
+		t.lastState = t.State()
 	}
 	return true
 }
@@ -113,7 +115,7 @@ func (t *Task) RecordStatus(b bool) {
 		"file":      "lib/task.go",
 		"task_name": t.Name,
 		"task_hash": t.Hash(),
-	}).Info("recording status")
+	}).Trace(fmt.Sprintf("recording status %v", b))
 
 	t.history = t.history << 1
 	if b {
@@ -126,22 +128,12 @@ func (t *Task) RecordStatus(b bool) {
 		"task_hash": t.Hash(),
 	}).Trace(fmt.Sprintf("history is %b", t.history))
 
-	s := t.State()
-	if (s != STATE_UNKNOWN) && (s != t.lastState) {
-		t.lastState = s
-		log.WithFields(log.Fields{
-			"file":      "lib/task.go",
-			"task_name": t.Name,
-			"task_hash": t.Hash(),
-		}).Trace(fmt.Sprintf("updating lastState to %d", s))
-		t.stateChanged = true
-	} else {
-		log.WithFields(log.Fields{
-			"file":      "lib/task.go",
-			"task_name": t.Name,
-			"task_hash": t.Hash(),
-		}).Trace("state was unchanged")
+	if t.State() == STATE_UNKNOWN {
 		t.stateChanged = false
+	} else if t.State() == t.lastState {
+		t.stateChanged = false
+	} else {
+		t.stateChanged = true
 	}
 }
 
@@ -212,9 +204,9 @@ func (t Task) notifications() []Notification {
 	var body string
 
 	if t.State() == STATE_OK {
-		body = t.ErrorBody
-	} else {
 		body = t.RecoverBody
+	} else {
+		body = t.ErrorBody
 	}
 
 	subject := fmt.Sprintf("task %s changed state from %d to %d", t.Name, t.lastState, t.State())

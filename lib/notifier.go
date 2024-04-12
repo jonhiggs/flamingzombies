@@ -67,6 +67,11 @@ func ProcessNotifications() {
 					fmt.Sprintf("SUBJECT=%s", n.Subject),
 				}
 
+				log.WithFields(log.Fields{
+					"file":          "lib/notifier.go",
+					"notifier_name": n.Notifier.Name,
+				}).Trace(fmt.Sprintf("writing string to stdin: %s", n.Body))
+
 				io.WriteString(stdin, n.Body+"\n")
 
 				if err := cmd.Run(); err != nil {
