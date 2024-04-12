@@ -33,9 +33,10 @@ func TestTaskReady(t *testing.T) {
 		ts   time.Time
 		want bool
 	}{
-		{Task{FrequencySeconds: 1}, time.Unix(1712882669, 0), true},
-		{Task{FrequencySeconds: 10}, time.Unix(1712882670, 0), true},
-		{Task{FrequencySeconds: 10}, time.Unix(1712882669, 0), false},
+		{Task{Retries: 5, FrequencySeconds: 1, history: 0b11111}, time.Unix(1712882669, 0), true},
+		{Task{Retries: 5, FrequencySeconds: 10, history: 0b11111}, time.Unix(1712882670, 0), true},
+		{Task{Retries: 5, FrequencySeconds: 10, history: 0b11111}, time.Unix(1712882669, 0), false},
+		{Task{Retries: 5, FrequencySeconds: 10, history: 0b01011, RetryFrequencySeconds: 1}, time.Unix(1712882669, 0), true}, // should be retrying
 	}
 
 	for _, tt := range tests {
@@ -54,10 +55,10 @@ func TestTaskState(t *testing.T) {
 		ta   Task
 		want int
 	}{
-		{Task{Retries: 5, history: 0b11111}, 1},  // up
-		{Task{Retries: 5, history: 0b00000}, 0},  // down
-		{Task{Retries: 5, history: 0b10111}, -1}, // unknown
-		{Task{Retries: 5, history: 0b01000}, -1}, // unknown
+		{Task{Retries: 5, history: 0b11111}, STATE_OK},
+		{Task{Retries: 5, history: 0b00000}, STATE_FAIL},
+		{Task{Retries: 5, history: 0b10111}, STATE_UNKNOWN},
+		{Task{Retries: 5, history: 0b01000}, STATE_UNKNOWN},
 	}
 
 	for _, tt := range tests {

@@ -27,12 +27,10 @@ type Task struct {
 	LockTimeoutSeconds    int      `toml:"lock_timeout_seconds"`    // how long to wait for a lock
 	Retries               int      `toml:"retries"`                 // number of retries before changing the state
 
-	NotifierStr    []string      // notifiers to trigger upon state change
-	Notifiers      []*Notifier   // notifiers to trigger upon state change
-	history        uint32        // represented in binary. sucessess are high
-	lockTimeout    time.Duration // how long to wait for a lock
-	mutex          sync.Mutex    // lock to ensure one task runs at a time
-	retryFrequency time.Duration // how long to way between retries
+	NotifierStr []string    // notifiers to trigger upon state change
+	Notifiers   []*Notifier // notifiers to trigger upon state change
+	history     uint32      // represented in binary. sucessess are high
+	mutex       sync.Mutex  // lock to ensure one task runs at a time
 }
 
 func (t Task) Hash() uint32 {
@@ -66,14 +64,11 @@ func (t Task) Ready(ts time.Time) bool {
 	// if the state is unknown, retry at the rate of RetryFrequencySeconds
 
 	if t.State() == STATE_UNKNOWN {
-		return (uint32(ts.Unix())+t.Hash())%uint32(t.RetryFrequencySeconds) == 0
+		return true
+		//return (uint32(ts.Unix())+t.Hash())%uint32(t.RetryFrequencySeconds) == 0
 	}
 
 	return (uint32(ts.Unix())+t.Hash())%uint32(t.FrequencySeconds) == 0
-}
-
-func (t Task) Timeout() time.Duration {
-	return time.Duration(t.TimeoutSeconds) * time.Second
 }
 
 func (t *Task) Run() bool {
@@ -163,4 +158,16 @@ func (t *Task) State() int {
 	}
 
 	return -1
+}
+
+func (t Task) timeout() time.Duration {
+	return time.Duration(t.TimeoutSeconds) * time.Second
+}
+
+func (t Task) lockTimeout() time.Duration {
+	return time.Duration(t.LockTimeoutSeconds) * time.Second
+}
+
+func (t Task) retryFrequency() time.Duration {
+	return time.Duration(t.RetryFrequencySeconds) * time.Second
 }
