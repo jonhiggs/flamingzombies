@@ -28,8 +28,10 @@ type Task struct {
 	Retries               int      `toml:"retries"`                 // number of retries before changing the state
 	NotifierNames         []string `toml:"notifiers"`               // notifiers to trigger upon state change
 
-	history uint32     // represented in binary. sucessess are high
-	mutex   sync.Mutex // lock to ensure one task runs at a time
+	history      uint32     // represented in binary. sucessess are high
+	lastState    int        // last known state
+	stateChanged bool       // set to true if the last measure changed the state
+	mutex        sync.Mutex // lock to ensure one task runs at a time
 }
 
 func (t Task) Hash() uint32 {
@@ -96,15 +98,12 @@ func (t *Task) Run() bool {
 
 	return false
 
-	originalState := t.State()
 	t.RecordStatus(true)
-	newState := t.State()
-
-	if newState != originalState {
+	if t.stateChanged {
 		for _, n := range t.notifiers() {
 			NotifyCh <- Notification{
 				Notifier: n,
-				Subject:  fmt.Sprintf("command %s changed from %d to %d", t.Name, originalState, newState),
+				Subject:  fmt.Sprintf("command %s changed to %d to %d", t.Name, t.lastState, t.State()),
 				Body:     "blah, blah, blah",
 			}
 		}
@@ -129,6 +128,24 @@ func (t *Task) RecordStatus(b bool) {
 		"task_name": t.Name,
 		"task_hash": t.Hash(),
 	}).Trace(fmt.Sprintf("history is %b", t.history))
+
+	s := t.State()
+	if (s != STATE_UNKNOWN) && (s != t.lastState) {
+		t.lastState = s
+		log.WithFields(log.Fields{
+			"file":      "lib/task.go",
+			"task_name": t.Name,
+			"task_hash": t.Hash(),
+		}).Trace(fmt.Sprintf("updating lastState to %d", s))
+		t.stateChanged = true
+	} else {
+		log.WithFields(log.Fields{
+			"file":      "lib/task.go",
+			"task_name": t.Name,
+			"task_hash": t.Hash(),
+		}).Trace("state was unchanged")
+		t.stateChanged = false
+	}
 }
 
 // extract the current state from the history
