@@ -26,6 +26,7 @@ type Defaults struct {
 type Config struct {
 	Defaults  Defaults
 	LogLevel  string     `toml:"log_level"`
+	LogFile   string     `toml:"log_file"`
 	Notifiers []Notifier `toml:"notifier"`
 	Tasks     []Task     `toml:"task"`
 }
@@ -47,6 +48,11 @@ func ReadConfig() Config {
 	err = toml.Unmarshal(b, &config)
 	if err != nil {
 		panic(err)
+	}
+
+	if config.LogFile == "" {
+		config.LogFile = "stdout"
+
 	}
 
 	for i, t := range config.Tasks {

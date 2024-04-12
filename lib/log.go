@@ -1,6 +1,8 @@
 package fz
 
 import (
+	"os"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -9,6 +11,18 @@ func StartLogger(l string) {
 		DisableColors: true,
 		FullTimestamp: true,
 	})
+
+	if config.LogFile == "stdout" || config.LogFile == "-" {
+		log.SetOutput(os.Stdout)
+	} else if config.LogFile == "stderr" {
+		log.SetOutput(os.Stderr)
+	} else {
+		f, err := os.OpenFile(config.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+		if err != nil {
+			panic(err)
+		}
+		log.SetOutput(f)
+	}
 
 	switch l {
 	case "trace":
