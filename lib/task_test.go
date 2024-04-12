@@ -36,7 +36,8 @@ func TestTaskReady(t *testing.T) {
 		{Task{Retries: 5, FrequencySeconds: 1, history: 0b11111}, time.Unix(1712882669, 0), true},
 		{Task{Retries: 5, FrequencySeconds: 10, history: 0b11111}, time.Unix(1712882670, 0), true},
 		{Task{Retries: 5, FrequencySeconds: 10, history: 0b11111}, time.Unix(1712882669, 0), false},
-		{Task{Retries: 5, FrequencySeconds: 10, history: 0b01011, RetryFrequencySeconds: 1}, time.Unix(1712882669, 0), true}, // should be retrying
+		{Task{Retries: 5, FrequencySeconds: 10, history: 0b01011, RetryFrequencySeconds: 2}, time.Unix(1712882668, 0), true},
+		{Task{Retries: 5, FrequencySeconds: 10, history: 0b01011, RetryFrequencySeconds: 2}, time.Unix(1712882669, 0), false},
 	}
 
 	for _, tt := range tests {

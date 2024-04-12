@@ -63,8 +63,7 @@ func (t Task) Ready(ts time.Time) bool {
 	// if the state is unknown, retry at the rate of RetryFrequencySeconds
 
 	if t.State() == STATE_UNKNOWN {
-		return true
-		//return (uint32(ts.Unix())+t.Hash())%uint32(t.RetryFrequencySeconds) == 0
+		return (uint32(ts.Unix())+t.Hash())%uint32(t.RetryFrequencySeconds) == 0
 	}
 
 	return (uint32(ts.Unix())+t.Hash())%uint32(t.FrequencySeconds) == 0
