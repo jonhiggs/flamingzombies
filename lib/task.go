@@ -23,12 +23,11 @@ type Task struct {
 	Retries            int      `toml:"retries"`              // historic values used to determine the status
 
 	LockTimout  time.Duration // how long to wait for a lock
-	Frequency   time.Duration // how often to run (for system)
 	Timeout     time.Duration // how long an execution may run (for system)
 	NotifierStr []string      // notifiers to trigger upon state change
 	Notifiers   []*Notifier   // notifiers to trigger upon state change
-	History     uint32        // represented in binary. sucessess are high
-	Mutex       sync.Mutex    // lock to ensure one task runs at a time
+	history     uint32        // represented in binary. sucessess are high
+	mutex       sync.Mutex    // lock to ensure one task runs at a time
 }
 
 func (t Task) Hash() uint32 {
@@ -42,14 +41,23 @@ func (t Task) Hash() uint32 {
 	return h.Sum32()
 }
 
+// how often to run
+func (t Task) Frequency() time.Duration {
+	if t.FrequencySeconds == 0 {
+		return time.Duration(DEFAULT_FREQUENCY_SECONDS) * time.Second
+	}
+
+	return time.Duration(t.FrequencySeconds) * time.Second
+}
+
 func (t Task) Ready(ts time.Time) bool {
-	return (uint32(ts.Second())+t.Hash())%uint32(t.Frequency) == 0
+	return (uint32(ts.Second())+t.Hash())%uint32(t.FrequencySeconds) == 0
 }
 
 func (t *Task) Run() bool {
 	// TODO: add a deadline
-	t.Mutex.Lock()
-	defer t.Mutex.Unlock()
+	t.mutex.Lock()
+	defer t.mutex.Unlock()
 
 	log.WithFields(log.Fields{
 		"file":      "lib/task.go",
@@ -97,19 +105,19 @@ func (t *Task) RecordStatus(b bool) {
 		"task_hash": t.Hash(),
 	}).Info("recording status")
 
-	t.History = t.History << 1
+	t.history = t.history << 1
 	if b {
-		t.History += 1
+		t.history += 1
 	}
 
 	log.WithFields(log.Fields{
 		"file":      "lib/task.go",
 		"task_name": t.Name,
 		"task_hash": t.Hash(),
-	}).Trace(fmt.Sprintf("history is %b", t.History))
+	}).Trace(fmt.Sprintf("history is %b", t.history))
 }
 
-// extract the current state from the History
+// extract the current state from the history
 // the returned values are:
 //
 //	-1: unknown
@@ -122,7 +130,7 @@ func (t *Task) State() int {
 		mask += 1
 	}
 
-	v := t.History & mask
+	v := t.history & mask
 
 	if v == 0 {
 		return 0

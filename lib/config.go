@@ -79,7 +79,6 @@ func ReadConfig() Config {
 		}
 
 		// create the duration from the *_seconds settings
-		config.Tasks[i].Frequency = time.Duration(config.Tasks[i].FrequencySeconds) * time.Second
 		config.Tasks[i].Timeout = time.Duration(config.Tasks[i].TimeoutSeconds) * time.Second
 
 		// construct the Task.Notifiers
@@ -88,7 +87,7 @@ func ReadConfig() Config {
 		}
 
 		// start the history in an unknown state
-		config.Tasks[i].History = 0b10
+		config.Tasks[i].history = 0b10
 
 		// validate the inputs
 		if config.Tasks[i].Retries > 32 {
@@ -107,7 +106,7 @@ func ReadConfig() Config {
 			}).Fatal("frequency_seconds must be greater than 1")
 		}
 
-		if config.Tasks[i].Timeout > config.Tasks[i].Frequency {
+		if config.Tasks[i].TimeoutSeconds > config.Tasks[i].FrequencySeconds {
 			log.WithFields(log.Fields{
 				"file":      "lib/config.go",
 				"task_name": t.Name,
