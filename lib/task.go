@@ -22,8 +22,8 @@ type Task struct {
 	LockTimeoutSeconds int      `toml:"lock_timeout_seconds"` // how long to wait for a lock
 	Retries            int      `toml:"retries"`              // historic values used to determine the status
 
-	LockTimout  time.Duration // how long to wait for a lock
-	Timeout     time.Duration // how long an execution may run (for system)
+	lockTimout  time.Duration // how long to wait for a lock
+	timeout     time.Duration // how long an execution may run (for system)
 	NotifierStr []string      // notifiers to trigger upon state change
 	Notifiers   []*Notifier   // notifiers to trigger upon state change
 	history     uint32        // represented in binary. sucessess are high

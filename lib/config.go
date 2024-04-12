@@ -79,7 +79,7 @@ func ReadConfig() Config {
 		}
 
 		// create the duration from the *_seconds settings
-		config.Tasks[i].Timeout = time.Duration(config.Tasks[i].TimeoutSeconds) * time.Second
+		config.Tasks[i].timeout = time.Duration(config.Tasks[i].TimeoutSeconds) * time.Second
 
 		// construct the Task.Notifiers
 		for _, ns := range config.Tasks[i].NotifierStr {
