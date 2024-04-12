@@ -28,6 +28,8 @@ type Task struct {
 	Retries               int      `toml:"retries"`                 // number of retries before changing the state
 	NotifierNames         []string `toml:"notifiers"`               // notifiers to trigger upon state change
 	Priority              int      `toml:"priority"`                // the priority of the notifications
+	ErrorBody             string   `toml:"error_body"`              // the body of the notifiation when entering an error state
+	RecoverBody           string   `toml:"recover_body"`            // the body of the notifiation when recovering from an error state
 
 	history      uint32     // represented in binary. sucessess are high
 	lastState    int        // last known state
@@ -99,13 +101,8 @@ func (t *Task) Run() bool {
 
 	t.RecordStatus(true)
 	if t.stateChanged {
-		for _, n := range t.notifiers() {
-			NotifyCh <- Notification{
-				Notifier: n,
-				Subject:  fmt.Sprintf("command %s changed to %d to %d", t.Name, t.lastState, t.State()),
-				Body:     "blah, blah, blah",
-				Priority: t.Priority,
-			}
+		for _, n := range t.notifications() {
+			NotifyCh <- n
 		}
 	}
 	return true
@@ -208,4 +205,28 @@ func (t Task) notifiers() []*Notifier {
 	}
 
 	return not
+}
+
+func (t Task) notifications() []Notification {
+	var ns []Notification
+	var body string
+
+	if t.State() == STATE_OK {
+		body = t.ErrorBody
+	} else {
+		body = t.RecoverBody
+	}
+
+	subject := fmt.Sprintf("task %s changed state from %d to %d", t.Name, t.lastState, t.State())
+
+	for _, n := range t.notifiers() {
+		ns = append(ns, Notification{
+			Notifier: n,
+			Subject:  subject,
+			Body:     body,
+			Priority: t.Priority,
+		})
+	}
+
+	return ns
 }

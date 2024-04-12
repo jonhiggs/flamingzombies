@@ -52,7 +52,6 @@ func ReadConfig() Config {
 
 	if config.LogFile == "" {
 		config.LogFile = "stdout"
-
 	}
 
 	for i, t := range config.Tasks {
@@ -94,6 +93,13 @@ func ReadConfig() Config {
 			} else {
 				config.Tasks[i].Priority = config.Defaults.Priority
 			}
+		}
+
+		if len(t.ErrorBody) == 0 {
+			config.Tasks[i].ErrorBody = "The task has entered an error state"
+		}
+		if len(t.RecoverBody) == 0 {
+			config.Tasks[i].RecoverBody = "The task has recovered from an error state"
 		}
 
 		if len(t.NotifierNames) == 0 {

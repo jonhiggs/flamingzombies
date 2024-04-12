@@ -35,7 +35,7 @@ func ProcessNotifications() {
 		C:
 			select {
 			case n := <-NotifyCh:
-				if n.Priority > n.Notifier.MinPriority { // 1 is a higher priority than 2
+				if n.Notifier.MinPriority != 0 && n.Priority > n.Notifier.MinPriority { // 1 is a higher priority than 2
 					log.WithFields(log.Fields{
 						"file":          "lib/notifier.go",
 						"notifier_name": n.Notifier.Name,
