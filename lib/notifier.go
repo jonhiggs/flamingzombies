@@ -2,7 +2,8 @@ package fz
 
 import (
 	"context"
-	"os"
+	"fmt"
+	"io"
 	"os/exec"
 	"time"
 
@@ -21,6 +22,7 @@ type Notification struct {
 	Notifier *Notifier
 	Subject  string
 	Body     string
+	Priority int
 }
 
 var NotifyCh = make(chan Notification, 100)
@@ -49,8 +51,12 @@ func ProcessNotifications() {
 				}
 				defer stdin.Close()
 
-				cmd.Stdout = os.Stdout
-				cmd.Stderr = os.Stderr
+				cmd.Env = []string{
+					fmt.Sprintf("PRIORITY=%d", n.Priority),
+					fmt.Sprintf("SUBJECT=%s", n.Subject),
+				}
+
+				io.WriteString(stdin, n.Body+"\n")
 
 				if err := cmd.Run(); err != nil {
 					log.WithFields(log.Fields{
