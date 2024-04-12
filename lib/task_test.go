@@ -27,6 +27,28 @@ func TestTaskFrequency(t *testing.T) {
 	}
 }
 
+func TestTaskReady(t *testing.T) {
+	var tests = []struct {
+		ta   Task
+		ts   time.Time
+		want bool
+	}{
+		{Task{FrequencySeconds: 1}, time.Unix(1712882669, 0), true},
+		{Task{FrequencySeconds: 10}, time.Unix(1712882670, 0), true},
+		{Task{FrequencySeconds: 10}, time.Unix(1712882669, 0), false},
+	}
+
+	for _, tt := range tests {
+		testname := fmt.Sprintf("ts:%d freq:%d", tt.ts.Unix(), tt.ta.FrequencySeconds)
+		t.Run(testname, func(t *testing.T) {
+			got := tt.ta.Ready(tt.ts)
+			if got != tt.want {
+				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestTaskState(t *testing.T) {
 	var tests = []struct {
 		ta   Task

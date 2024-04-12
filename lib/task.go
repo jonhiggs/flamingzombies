@@ -31,6 +31,12 @@ type Task struct {
 }
 
 func (t Task) Hash() uint32 {
+	// To help with testing, return hash of zero when there isn't a command or
+	// any arguments.
+	if t.Command == "" && len(t.Args) == 0 {
+		return uint32(0)
+	}
+
 	s := t.Command
 	for _, a := range t.Args {
 		s += a
@@ -51,7 +57,8 @@ func (t Task) Frequency() time.Duration {
 }
 
 func (t Task) Ready(ts time.Time) bool {
-	return (uint32(ts.Second())+t.Hash())%uint32(t.FrequencySeconds) == 0
+	// the hash is used to spread the checks across time.
+	return (uint32(ts.Unix())+t.Hash())%uint32(t.FrequencySeconds) == 0
 }
 
 func (t *Task) Run() bool {
