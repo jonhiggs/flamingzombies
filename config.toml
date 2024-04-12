@@ -13,6 +13,7 @@ name = "whoami"
 command = "whoami"
 args = ["--help"]
 frequency_seconds = 1
+retry_frequency_seconds = 1
 
 [[task]]
 name = "ping.localhost"

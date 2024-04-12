@@ -11,23 +11,28 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const STATE_UNKNOWN = -1
+const STATE_FAIL = 0
+const STATE_OK = 1
+
 var unlockLock sync.Mutex // ensure two unlocks don't run concurrently
 
 type Task struct {
-	Name               string   `toml:"name"`                 // friendly name
-	Command            string   `toml:"command"`              // command
-	Args               []string `toml:"args"`                 // command aruments
-	FrequencySeconds   int      `toml:"frequency_seconds"`    // how often to run
-	TimeoutSeconds     int      `toml:"timeout_seconds"`      // how long an execution may run
-	LockTimeoutSeconds int      `toml:"lock_timeout_seconds"` // how long to wait for a lock
-	Retries            int      `toml:"retries"`              // historic values used to determine the status
+	Name                  string   `toml:"name"`                    // friendly name
+	Command               string   `toml:"command"`                 // command
+	Args                  []string `toml:"args"`                    // command aruments
+	FrequencySeconds      int      `toml:"frequency_seconds"`       // how often to run
+	RetryFrequencySeconds int      `toml:"retry_frequency_seconds"` // how quickly to retry when state unknown
+	TimeoutSeconds        int      `toml:"timeout_seconds"`         // how long an execution may run
+	LockTimeoutSeconds    int      `toml:"lock_timeout_seconds"`    // how long to wait for a lock
+	Retries               int      `toml:"retries"`                 // number of retries before changing the state
 
-	lockTimout  time.Duration // how long to wait for a lock
-	timeout     time.Duration // how long an execution may run (for system)
-	NotifierStr []string      // notifiers to trigger upon state change
-	Notifiers   []*Notifier   // notifiers to trigger upon state change
-	history     uint32        // represented in binary. sucessess are high
-	mutex       sync.Mutex    // lock to ensure one task runs at a time
+	NotifierStr    []string      // notifiers to trigger upon state change
+	Notifiers      []*Notifier   // notifiers to trigger upon state change
+	history        uint32        // represented in binary. sucessess are high
+	lockTimeout    time.Duration // how long to wait for a lock
+	mutex          sync.Mutex    // lock to ensure one task runs at a time
+	retryFrequency time.Duration // how long to way between retries
 }
 
 func (t Task) Hash() uint32 {
@@ -58,7 +63,17 @@ func (t Task) Frequency() time.Duration {
 
 func (t Task) Ready(ts time.Time) bool {
 	// the hash is used to spread the checks across time.
+	// if the state is unknown, retry at the rate of RetryFrequencySeconds
+
+	if t.State() == STATE_UNKNOWN {
+		return (uint32(ts.Unix())+t.Hash())%uint32(t.RetryFrequencySeconds) == 0
+	}
+
 	return (uint32(ts.Unix())+t.Hash())%uint32(t.FrequencySeconds) == 0
+}
+
+func (t Task) Timeout() time.Duration {
+	return time.Duration(t.TimeoutSeconds) * time.Second
 }
 
 func (t *Task) Run() bool {

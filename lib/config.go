@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"time"
 
 	"github.com/pelletier/go-toml"
 	log "github.com/sirupsen/logrus"
@@ -15,10 +14,11 @@ const DEFAULT_TIMEOUT_SECONDS = 5
 const DEFAULT_FREQUENCY_SECONDS = 300
 
 type Defaults struct {
-	Notifiers        []string `toml:"notifiers"`
-	Retries          int      `toml:"retries"`
-	FrequencySeconds int      `toml:"frequency_seconds"`
-	TimeoutSeconds   int      `toml:"timeout_seconds"` // better to put the timeout into the commmand
+	FrequencySeconds      int      `toml:"frequency_seconds"`
+	Notifiers             []string `toml:"notifiers"`
+	Retries               int      `toml:"retries"`
+	RetryFrequencySeconds int      `toml:"retry_frequency_seconds"`
+	TimeoutSeconds        int      `toml:"timeout_seconds"` // better to put the timeout into the commmand
 }
 
 type Config struct {
@@ -47,39 +47,42 @@ func ReadConfig() Config {
 		panic(err)
 	}
 
-	// set the default defaults
-	if config.Defaults.Retries == 0 {
-		config.Defaults.Retries = DEFAULT_RETRIES
-	}
-
-	if config.Defaults.TimeoutSeconds == 0 {
-		config.Defaults.TimeoutSeconds = DEFAULT_TIMEOUT_SECONDS
-	}
-
-	if config.Defaults.FrequencySeconds == 0 {
-		config.Defaults.FrequencySeconds = DEFAULT_FREQUENCY_SECONDS
-	}
-
 	for i, t := range config.Tasks {
-		// fill in the defaults
 		if len(t.Notifiers) == 0 && len(config.Defaults.Notifiers) != 0 {
 			t.NotifierStr = config.Defaults.Notifiers
 		}
 
 		if t.Retries == 0 {
-			config.Tasks[i].Retries = config.Defaults.Retries
+			if config.Defaults.Retries == 0 {
+				config.Tasks[i].Retries = DEFAULT_RETRIES
+			} else {
+				config.Tasks[i].Retries = config.Defaults.Retries
+			}
 		}
 
 		if t.TimeoutSeconds == 0 {
-			config.Tasks[i].TimeoutSeconds = config.Defaults.TimeoutSeconds
+			if config.Defaults.TimeoutSeconds == 0 {
+				config.Tasks[i].TimeoutSeconds = DEFAULT_TIMEOUT_SECONDS
+			} else {
+				config.Tasks[i].TimeoutSeconds = config.Defaults.TimeoutSeconds
+			}
 		}
 
 		if t.FrequencySeconds == 0 {
-			config.Tasks[i].FrequencySeconds = config.Defaults.FrequencySeconds
+			if config.Defaults.FrequencySeconds == 0 {
+				config.Tasks[i].FrequencySeconds = DEFAULT_FREQUENCY_SECONDS
+			} else {
+				config.Tasks[i].FrequencySeconds = config.Defaults.FrequencySeconds
+			}
 		}
 
-		// create the duration from the *_seconds settings
-		config.Tasks[i].timeout = time.Duration(config.Tasks[i].TimeoutSeconds) * time.Second
+		if t.RetryFrequencySeconds == 0 {
+			if config.Defaults.RetryFrequencySeconds == 0 {
+				config.Tasks[i].RetryFrequencySeconds = config.Tasks[i].FrequencySeconds
+			} else {
+				config.Tasks[i].RetryFrequencySeconds = config.Defaults.RetryFrequencySeconds
+			}
+		}
 
 		// construct the Task.Notifiers
 		for _, ns := range config.Tasks[i].NotifierStr {
