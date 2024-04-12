@@ -12,6 +12,7 @@ import (
 const DEFAULT_RETRIES = 5
 const DEFAULT_TIMEOUT_SECONDS = 5
 const DEFAULT_FREQUENCY_SECONDS = 300
+const DEFAULT_PRIORITY = 5
 
 type Defaults struct {
 	FrequencySeconds      int      `toml:"frequency_seconds"`
@@ -19,6 +20,7 @@ type Defaults struct {
 	Retries               int      `toml:"retries"`
 	RetryFrequencySeconds int      `toml:"retry_frequency_seconds"`
 	TimeoutSeconds        int      `toml:"timeout_seconds"` // better to put the timeout into the commmand
+	Priority              int      `toml:"priority"`
 }
 
 type Config struct {
@@ -80,6 +82,14 @@ func ReadConfig() Config {
 			}
 		}
 
+		if t.Priority == 0 {
+			if config.Defaults.Priority == 0 {
+				config.Tasks[i].Priority = DEFAULT_PRIORITY
+			} else {
+				config.Tasks[i].Priority = config.Defaults.Priority
+			}
+		}
+
 		if len(t.NotifierNames) == 0 {
 			config.Tasks[i].NotifierNames = config.Defaults.NotifierNames
 		}
@@ -112,6 +122,14 @@ func ReadConfig() Config {
 				"task_name": t.Name,
 				"task_hash": t.Hash(),
 			}).Fatal(fmt.Sprintf("frequency_seconds (%d) must be shorter than the timeout_seconds (%d)", config.Tasks[i].FrequencySeconds, config.Tasks[i].TimeoutSeconds))
+		}
+
+		if config.Tasks[i].Priority < 0 || config.Tasks[i].Priority > 100 {
+			log.WithFields(log.Fields{
+				"file":      "lib/config.go",
+				"task_name": t.Name,
+				"task_hash": t.Hash(),
+			}).Fatal("priority must be between 1 and 100")
 		}
 
 		// hit the notifiers() method to check that all specified notifiers exist

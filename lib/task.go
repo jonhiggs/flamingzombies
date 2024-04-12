@@ -27,6 +27,7 @@ type Task struct {
 	LockTimeoutSeconds    int      `toml:"lock_timeout_seconds"`    // how long to wait for a lock
 	Retries               int      `toml:"retries"`                 // number of retries before changing the state
 	NotifierNames         []string `toml:"notifiers"`               // notifiers to trigger upon state change
+	Priority              int      `toml:"priority"`                // the priority of the notifications
 
 	history      uint32     // represented in binary. sucessess are high
 	lastState    int        // last known state
@@ -103,6 +104,7 @@ func (t *Task) Run() bool {
 				Notifier: n,
 				Subject:  fmt.Sprintf("command %s changed to %d to %d", t.Name, t.lastState, t.State()),
 				Body:     "blah, blah, blah",
+				Priority: t.Priority,
 			}
 		}
 	}

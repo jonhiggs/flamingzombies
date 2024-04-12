@@ -10,6 +10,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const DEFAULT_MIN_PRIORITY = 100
+
 type Notifier struct {
 	Name           string
 	Command        string
@@ -30,8 +32,17 @@ var NotifyCh = make(chan Notification, 100)
 func ProcessNotifications() {
 	go func() {
 		for {
+		C:
 			select {
 			case n := <-NotifyCh:
+				if n.Priority > n.Notifier.MinPriority { // 1 is a higher priority than 2
+					log.WithFields(log.Fields{
+						"file":          "lib/notifier.go",
+						"notifier_name": n.Notifier.Name,
+					}).Info(fmt.Sprintf("not notifying because notification priority (%d) is lower than the notifiers minimum_priority (%d)", n.Priority, n.Notifier.MinPriority))
+					break C
+				}
+
 				log.WithFields(log.Fields{
 					"file":          "lib/notifier.go",
 					"notifier_name": n.Notifier.Name,
