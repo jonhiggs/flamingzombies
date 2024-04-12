@@ -70,7 +70,6 @@ func (t Task) Ready(ts time.Time) bool {
 }
 
 func (t *Task) Run() bool {
-	// TODO: add a deadline
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
@@ -80,7 +79,7 @@ func (t *Task) Run() bool {
 		"task_hash": t.Hash(),
 	}).Info("executing task")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), t.timeout())
 	defer cancel()
 	cmd := exec.CommandContext(ctx, t.Command, t.Args...)
 
