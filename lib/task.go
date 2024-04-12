@@ -96,8 +96,6 @@ func (t *Task) Run() bool {
 		return false
 	}
 
-	return false
-
 	t.RecordStatus(true)
 	if t.stateChanged {
 		for _, n := range t.notifiers() {
@@ -178,12 +176,13 @@ func (t Task) timeout() time.Duration {
 	return time.Duration(t.TimeoutSeconds) * time.Second
 }
 
-func (t Task) lockTimeout() time.Duration {
-	return time.Duration(t.LockTimeoutSeconds) * time.Second
-}
-
 func (t Task) retryFrequency() time.Duration {
 	return time.Duration(t.RetryFrequencySeconds) * time.Second
+}
+
+// TODO: this is currently unused
+func (t Task) lockTimeout() time.Duration {
+	return time.Duration(t.LockTimeoutSeconds) * time.Second
 }
 
 func (t Task) notifiers() []*Notifier {

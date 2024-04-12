@@ -1,14 +1,11 @@
-# contrib
+# plugins
 
-A directory of user-contributed task and notification handlers.
-
+A directory of task and notification plugins handlers.
 
 
 ## notifier
 
 The interface for a notifier is:
-
-## Environment Variables
 
 - `SUBJECT`: The message subject.
 - `NAME`: The configured name of the notifier.

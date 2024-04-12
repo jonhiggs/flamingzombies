@@ -4,7 +4,7 @@ log_level = "trace"
 retries = 5
 timeout_seconds = 1
 notifiers = [
-    "echo"
+    "logger"
 ]
 priority = 3
 
@@ -14,9 +14,6 @@ command = "whoami"
 args = ["--help"]
 frequency_seconds = 1
 retry_frequency_seconds = 1
-notifiers = [
-    "echo"
-]
 
 [[task]]
 name = "ping.localhost"
@@ -38,6 +35,7 @@ args = []
 frequency_seconds = 1
 
 [[notifier]]
-name = "echo"
-command = "contrib/notifier/echo"
+name = "logger"
+command = "plugins/notifier/logger"
 args = []
+timeout_seconds = 5
