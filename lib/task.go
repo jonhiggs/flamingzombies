@@ -11,10 +11,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const STATE_UNKNOWN = -1
-const STATE_FAIL = 0
-const STATE_OK = 1
-
 var unlockLock sync.Mutex // ensure two unlocks don't run concurrently
 
 type Task struct {
@@ -32,8 +28,7 @@ type Task struct {
 	RecoverBody           string   `toml:"recover_body"`            // the body of the notifiation when recovering from an error state
 
 	history      uint32     // represented in binary. sucessess are high
-	lastState    int        // last known state
-	stateChanged bool       // set to true if the last measure changed the state
+	measurements uint32     // the bits in the history with a recorded value. Needed to understand a history of 0
 	mutex        sync.Mutex // lock to ensure one task runs at a time
 }
 
@@ -96,21 +91,23 @@ func (t *Task) Run() bool {
 		}).Error("command failed or timed out")
 
 		t.RecordStatus(false)
-		return false
+	} else {
+		t.RecordStatus(true)
 	}
 
-	t.RecordStatus(true)
-
-	if t.stateChanged {
+	if t.StateChanged() {
 		for _, name := range t.NotifierNames {
 			for i, n := range config.Notifiers {
 				if n.Name == name {
+					log.WithFields(log.Fields{
+						"file":      "lib/task.go",
+						"task_name": t.Name,
+						"task_hash": t.Hash(),
+					}).Debug(fmt.Sprintf("raising notification. is %s, was %s", t.State(), t.LastState()))
 					NotifyCh <- Notification{&config.Notifiers[i], t}
 				}
 			}
 		}
-
-		t.lastState = t.State()
 	}
 	return true
 }
@@ -127,45 +124,89 @@ func (t *Task) RecordStatus(b bool) {
 		t.history += 1
 	}
 
+	t.measurements = t.measurements << 1
+	t.measurements += 1
+
 	log.WithFields(log.Fields{
 		"file":      "lib/task.go",
 		"task_name": t.Name,
 		"task_hash": t.Hash(),
 	}).Trace(fmt.Sprintf("history is %b", t.history))
 
-	if t.State() == STATE_UNKNOWN {
-		t.stateChanged = false
-	} else if t.State() == t.lastState {
-		t.stateChanged = false
-	} else {
-		t.stateChanged = true
-	}
 }
 
 // extract the current state from the history
-// the returned values are:
-//
-//	-1: unknown
-//	 0: down
-//	 1: up
-func (t *Task) State() int {
-	var mask uint32
-	for i := 0; i < t.Retries; i++ {
-		mask = mask << 1
-		mask += 1
+func (t Task) State() State {
+	// if there aren't enough measurements, return STATE_UNKNOWN
+	if t.retryMask() > t.measurements {
+		return STATE_UNKNOWN
 	}
 
-	v := t.history & mask
+	v := t.history & t.retryMask()
 
 	if v == 0 {
-		return 0
+		return STATE_FAIL
 	}
 
-	if v == mask {
-		return 1
+	if v == t.retryMask() {
+		return STATE_OK
 	}
 
-	return -1
+	return STATE_UNKNOWN
+}
+
+// step back though the data to find the previous state
+func (t Task) LastState() State {
+	h := t.history >> t.Retries
+	m := t.measurements >> t.Retries
+
+	mask := t.retryMask()
+
+	for mask <= m {
+		if h&mask == mask {
+			return STATE_OK
+		}
+
+		if h&mask == 0 {
+			return STATE_FAIL
+		}
+
+		h = h >> 1
+		m = m >> 1
+	}
+
+	return STATE_UNKNOWN
+}
+
+// if the state changed
+func (t Task) StateChanged() bool {
+	// if state is unknown, then we can't make an assessment.
+	if t.State() == STATE_UNKNOWN {
+		return false
+	}
+
+	// shift back to the last record. if we had the data to raise an alert,
+	// then assume we did.
+	l := (t.history >> 1) & t.retryMask()
+	if l == (t.history & t.retryMask()) {
+		return false
+	}
+
+	if t.LastState() == STATE_UNKNOWN {
+		return false
+	}
+
+	return t.State() != t.LastState()
+}
+
+func (t Task) retryMask() uint32 {
+	var m uint32
+	for i := 0; i < t.Retries; i++ {
+		m = m << 1
+		m += 1
+	}
+
+	return m
 }
 
 func (t Task) timeout() time.Duration {

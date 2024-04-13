@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"strconv"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -33,6 +34,17 @@ func ProcessNotifications() {
 		C:
 			select {
 			case n := <-NotifyCh:
+				if n.Task.State() == n.Task.LastState() {
+					log.WithFields(log.Fields{
+						"file":          "lib/notifier.go",
+						"notifier_name": n.Notifier.Name,
+					}).Error(
+						fmt.Sprintf("Notification raised but the State (%s) is equal to LastState (%s)", n.Task.State(), n.Task.LastState()),
+					)
+
+					panic(strconv.FormatInt(int64(n.Task.history), 2))
+				}
+
 				if n.Notifier.MinPriority != 0 && n.Task.Priority > n.Notifier.MinPriority { // 1 is a higher priority than 2
 					log.WithFields(log.Fields{
 						"file":          "lib/notifier.go",
@@ -63,7 +75,8 @@ func ProcessNotifications() {
 				cmd.Env = []string{
 					fmt.Sprintf("PRIORITY=%d", n.Task.Priority),
 					fmt.Sprintf("SUBJECT=%s", n.subject()),
-					fmt.Sprintf("STATE=%d", n.Task.State()),
+					fmt.Sprintf("STATE=%s", n.Task.State()),
+					fmt.Sprintf("LAST_STATE=%s", n.Task.LastState()),
 				}
 
 				log.WithFields(log.Fields{
@@ -91,9 +104,9 @@ func (n Notifier) timeout() time.Duration {
 
 func (n Notification) subject() string {
 	return fmt.Sprintf(
-		"task %s changed state from %d to %d",
+		"task %s changed state from %s to %s",
 		n.Task.Name,
-		n.Task.lastState,
+		n.Task.LastState(),
 		n.Task.State(),
 	)
 }
@@ -105,5 +118,5 @@ func (n Notification) body() string {
 		return n.Task.ErrorBody
 	}
 
-	return fmt.Sprintf("The task %s is in an unknown state", n.Task.Name)
+	return fmt.Sprintf("The task %s is in an %s state", n.Task.Name, n.Task.State())
 }
