@@ -100,9 +100,14 @@ func (t *Task) Run() bool {
 	}
 
 	t.RecordStatus(true)
+
 	if t.stateChanged {
-		for _, n := range t.notifications() {
-			NotifyCh <- n
+		for _, name := range t.NotifierNames {
+			for i, n := range config.Notifiers {
+				if n.Name == name {
+					NotifyCh <- Notification{&config.Notifiers[i], t}
+				}
+			}
 		}
 
 		t.lastState = t.State()
@@ -197,28 +202,4 @@ func (t Task) notifiers() []*Notifier {
 	}
 
 	return not
-}
-
-func (t Task) notifications() []Notification {
-	var ns []Notification
-	var body string
-
-	if t.State() == STATE_OK {
-		body = t.RecoverBody
-	} else {
-		body = t.ErrorBody
-	}
-
-	subject := fmt.Sprintf("task %s changed state from %d to %d", t.Name, t.lastState, t.State())
-
-	for _, n := range t.notifiers() {
-		ns = append(ns, Notification{
-			Notifier: n,
-			Subject:  subject,
-			Body:     body,
-			Priority: t.Priority,
-		})
-	}
-
-	return ns
 }
