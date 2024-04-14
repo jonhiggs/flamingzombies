@@ -33,12 +33,12 @@ flappy has recovered
 #args = [ "-A", "-c3", "127.0.0.1" ]
 #frequency_seconds = 3
 
-[[task]]
-name = "sleep"
-command = "sleep"
-args = [ "4" ]
-frequency_seconds = 1
-timeout_seconds = 1
+#[[task]]
+#name = "sleep"
+#command = "sleep"
+#args = [ "4" ]
+#frequency_seconds = 1
+#timeout_seconds = 1
 
 #[[task]]
 #name = "false"
