@@ -11,8 +11,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var unlockLock sync.Mutex // ensure two unlocks don't run concurrently
-
 type Task struct {
 	Name                  string   `toml:"name"`                    // friendly name
 	Command               string   `toml:"command"`                 // command
@@ -83,15 +81,36 @@ func (t *Task) Run() bool {
 	defer cancel()
 	cmd := exec.CommandContext(ctx, t.Command, t.Args...)
 
-	if err := cmd.Run(); err != nil {
+	err := cmd.Run()
+
+	if ctx.Err() == context.DeadlineExceeded {
 		log.WithFields(log.Fields{
 			"file":      "lib/task.go",
 			"task_name": t.Name,
 			"task_hash": t.Hash(),
-		}).Error("command failed or timed out")
+		}).Error(fmt.Sprintf("time out exceeded while executing command"))
 
+		return false
+	}
+
+	if err != nil {
+		exiterr, _ := err.(*exec.ExitError)
+		code := exiterr.ExitCode()
+
+		//panic(fmt.Sprintf("status not 0: %d", code))
+		log.WithFields(log.Fields{
+			"file":      "lib/task.go",
+			"task_name": t.Name,
+			"task_hash": t.Hash(),
+		}).Info(fmt.Sprintf("command exited with %d", code))
 		t.RecordStatus(false)
 	} else {
+		log.WithFields(log.Fields{
+			"file":      "lib/task.go",
+			"task_name": t.Name,
+			"task_hash": t.Hash(),
+		}).Info(fmt.Sprintf("command succeeded"))
+
 		t.RecordStatus(true)
 	}
 
