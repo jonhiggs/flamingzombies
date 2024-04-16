@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
-	"strconv"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -17,13 +16,13 @@ type Notifier struct {
 	Name           string
 	Command        string
 	Args           []string
-	MinPriority    int
 	TimeoutSeconds int `toml:"timeout_seconds"`
 }
 
 type Notification struct {
 	Notifier *Notifier
 	Task     *Task
+	Version  uint64
 }
 
 var NotifyCh = make(chan Notification, 100)
@@ -34,28 +33,21 @@ func ProcessNotifications() {
 		C:
 			select {
 			case n := <-NotifyCh:
-				if n.Task.State() == n.Task.LastState() {
+				if n.Task.stateVersion > n.Version {
 					log.WithFields(log.Fields{
-						"file":          "lib/notifier.go",
-						"notifier_name": n.Notifier.Name,
-					}).Error(
-						fmt.Sprintf("Notification raised but the State (%s) is equal to LastState (%s)", n.Task.State(), n.Task.LastState()),
-					)
-
-					panic(strconv.FormatInt(int64(n.Task.history), 2))
-				}
-
-				if n.Notifier.MinPriority != 0 && n.Task.Priority > n.Notifier.MinPriority { // 1 is a higher priority than 2
-					log.WithFields(log.Fields{
-						"file":          "lib/notifier.go",
-						"notifier_name": n.Notifier.Name,
-					}).Info(fmt.Sprintf("not notifying because notification priority (%d) is lower than the notifiers minimum_priority (%d)", n.Task.Priority, n.Notifier.MinPriority))
+						"file":                 "lib/notifier.go",
+						"notifier_name":        n.Notifier.Name,
+						"notification_version": n.Version,
+						"task_state_version":   n.Task.stateVersion,
+					}).Debug("skipping stale notification")
 					break C
 				}
 
 				log.WithFields(log.Fields{
-					"file":          "lib/notifier.go",
-					"notifier_name": n.Notifier.Name,
+					"file":                 "lib/notifier.go",
+					"notifier_name":        n.Notifier.Name,
+					"notification_version": n.Version,
+					"task_state_version":   n.Task.stateVersion,
 				}).Info("sending notification")
 
 				ctx, cancel := context.WithTimeout(context.Background(), n.Notifier.timeout())
@@ -66,8 +58,10 @@ func ProcessNotifications() {
 				stdin, err := cmd.StdinPipe()
 				if err != nil {
 					log.WithFields(log.Fields{
-						"file":          "lib/notifier.go",
-						"notifier_name": n.Notifier.Name,
+						"file":                 "lib/notifier.go",
+						"notifier_name":        n.Notifier.Name,
+						"notification_version": n.Version,
+						"task_state_version":   n.Task.stateVersion,
 					}).Error(err)
 				}
 				defer stdin.Close()
@@ -80,8 +74,10 @@ func ProcessNotifications() {
 				}
 
 				log.WithFields(log.Fields{
-					"file":          "lib/notifier.go",
-					"notifier_name": n.Notifier.Name,
+					"file":                 "lib/notifier.go",
+					"notifier_name":        n.Notifier.Name,
+					"notification_version": n.Version,
+					"task_state_version":   n.Task.stateVersion,
 				}).Trace(fmt.Sprintf("writing string to stdin: %s", n.body()))
 
 				io.WriteString(stdin, n.body())
@@ -90,13 +86,17 @@ func ProcessNotifications() {
 
 				if ctx.Err() == context.DeadlineExceeded {
 					log.WithFields(log.Fields{
-						"file":          "lib/notifier.go",
-						"notifier_name": n.Notifier.Name,
+						"file":                 "lib/notifier.go",
+						"notifier_name":        n.Notifier.Name,
+						"notification_version": n.Version,
+						"task_state_version":   n.Task.stateVersion,
 					}).Error(fmt.Sprintf("time out exceeded while executing notifier"))
 				} else if err != nil {
 					log.WithFields(log.Fields{
-						"file":          "lib/notifier.go",
-						"notifier_name": n.Notifier.Name,
+						"file":                 "lib/notifier.go",
+						"notifier_name":        n.Notifier.Name,
+						"notification_version": n.Version,
+						"task_state_version":   n.Task.stateVersion,
 					}).Error(err)
 				}
 			}

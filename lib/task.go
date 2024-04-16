@@ -14,7 +14,7 @@ import (
 type Task struct {
 	Name                  string   `toml:"name"`                    // friendly name
 	Command               string   `toml:"command"`                 // command
-	Args                  []string `toml:"args"`                    // command aruments
+	Args                  []string `toml:"args"`                    // command arguments
 	FrequencySeconds      int      `toml:"frequency_seconds"`       // how often to run
 	RetryFrequencySeconds int      `toml:"retry_frequency_seconds"` // how quickly to retry when state unknown
 	TimeoutSeconds        int      `toml:"timeout_seconds"`         // how long an execution may run
@@ -22,12 +22,13 @@ type Task struct {
 	Retries               int      `toml:"retries"`                 // number of retries before changing the state
 	NotifierNames         []string `toml:"notifiers"`               // notifiers to trigger upon state change
 	Priority              int      `toml:"priority"`                // the priority of the notifications
-	ErrorBody             string   `toml:"error_body"`              // the body of the notifiation when entering an error state
-	RecoverBody           string   `toml:"recover_body"`            // the body of the notifiation when recovering from an error state
+	ErrorBody             string   `toml:"error_body"`              // the body of the notification when entering an error state
+	RecoverBody           string   `toml:"recover_body"`            // the body of the notification when recovering from an error state
 
-	history      uint32     // represented in binary. sucessess are high
+	history      uint32     // represented in binary. Successes are high
 	measurements uint32     // the bits in the history with a recorded value. Needed to understand a history of 0
 	mutex        sync.Mutex // lock to ensure one task runs at a time
+	stateVersion uint64     // track the state changes for notification deduplication
 }
 
 func (t Task) Hash() uint32 {
@@ -115,6 +116,7 @@ func (t *Task) Run() bool {
 	}
 
 	if t.StateChanged() {
+		t.stateVersion++
 		for _, name := range t.NotifierNames {
 			for i, n := range config.Notifiers {
 				if n.Name == name {
@@ -123,7 +125,7 @@ func (t *Task) Run() bool {
 						"task_name": t.Name,
 						"task_hash": t.Hash(),
 					}).Debug(fmt.Sprintf("raising notification. is %s, was %s", t.State(), t.LastState()))
-					NotifyCh <- Notification{&config.Notifiers[i], t}
+					NotifyCh <- Notification{&config.Notifiers[i], t, t.stateVersion}
 				}
 			}
 		}
