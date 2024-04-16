@@ -64,7 +64,6 @@ func ProcessNotifications() {
 						"task_state_version":   n.Task.stateVersion,
 					}).Error(err)
 				}
-				defer stdin.Close()
 
 				cmd.Env = []string{
 					fmt.Sprintf("PRIORITY=%d", n.Task.Priority),
@@ -81,6 +80,7 @@ func ProcessNotifications() {
 				}).Trace(fmt.Sprintf("writing string to stdin: %s", n.body()))
 
 				io.WriteString(stdin, n.body())
+				stdin.Close()
 
 				err = cmd.Run()
 
