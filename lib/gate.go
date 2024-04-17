@@ -17,9 +17,25 @@ type Gate struct {
 }
 
 func (g Gate) IsOpen(t *Task) bool {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, g.Command, g.Args...)
+
+	cmd.Env = []string{
+		fmt.Sprintf("FREQUENCY_SECONDS=%d", t.FrequencySeconds),
+		fmt.Sprintf("TASK_COMMAND=%s", t.Command),
+		fmt.Sprintf("LAST_STATE=%s", t.LastState()),
+		fmt.Sprintf("PRIORITY=%d", t.Priority),
+		fmt.Sprintf("STATE=%s", t.State()),
+		fmt.Sprintf("STATE_CHANGED=%v", t.StateChanged()),
+		fmt.Sprintf("HISTORY=%d", t.history),
+		fmt.Sprintf("MEASUREMENTS=%d", t.measurements),
+	}
+
+	log.WithFields(log.Fields{
+		"file":      "lib/gate.go",
+		"gate_name": g.Name,
+	}).Info(fmt.Sprintf("running"))
 
 	err := cmd.Run()
 

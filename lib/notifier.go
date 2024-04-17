@@ -16,7 +16,7 @@ type Notifier struct {
 	Name           string
 	Command        string
 	Args           []string
-	GateNames      []string `tomel:"gates"`
+	GateNames      []string `toml:"gates"`
 	TimeoutSeconds int      `toml:"timeout_seconds"`
 }
 
