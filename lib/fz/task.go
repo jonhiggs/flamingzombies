@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"hash/fnv"
+	"os"
 	"os/exec"
 	"sync"
 	"time"
@@ -94,6 +95,16 @@ func (t *Task) Run() bool {
 	}
 
 	if err != nil {
+		if os.IsPermission(err) {
+			log.WithFields(log.Fields{
+				"file":      "lib/task.go",
+				"task_name": t.Name,
+				"task_hash": t.Hash(),
+			}).Error(err)
+
+			return false
+		}
+
 		exiterr, _ := err.(*exec.ExitError)
 		code := exiterr.ExitCode()
 
