@@ -11,7 +11,7 @@ var testTask = Task{
 var testNotifier = Notifier{Name: "testing"}
 
 func TestNotificationSubject(t *testing.T) {
-	n := Notification{&testNotifier, &testTask, 0}
+	n := Notification{&testNotifier, &testTask}
 
 	t.Run("when_ok", func(t *testing.T) {
 		testTask.history = 0b111

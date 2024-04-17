@@ -29,6 +29,7 @@ type Config struct {
 	LogFile   string     `toml:"log_file"`
 	Notifiers []Notifier `toml:"notifier"`
 	Tasks     []Task     `toml:"task"`
+	Gates     []Gate     `toml:"gate"`
 }
 
 var config Config

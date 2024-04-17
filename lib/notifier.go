@@ -16,13 +16,13 @@ type Notifier struct {
 	Name           string
 	Command        string
 	Args           []string
-	TimeoutSeconds int `toml:"timeout_seconds"`
+	GateNames      []string `tomel:"gates"`
+	TimeoutSeconds int      `toml:"timeout_seconds"`
 }
 
 type Notification struct {
 	Notifier *Notifier
 	Task     *Task
-	Version  uint64
 }
 
 var NotifyCh = make(chan Notification, 100)
@@ -33,21 +33,21 @@ func ProcessNotifications() {
 		C:
 			select {
 			case n := <-NotifyCh:
-				if n.Task.stateVersion > n.Version {
-					log.WithFields(log.Fields{
-						"file":                 "lib/notifier.go",
-						"notifier_name":        n.Notifier.Name,
-						"notification_version": n.Version,
-						"task_state_version":   n.Task.stateVersion,
-					}).Debug("skipping stale notification")
-					break C
+				for _, g := range n.Notifier.gates() {
+					if g.IsOpen(n.Task) == false {
+						log.WithFields(log.Fields{
+							"file":          "lib/notifier.go",
+							"notifier_name": n.Notifier.Name,
+							"gate_name":     g.Name,
+						}).Debug(fmt.Sprintf("gate is closed"))
+
+						break C
+					}
 				}
 
 				log.WithFields(log.Fields{
-					"file":                 "lib/notifier.go",
-					"notifier_name":        n.Notifier.Name,
-					"notification_version": n.Version,
-					"task_state_version":   n.Task.stateVersion,
+					"file":          "lib/notifier.go",
+					"notifier_name": n.Notifier.Name,
 				}).Info("sending notification")
 
 				ctx, cancel := context.WithTimeout(context.Background(), n.Notifier.timeout())
@@ -58,10 +58,8 @@ func ProcessNotifications() {
 				stdin, err := cmd.StdinPipe()
 				if err != nil {
 					log.WithFields(log.Fields{
-						"file":                 "lib/notifier.go",
-						"notifier_name":        n.Notifier.Name,
-						"notification_version": n.Version,
-						"task_state_version":   n.Task.stateVersion,
+						"file":          "lib/notifier.go",
+						"notifier_name": n.Notifier.Name,
 					}).Error(err)
 				}
 
@@ -73,10 +71,8 @@ func ProcessNotifications() {
 				}
 
 				log.WithFields(log.Fields{
-					"file":                 "lib/notifier.go",
-					"notifier_name":        n.Notifier.Name,
-					"notification_version": n.Version,
-					"task_state_version":   n.Task.stateVersion,
+					"file":          "lib/notifier.go",
+					"notifier_name": n.Notifier.Name,
 				}).Trace(fmt.Sprintf("writing string to stdin: %s", n.body()))
 
 				io.WriteString(stdin, n.body())
@@ -86,17 +82,13 @@ func ProcessNotifications() {
 
 				if ctx.Err() == context.DeadlineExceeded {
 					log.WithFields(log.Fields{
-						"file":                 "lib/notifier.go",
-						"notifier_name":        n.Notifier.Name,
-						"notification_version": n.Version,
-						"task_state_version":   n.Task.stateVersion,
+						"file":          "lib/notifier.go",
+						"notifier_name": n.Notifier.Name,
 					}).Error(fmt.Sprintf("time out exceeded while executing notifier"))
 				} else if err != nil {
 					log.WithFields(log.Fields{
-						"file":                 "lib/notifier.go",
-						"notifier_name":        n.Notifier.Name,
-						"notification_version": n.Version,
-						"task_state_version":   n.Task.stateVersion,
+						"file":          "lib/notifier.go",
+						"notifier_name": n.Notifier.Name,
 					}).Error(err)
 				}
 			}
@@ -115,6 +107,28 @@ func (n Notification) subject() string {
 		n.Task.LastState(),
 		n.Task.State(),
 	)
+}
+
+func (n Notifier) gates() []*Gate {
+	var gat []*Gate
+	for _, gName := range n.GateNames {
+		found := false
+		for i, _ := range config.Gates {
+			if gName == config.Gates[i].Name {
+				gat = append(gat, &config.Gates[i])
+				found = true
+			}
+		}
+
+		if !found {
+			log.WithFields(log.Fields{
+				"file":          "lib/notifier.go",
+				"notifier_name": n.Name,
+			}).Fatal(fmt.Sprintf("unknown gate '%s'", gName))
+		}
+	}
+
+	return gat
 }
 
 func (n Notification) body() string {

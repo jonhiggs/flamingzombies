@@ -28,7 +28,6 @@ type Task struct {
 	history      uint32     // represented in binary. Successes are high
 	measurements uint32     // the bits in the history with a recorded value. Needed to understand a history of 0
 	mutex        sync.Mutex // lock to ensure one task runs at a time
-	stateVersion uint64     // track the state changes for notification deduplication
 }
 
 func (t Task) Hash() uint32 {
@@ -115,8 +114,7 @@ func (t *Task) Run() bool {
 		t.RecordStatus(true)
 	}
 
-	if t.StateChanged() {
-		t.stateVersion++
+	if t.State() != STATE_UNKNOWN {
 		for _, name := range t.NotifierNames {
 			for i, n := range config.Notifiers {
 				if n.Name == name {
@@ -125,7 +123,7 @@ func (t *Task) Run() bool {
 						"task_name": t.Name,
 						"task_hash": t.Hash(),
 					}).Debug(fmt.Sprintf("raising notification. is %s, was %s", t.State(), t.LastState()))
-					NotifyCh <- Notification{&config.Notifiers[i], t, t.stateVersion}
+					NotifyCh <- Notification{&config.Notifiers[i], t}
 				}
 			}
 		}

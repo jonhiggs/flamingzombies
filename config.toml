@@ -49,5 +49,10 @@ flappy has recovered
 [[notifier]]
 name = "logger"
 command = "plugins/notifier/logger"
-args = []
 timeout_seconds = 5
+gates = ["state_change"]
+
+[[gate]]
+name = "state_change"
+command = "plugins/gates/state_change"
+timeout_seconds = 1
