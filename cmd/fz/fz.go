@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	fz "git.altos/flamingzombies/lib"
+	"git.altos/flamingzombies/lib/fz"
 )
 
 var config fz.Config
