@@ -3,6 +3,7 @@ package fz
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"time"
 
@@ -35,7 +36,7 @@ func (g Gate) IsOpen(t *Task) bool {
 	log.WithFields(log.Fields{
 		"file":      "lib/gate.go",
 		"gate_name": g.Name,
-	}).Info(fmt.Sprintf("running"))
+	}).Trace(fmt.Sprintf("running"))
 
 	err := cmd.Run()
 
@@ -49,6 +50,15 @@ func (g Gate) IsOpen(t *Task) bool {
 	}
 
 	if err != nil {
+		if os.IsPermission(err) {
+			log.WithFields(log.Fields{
+				"file":      "lib/task.go",
+				"gate_name": g.Name,
+			}).Error(err)
+
+			return false
+		}
+
 		exiterr, _ := err.(*exec.ExitError)
 
 		log.WithFields(log.Fields{
