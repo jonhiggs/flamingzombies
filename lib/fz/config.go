@@ -82,7 +82,7 @@ func ReadConfig() Config {
 
 		if t.RetryFrequencySeconds == 0 {
 			if config.Defaults.RetryFrequencySeconds == 0 {
-				config.Tasks[i].RetryFrequencySeconds = config.Tasks[i].FrequencySeconds
+				config.Tasks[i].RetryFrequencySeconds = config.Tasks[i].TimeoutSeconds
 			} else {
 				config.Tasks[i].RetryFrequencySeconds = config.Defaults.RetryFrequencySeconds
 			}
@@ -133,6 +133,14 @@ func ReadConfig() Config {
 				"task_name": t.Name,
 				"task_hash": t.Hash(),
 			}).Fatal(fmt.Sprintf("frequency_seconds (%d) must be shorter than the timeout_seconds (%d)", config.Tasks[i].FrequencySeconds, config.Tasks[i].TimeoutSeconds))
+		}
+
+		if config.Tasks[i].TimeoutSeconds > config.Tasks[i].RetryFrequencySeconds {
+			log.WithFields(log.Fields{
+				"file":      "lib/config.go",
+				"task_name": t.Name,
+				"task_hash": t.Hash(),
+			}).Fatal(fmt.Sprintf("retry_frequency_seconds (%d) must be shorter than the timeout_seconds (%d)", config.Tasks[i].RetryFrequencySeconds, config.Tasks[i].TimeoutSeconds))
 		}
 
 		if config.Tasks[i].Priority < 0 || config.Tasks[i].Priority > 100 {

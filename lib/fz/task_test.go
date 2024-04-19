@@ -121,9 +121,14 @@ func TestTaskReady(t *testing.T) {
 		{Task{Retries: 5, FrequencySeconds: 10, history: 0b01011, measurements: 0b11111, RetryFrequencySeconds: 2}, time.Unix(1712882668, 0), true},
 		{Task{Retries: 5, FrequencySeconds: 10, history: 0b01011, measurements: 0b11111, RetryFrequencySeconds: 2}, time.Unix(1712882669, 0), false},
 
+		// an unknown task should test at the frequency of RetryFrequencySeconds
 		{Task{Retries: 5, FrequencySeconds: 10, RetryFrequencySeconds: 1, history: 0b00001, measurements: 0b00001}, time.Unix(1712882670, 0), true},
 		{Task{Retries: 5, FrequencySeconds: 10, RetryFrequencySeconds: 1, history: 0b00001, measurements: 0b00001}, time.Unix(1712882671, 0), true},
 		{Task{Retries: 5, FrequencySeconds: 10, RetryFrequencySeconds: 10, history: 0b00001, measurements: 0b00001}, time.Unix(1712882671, 0), false},
+
+		// a passing task should test at FrequencySeconds
+		{Task{Retries: 5, FrequencySeconds: 60, RetryFrequencySeconds: 10, history: 0b11111, measurements: 0b11111}, time.Unix(1712882670, 0), false},
+		{Task{Retries: 5, FrequencySeconds: 60, RetryFrequencySeconds: 10, history: 0b11111, measurements: 0b11111}, time.Unix(1712882700, 0), true},
 	}
 
 	for _, tt := range tests {
