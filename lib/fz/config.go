@@ -145,6 +145,14 @@ func ReadConfig() Config {
 
 		// hit the notifiers() method to check that all specified notifiers exist
 		config.Tasks[i].notifiers()
+
+		if t.validate() != nil {
+			log.WithFields(log.Fields{
+				"file":      "lib/config.go",
+				"task_name": t.Name,
+				"task_hash": t.Hash(),
+			}).Fatal(err)
+		}
 	}
 
 	return config

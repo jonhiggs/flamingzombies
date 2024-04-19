@@ -106,6 +106,7 @@ func (t *Task) Run() bool {
 		}
 
 		exiterr, _ := err.(*exec.ExitError)
+		panic(err)
 		code := exiterr.ExitCode()
 
 		//panic(fmt.Sprintf("status not 0: %d", code))
@@ -273,4 +274,12 @@ func (t Task) notifiers() []*Notifier {
 	}
 
 	return not
+}
+
+func (t Task) validate() error {
+	if _, err := os.Stat(t.Command); os.IsNotExist(err) {
+		return fmt.Errorf("task command not found")
+	}
+
+	return nil
 }
