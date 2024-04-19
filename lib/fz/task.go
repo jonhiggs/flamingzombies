@@ -19,7 +19,6 @@ type Task struct {
 	FrequencySeconds      int      `toml:"frequency_seconds"`       // how often to run
 	RetryFrequencySeconds int      `toml:"retry_frequency_seconds"` // how quickly to retry when state unknown
 	TimeoutSeconds        int      `toml:"timeout_seconds"`         // how long an execution may run
-	LockTimeoutSeconds    int      `toml:"lock_timeout_seconds"`    // how long to wait for a lock
 	Retries               int      `toml:"retries"`                 // number of retries before changing the state
 	NotifierNames         []string `toml:"notifiers"`               // notifiers to trigger upon state change
 	Priority              int      `toml:"priority"`                // the priority of the notifications
@@ -246,11 +245,6 @@ func (t Task) timeout() time.Duration {
 
 func (t Task) retryFrequency() time.Duration {
 	return time.Duration(t.RetryFrequencySeconds) * time.Second
-}
-
-// TODO: this is currently unused
-func (t Task) lockTimeout() time.Duration {
-	return time.Duration(t.LockTimeoutSeconds) * time.Second
 }
 
 func (t Task) notifiers() []*Notifier {
