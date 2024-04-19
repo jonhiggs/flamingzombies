@@ -213,3 +213,27 @@ func TestRecordStatus(t *testing.T) {
 		})
 	}
 }
+
+func TestExpandArgs(t *testing.T) {
+	var tests = []struct {
+		name string
+		args []string
+		want []string
+	}{
+		{"empty", []string{}, []string{}},
+		{"empty", []string{"%{TIMEOUT_SECONDS}"}, []string{"10"}},
+	}
+
+	for _, tt := range tests {
+
+		ta := Task{Args: tt.args, TimeoutSeconds: 10}
+		for i, got := range ta.ExpandArgs() {
+			name := fmt.Sprintf("%s:%d", tt.name, i)
+			t.Run(name, func(t *testing.T) {
+				if got != tt.want[i] {
+					t.Errorf("got %v, want %v", got, tt.want[i])
+				}
+			})
+		}
+	}
+}
