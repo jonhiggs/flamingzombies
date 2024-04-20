@@ -92,7 +92,7 @@ func (t *Task) Run() bool {
 	cmd := exec.CommandContext(ctx, t.Command, t.ExpandArgs()...)
 
 	cmd.Env = []string{
-		fmt.Sprintf("TIMEOUT=%d", n.Task.TimeoutSeconds),
+		fmt.Sprintf("TIMEOUT=%d", t.TimeoutSeconds),
 	}
 
 	err := cmd.Run()
