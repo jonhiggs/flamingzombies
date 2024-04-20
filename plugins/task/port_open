@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+if [[ $# -ne 2 ]]; then
+  echo "usage: $0 <host> <port>" >&2
+  exit 1
+fi
+
+/usr/bin/nc -zv $@
