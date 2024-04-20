@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v0.0.8
+## v0.0.9
 
 - License it under BSD-2-Clause
 - Start a man page
