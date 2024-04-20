@@ -12,7 +12,7 @@ TAG := v$(VERSION)
 
 artifacts := $(addsuffix .tar.gz, dist/fz_openbsd_arm64 dist/fz_openbsd_amd64 dist/fz_linux_arm64 dist/fz_linux_amd64 dist/fz_darwin_arm64 dist/fz_darwin_amd64)
 
-release: export GITHUB_TOKEN="$(shell pass api/github.com/goreleaser)"
+release: export GITHUB_TOKEN="$(shell pass api/github.com/ghcli)"
 release: $(artifacts)
 	gh release upload $(TAG) $(artifacts)
 
