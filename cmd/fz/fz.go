@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"git.altos/flamingzombies/lib/daemon"
 	"git.altos/flamingzombies/lib/fz"
 )
 
@@ -12,6 +13,7 @@ func init() {
 	config = fz.ReadConfig()
 	fz.StartLogger(config.LogLevel)
 	fz.ProcessNotifications()
+	daemon.Listen()
 }
 
 func main() {
