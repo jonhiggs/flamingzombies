@@ -6,6 +6,6 @@ endif
 ifndef VERSION
   $(error VERSION was not provided)
 endif
-	git tag -a v$(VERSION) -m "$(MESSAGE)"
-	git push origin v$(VERSION)
+	#git tag -a v$(VERSION) -m "$(MESSAGE)"
+	#git push origin v$(VERSION)
 	goreleaser build --clean
