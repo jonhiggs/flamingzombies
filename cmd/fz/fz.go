@@ -24,8 +24,17 @@ func init() {
 		os.Setenv("FZ_DIRECTORY", "/usr/libexec/flamingzombies")
 	}
 
+	if os.Getenv("FZ_LOG_LEVEL") == "" {
+		os.Setenv("FZ_LOG_LEVEL", "info")
+	}
+
+	if os.Getenv("FZ_LOG_FILE") == "" {
+		os.Setenv("FZ_LOG_FILE", "stdout")
+	}
+
 	options := []optparse.Option{
 		{"config", 'c', optparse.KindRequired},
+		{"directory", 'C', optparse.KindRequired},
 		{"help", 'h', optparse.KindNone},
 		{"loglevel", 'l', optparse.KindRequired},
 		{"version", 'V', optparse.KindNone},
@@ -42,8 +51,8 @@ func init() {
 			os.Setenv("FZ_CONFIG_FILE", result.Optarg)
 		case "loglevel":
 			os.Setenv("FZ_LOG_LEVEL", result.Optarg)
-		case "scriptdir":
-			os.Setenv("FZ_SCRIPT_DIR", result.Optarg)
+		case "directory":
+			os.Setenv("FZ_DIRECTORY", result.Optarg)
 		case "help":
 			usage()
 			return

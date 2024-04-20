@@ -90,6 +90,7 @@ func (t *Task) Run() bool {
 	ctx, cancel := context.WithTimeout(context.Background(), t.timeout())
 	defer cancel()
 	cmd := exec.CommandContext(ctx, t.Command, t.ExpandArgs()...)
+	cmd.Dir = config.Directory
 
 	cmd.Env = []string{
 		fmt.Sprintf("TIMEOUT=%d", t.TimeoutSeconds),

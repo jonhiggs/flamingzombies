@@ -22,6 +22,7 @@ func (g Gate) IsOpen(t *Task) bool {
 	defer cancel()
 	cmd := exec.CommandContext(ctx, g.Command, g.Args...)
 
+	cmd.Dir = config.Directory
 	cmd.Env = []string{
 		fmt.Sprintf("FREQUENCY_SECONDS=%d", t.FrequencySeconds),
 		fmt.Sprintf("TASK_COMMAND=%s", t.Command),

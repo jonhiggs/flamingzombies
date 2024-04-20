@@ -13,7 +13,6 @@ const DEFAULT_RETRIES = 5
 const DEFAULT_TIMEOUT_SECONDS = 5
 const DEFAULT_FREQUENCY_SECONDS = 300
 const DEFAULT_PRIORITY = 5
-const DEFAULT_LOG_LEVEL = "info"
 const DEFAULT_UNKNOWN_EXIT_CODE = 3 // straight from Nagios
 
 type Defaults struct {
@@ -34,6 +33,7 @@ type Config struct {
 	Tasks         []Task     `toml:"task"`
 	Gates         []Gate     `toml:"gate"`
 	ListenAddress string     `toml:"listen_address"`
+	Directory     string     `toml:"directory"`
 }
 
 var config Config
@@ -62,11 +62,15 @@ func ReadConfig() Config {
 	}
 
 	if config.LogFile == "" {
-		config.LogFile = "stdout"
+		config.LogFile = os.Getenv("FZ_LOG_FILE")
 	}
 
 	if config.LogLevel == "" {
-		config.LogLevel = DEFAULT_LOG_LEVEL
+		config.LogLevel = os.Getenv("FZ_LOG_LEVEL")
+	}
+
+	if config.Directory == "" {
+		config.LogLevel = os.Getenv("FZ_DIRECTORY")
 	}
 
 	for i, t := range config.Tasks {
@@ -176,7 +180,7 @@ func ReadConfig() Config {
 		// hit the notifiers() method to check that all specified notifiers exist
 		config.Tasks[i].notifiers()
 
-		if t.validate() != nil {
+		if err = t.validate(); err != nil {
 			log.WithFields(log.Fields{
 				"file":      "lib/fz/config.go",
 				"task_name": t.Name,

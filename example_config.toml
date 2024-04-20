@@ -13,13 +13,13 @@ priority = 3
 
 #[[task]]
 #name = "localhost:ssh"
-#command = "/usr/lib/nagios/plugins/check_ssh"
+#command = "/usr/lib/nagios/libexec/check_ssh"
 #args = [ "-t", "5", "-r", "9.7", "1.2.3.4"]
 #timeout_seconds = 6
 
 [[task]]
 name = "flappy"
-command = "plugins/task/flappy"
+command = "libexec/task/flappy"
 frequency_seconds = 1
 error_body = """
 flappy has entered an error state
@@ -56,11 +56,11 @@ retry_frequency_seconds = 1
 
 [[notifier]]
 name = "logger"
-command = "plugins/notifier/logger"
+command = "libexec/notifier/logger"
 timeout_seconds = 5
 gates = ["state_change"]
 
 [[gate]]
 name = "state_change"
-command = "plugins/gates/state_change"
+command = "libexec/gates/state_change"
 timeout_seconds = 1

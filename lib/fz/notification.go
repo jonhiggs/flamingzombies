@@ -52,6 +52,7 @@ func ProcessNotifications() {
 					}).Error(err)
 				}
 
+				cmd.Dir = config.Directory
 				cmd.Env = []string{
 					fmt.Sprintf("PRIORITY=%d", n.Task.Priority),
 					fmt.Sprintf("SUBJECT=%s", n.subject()),
