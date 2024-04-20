@@ -8,4 +8,4 @@ ifndef VERSION
 endif
 	git tag -a v$(VERSION) -m "$(MESSAGE)"
 	git push origin v$(VERSION)
-	goreleaser release --clean
+	goreleaser build --clean
