@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+if [[ $# -eq 1 ]]; then
+  echo "you must provide at least one email recepient" >&2
+  exit 1
+fi
+
+cat | mail -s "${SUBJECT}" $@
