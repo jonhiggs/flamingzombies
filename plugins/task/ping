@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+if [[ ${TIMEOUT:-0} -lt 2 ]]; then
+  echo "timeout_seconds cannot be less than 2" >&2
+  exit 1
+fi
+
+ADDRESS="$1"
+COUNT="${2:-3}"
+
+ping -W 1 -w "$((TIMEOUT - 1))" -c "${COUNT}" -A "${ADDRESS}"
