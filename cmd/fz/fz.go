@@ -3,8 +3,8 @@ package main
 import (
 	"time"
 
-	"git.altos/flamingzombies/lib/daemon"
-	"git.altos/flamingzombies/lib/fz"
+	"github.com/jonhiggs/flamingzombies/lib/daemon"
+	"github.com/jonhiggs/flamingzombies/lib/fz"
 )
 
 var config fz.Config

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"git.altos/flamingzombies/lib/fz"
+	"github.com/jonhiggs/flamingzombies/lib/fz"
 
 	log "github.com/sirupsen/logrus"
 )
