@@ -1,7 +1,6 @@
 package daemon
 
 import (
-	"flag"
 	"fmt"
 	"net"
 
@@ -10,15 +9,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var (
-	listen = flag.Bool("l", false, "Listen")
-	host   = flag.String("h", "localhost", "Host")
-	port   = flag.Int("p", 5891, "Port")
-)
-
 func Listen(c *fz.Config) {
-	addr := fmt.Sprintf("%s:%d", *host, *port)
-	listener, err := net.Listen("tcp", addr)
+	listener, err := net.Listen("tcp", c.ListenAddress)
 
 	if err != nil {
 		panic(err)
@@ -44,5 +36,4 @@ func processClient(conn net.Conn, c *fz.Config) {
 	for _, t := range c.Tasks {
 		fmt.Fprintf(conn, "%s\t%s\t%032b\t%d\t%d\n", t.Name, t.State(), t.History, t.LastRun.Unix(), t.LastOk.Unix())
 	}
-
 }

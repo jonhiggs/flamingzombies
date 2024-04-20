@@ -1,6 +1,8 @@
 log_file = "-"
 log_level = "debug"
 
+listen_address = "127.0.0.1:5891"
+
 [defaults]
 retries = 5
 timeout_seconds = 1

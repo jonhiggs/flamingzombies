@@ -13,8 +13,10 @@ func init() {
 	config = fz.ReadConfig()
 	fz.StartLogger(config.LogLevel)
 	fz.ProcessNotifications()
-	go daemon.Listen(&config)
 
+	if config.Listen() {
+		go daemon.Listen(&config)
+	}
 }
 
 func main() {

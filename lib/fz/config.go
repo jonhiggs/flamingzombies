@@ -26,12 +26,13 @@ type Defaults struct {
 }
 
 type Config struct {
-	Defaults  Defaults
-	LogLevel  string     `toml:"log_level"`
-	LogFile   string     `toml:"log_file"`
-	Notifiers []Notifier `toml:"notifier"`
-	Tasks     []Task     `toml:"task"`
-	Gates     []Gate     `toml:"gate"`
+	Defaults      Defaults
+	LogLevel      string     `toml:"log_level"`
+	LogFile       string     `toml:"log_file"`
+	Notifiers     []Notifier `toml:"notifier"`
+	Tasks         []Task     `toml:"task"`
+	Gates         []Gate     `toml:"gate"`
+	ListenAddress string     `toml:"listen_address"`
 }
 
 var config Config
@@ -174,4 +175,8 @@ func ReadConfig() Config {
 	}
 
 	return config
+}
+
+func (c Config) Listen() bool {
+	return c.ListenAddress != ""
 }
