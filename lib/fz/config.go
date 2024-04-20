@@ -40,18 +40,24 @@ var config Config
 func ReadConfig() Config {
 	file, err := os.Open("config.toml")
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, "Error opening config.toml")
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 	defer file.Close()
 
 	b, err := io.ReadAll(file)
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, "Error reading config.toml")
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	err = toml.Unmarshal(b, &config)
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, "Error parsing config.toml")
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
 	if config.LogFile == "" {
