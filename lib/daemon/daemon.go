@@ -1,12 +1,12 @@
 package daemon
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"net"
-	"os"
 )
 
 var (
@@ -39,10 +39,25 @@ func Listen() {
 	}
 }
 
-func processClient(conn net.Conn) {
-	_, err := io.Copy(os.Stdout, conn)
-	if err != nil {
-		fmt.Println(err)
+func processClient(conn net.Conn) error {
+	defer conn.Close()
+
+	fmt.Fprintf(conn, "# ")
+
+	buff := make([]byte, 1024)
+	c := bufio.NewReader(conn)
+
+	for {
+		size, err := c.ReadByte()
+		if err != nil {
+			return err
+		}
+
+		// read the full message, or return an error
+		_, err = io.ReadFull(c, buff[:int(size)])
+		if err != nil {
+			return err
+
+		}
 	}
-	conn.Close()
 }
