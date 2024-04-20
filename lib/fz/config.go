@@ -13,6 +13,7 @@ const DEFAULT_RETRIES = 5
 const DEFAULT_TIMEOUT_SECONDS = 5
 const DEFAULT_FREQUENCY_SECONDS = 300
 const DEFAULT_PRIORITY = 5
+const DEFAULT_LOG_LEVEL = "info"
 const DEFAULT_UNKNOWN_EXIT_CODE = 3 // straight from Nagios
 
 type Defaults struct {
@@ -62,6 +63,10 @@ func ReadConfig() Config {
 
 	if config.LogFile == "" {
 		config.LogFile = "stdout"
+	}
+
+	if config.LogLevel == "" {
+		config.LogLevel = DEFAULT_LOG_LEVEL
 	}
 
 	for i, t := range config.Tasks {

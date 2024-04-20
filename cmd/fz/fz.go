@@ -20,12 +20,8 @@ func init() {
 		os.Setenv("FZ_CONFIG_FILE", "/etc/flamingzombies.toml")
 	}
 
-	if os.Getenv("FZ_SCRIPT_DIR") == "" {
-		os.Setenv("FZ_SCRIPT_DIR", "/usr/libexec/flamingzombies")
-	}
-
-	if os.Getenv("FZ_LOG_LEVEL") == "" {
-		os.Setenv("FZ_LOG_LEVEL", "error")
+	if os.Getenv("FZ_DIRECTORY") == "" {
+		os.Setenv("FZ_DIRECTORY", "/usr/libexec/flamingzombies")
 	}
 
 	options := []optparse.Option{
@@ -46,6 +42,8 @@ func init() {
 			os.Setenv("FZ_CONFIG_FILE", result.Optarg)
 		case "loglevel":
 			os.Setenv("FZ_LOG_LEVEL", result.Optarg)
+		case "scriptdir":
+			os.Setenv("FZ_SCRIPT_DIR", result.Optarg)
 		case "help":
 			usage()
 			return
@@ -56,7 +54,13 @@ func init() {
 	}
 
 	config = fz.ReadConfig()
-	fz.StartLogger(config.LogLevel)
+
+	if os.Getenv("FZ_LOG_LEVEL") != "" {
+		fz.StartLogger(os.Getenv("FZ_LOG_LEVEL"))
+	} else {
+		fz.StartLogger(config.LogLevel)
+	}
+
 	fz.ProcessNotifications()
 
 	if config.Listen() {
@@ -86,6 +90,7 @@ func usage() {
 	fmt.Println("")
 	fmt.Println("Options:")
 	fmt.Println("  -c, --config <file>     Configuration file")
+	fmt.Println("  -C, --directory <path>  Change to directory")
 	fmt.Println("  -h, --help              This help")
 	fmt.Println("  -l, --loglevel <level>  Override the log level")
 	fmt.Println("  -V, --version           Version")
