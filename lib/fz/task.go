@@ -25,6 +25,7 @@ type Task struct {
 	Priority              int      `toml:"priority"`                // the priority of the notifications
 	ErrorBody             string   `toml:"error_body"`              // the body of the notification when entering an error state
 	RecoverBody           string   `toml:"recover_body"`            // the body of the notification when recovering from an error state
+	UnknownExitCode       int      `toml:"unknown_exit_code"`       // the exit code indicating that a measurement could not be taken
 
 	history      uint32     // represented in binary. Successes are high
 	measurements uint32     // the bits in the history with a recorded value. Needed to understand a history of 0
@@ -104,28 +105,37 @@ func (t *Task) Run() bool {
 
 			return false
 		}
-
-		exiterr, _ := err.(*exec.ExitError)
-		panic(err)
-		code := exiterr.ExitCode()
-
-		//panic(fmt.Sprintf("status not 0: %d", code))
-		log.WithFields(log.Fields{
-			"file":      "lib/task.go",
-			"task_name": t.Name,
-			"task_hash": t.Hash(),
-		}).Info(fmt.Sprintf("command exited with %d", code))
-		t.RecordStatus(false)
-	} else {
-		log.WithFields(log.Fields{
-			"file":      "lib/task.go",
-			"task_name": t.Name,
-			"task_hash": t.Hash(),
-		}).Info(fmt.Sprintf("command succeeded"))
-
-		t.RecordStatus(true)
 	}
 
+	var exitCode int
+	if err != nil {
+		exiterr, _ := err.(*exec.ExitError)
+		exitCode = exiterr.ExitCode()
+	} else {
+		exitCode = 0
+	}
+
+	log.WithFields(log.Fields{
+		"file":      "lib/task.go",
+		"task_name": t.Name,
+		"task_hash": t.Hash(),
+	}).Debug(fmt.Sprintf("command exited with %d", exitCode))
+
+	switch exitCode {
+	case t.UnknownExitCode:
+		log.WithFields(log.Fields{
+			"file":      "lib/task.go",
+			"task_name": t.Name,
+			"task_hash": t.Hash(),
+		}).Info(fmt.Sprintf("command exited with 'unknown_exit_code' (%d). The result will be disregarded.", exitCode))
+		return false
+	case 0:
+		t.RecordStatus(true)
+	default:
+		t.RecordStatus(false)
+	}
+
+	// raising notifications
 	if t.State() != STATE_UNKNOWN {
 		for _, name := range t.NotifierNames {
 			for i, n := range config.Notifiers {
