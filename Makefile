@@ -1,17 +1,14 @@
 SHELL := /bin/bash
 
-ifeq ($(findstring release,$(MAKECMDGOALS)),release)
-  ifndef MESSAGE
-    $(error MESSAGE was not provided)
-  endif
-endif
-
 VERSION = $(shell cat cmd/fz/fz.go | awk '/const VERSION/ { gsub(/"/,"",$$NF); print $$NF }')
 artifacts := $(addsuffix .tar.gz, dist/fz_openbsd_arm64 dist/fz_openbsd_amd64 dist/fz_linux_arm64 dist/fz_linux_amd64 dist/fz_darwin_arm64 dist/fz_darwin_amd64)
 
-release: $(artifacts)
-	gh release create $(VERSION) --notes "${MESSAGE}"
+release: release_notes.txt $(artifacts)
+		| gh release create $(VERSION) -F release_notes.txt
 	gh release upload $(VERSION) $(artifacts)
+
+release_notes.txt: CHANGELOG.md
+	sed -n '/^## $(VERSION)$$/,/##/ { /^#/d; /^\w*$$/d; p }' $< > $@
 
 dist/fz_darwin_amd64.tar.gz:  DIR := dist/fz_darwin_amd64_v1
 dist/fz_darwin_arm64.tar.gz:  DIR := dist/fz_darwin_arm64
@@ -33,6 +30,7 @@ dist/plugins.tar.bz:
 gorelease_build: test
 	git status status 2>&1 | grep -q "working tree clean"
 	git branch | grep -q "* master"
+	grep -q '^## $(VERSION)$$' CHANGELOG.md
 	git tag -a $(VERSION) -m "$(MESSAGE)"
 	git push origin $(VERSION)
 	goreleaser build --clean
