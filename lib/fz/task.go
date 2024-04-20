@@ -91,6 +91,10 @@ func (t *Task) Run() bool {
 	defer cancel()
 	cmd := exec.CommandContext(ctx, t.Command, t.ExpandArgs()...)
 
+	cmd.Env = []string{
+		fmt.Sprintf("TIMEOUT=%d", n.Task.TimeoutSeconds),
+	}
+
 	err := cmd.Run()
 	t.LastRun = time.Now()
 	t.ExecutionCount++
