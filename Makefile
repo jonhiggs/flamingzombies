@@ -4,18 +4,14 @@ ifeq ($(findstring release,$(MAKECMDGOALS)),release)
   ifndef MESSAGE
     $(error MESSAGE was not provided)
   endif
-  ifndef VERSION
-    $(error VERSION was not provided)
-  endif
 endif
 
-TAG := v$(VERSION)
-
+VERSION = $(shell cat cmd/fz/fz.go | awk '/const VERSION/ { gsub(/"/,"",$$NF); print $$NF }')
 artifacts := $(addsuffix .tar.gz, dist/fz_openbsd_arm64 dist/fz_openbsd_amd64 dist/fz_linux_arm64 dist/fz_linux_amd64 dist/fz_darwin_arm64 dist/fz_darwin_amd64)
 
 release: $(artifacts)
-	gh release create $(TAG) --notes "${MESSAGE}"
-	gh release upload $(TAG) $(artifacts)
+	gh release create $(VERSION) --notes "${MESSAGE}"
+	gh release upload $(VERSION) $(artifacts)
 
 dist/fz_darwin_amd64.tar.gz:  DIR := dist/fz_darwin_amd64_v1
 dist/fz_darwin_arm64.tar.gz:  DIR := dist/fz_darwin_arm64
@@ -35,8 +31,8 @@ dist/plugins.tar.bz:
 	tar xvf $@ plugins/
 
 gorelease_build:
-	git tag -a $(TAG) -m "$(MESSAGE)"
-	git push origin $(TAG)
+	git tag -a $(VERSION) -m "$(MESSAGE)"
+	git push origin $(VERSION)
 	goreleaser build --clean
 	goreleaser build --snapshot --clean
 
