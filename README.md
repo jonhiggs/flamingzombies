@@ -2,6 +2,12 @@
 
 A scheduler for performing monitoring checks, detecting failure and raising alerts.
 
+---
+
+THIS IS STILL A WORK IN PROGRESS
+
+---
+
 
 tasks -> gate -> notifier
 
