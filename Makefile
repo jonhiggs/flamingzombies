@@ -22,9 +22,9 @@ dist/fz_openbsd_arm64.tar.gz: DIR := dist/fz_openbsd_arm64
 dist/%.tar.gz: gorelease_build
 	mkdir -p $(DIR)/bin
 	mkdir -p $(DIR)/share/man1
-	mkdir -p $(DIR)/share/flamingzombies
+	mkdir -p $(DIR)/libexec/flamingzombies
 	mv $(DIR)/fz $(DIR)/bin/fz
-	cp -r plugins $(DIR)/share/flamingzombies
+	cp -r libexec/* $(DIR)/libexec/flamingzombies
 	tar -C dist -zcvf $@ $(notdir $(DIR))
 
 dist/plugins.tar.bz:

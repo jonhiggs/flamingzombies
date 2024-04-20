@@ -1,7 +1,6 @@
-# plugins
+# libexec
 
-A directory of task and notification plugins handlers.
-
+A directory of scripts for handling tasks, notifications and gates.
 
 ## notifier
 
