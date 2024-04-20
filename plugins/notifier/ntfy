@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+#
+# Deliver messages with ntfy.
+# https://github.com/binwiederhier/ntfy
+#
+
+if [[ $# -eq 0 ]]; then
+  echo "you must supply the topic as first argument" >&2
+  exit 1
+fi
+
+TOPIC="$1"
+
+case "${PRIORITY}" in
+  1) NTFY_PRIORITY="max"     ;;
+  2) NTFY_PRIORITY="high"    ;;
+  3) NTFY_PRIORITY="default" ;;
+  4) NTFY_PRIORITY="low"     ;;
+  5) NTFY_PRIORITY="min"     ;;
+  *) NTFY_PRIORITY="default" ;;
+esac
+
+cat | curl -v -f -d @-               \
+  -H "Title: ${SUBJECT}"          \
+  -H "Priority: ${NTFY_PRIORITY}" \
+  "ntfy.sh/${TOPIC}"
