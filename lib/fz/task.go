@@ -28,10 +28,14 @@ type Task struct {
 	UnknownExitCode       int      `toml:"unknown_exit_code"`       // the exit code indicating that a measurement could not be taken
 
 	// public, but unconfigurable
-	LastRun      time.Time
-	LastOk       time.Time
-	History      uint32 // represented in binary. Successes are high
-	Measurements uint32 // the bits in the history with a recorded value. Needed to understand a history of 0
+	LastRun        time.Time
+	LastOk         time.Time
+	History        uint32 // represented in binary. Successes are high
+	Measurements   uint32 // the bits in the history with a recorded value. Needed to understand a history of 0
+	ExecutionCount int    // task was executed
+	OKCount        int    // task passed
+	FailCount      int    // task failed
+	ErrorCount     int    // fask failed to executed
 
 	mutex sync.Mutex // lock to ensure one task runs at a time
 }
@@ -89,6 +93,7 @@ func (t *Task) Run() bool {
 
 	err := cmd.Run()
 	t.LastRun = time.Now()
+	t.ExecutionCount++
 
 	if ctx.Err() == context.DeadlineExceeded {
 		log.WithFields(log.Fields{
@@ -97,6 +102,7 @@ func (t *Task) Run() bool {
 			"task_hash": t.Hash(),
 		}).Error(fmt.Sprintf("time out exceeded while executing command"))
 
+		t.ErrorCount++
 		return false
 	}
 
@@ -108,6 +114,7 @@ func (t *Task) Run() bool {
 				"task_hash": t.Hash(),
 			}).Error(err)
 
+			t.ErrorCount++
 			return false
 		}
 	}
@@ -133,11 +140,14 @@ func (t *Task) Run() bool {
 			"task_name": t.Name,
 			"task_hash": t.Hash(),
 		}).Info(fmt.Sprintf("command exited with 'unknown_exit_code' (%d). The result will be disregarded.", exitCode))
+
 		return false
 	case 0:
-		t.RecordStatus(true)
 		t.LastOk = time.Now()
+		t.OKCount++
+		t.RecordStatus(true)
 	default:
+		t.FailCount++
 		t.RecordStatus(false)
 	}
 
