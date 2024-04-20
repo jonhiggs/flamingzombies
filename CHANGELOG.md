@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.0.8
+
+- License it under BSD-2-Clause
+- Start a man page
+
 ## v0.0.7
 
 - Add option parsing

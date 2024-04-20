@@ -16,13 +16,22 @@ dist/fz_linux_amd64.tar.gz:   DIR := dist/fz_linux_amd64_v1
 dist/fz_linux_arm64.tar.gz:   DIR := dist/fz_linux_arm64
 dist/fz_openbsd_amd64.tar.gz: DIR := dist/fz_openbsd_amd64_v1
 dist/fz_openbsd_arm64.tar.gz: DIR := dist/fz_openbsd_arm64
-dist/%.tar.gz: gorelease_build
+dist/%.tar.gz: gorelease_build dist/man/man1/fz.1.gz
 	mkdir -p $(DIR)/bin
 	mkdir -p $(DIR)/share/man1
 	mkdir -p $(DIR)/libexec/flamingzombies
 	mv $(DIR)/fz $(DIR)/bin/fz
 	cp -r libexec/* $(DIR)/libexec/flamingzombies
+	cp -r dist/man $(DIR)/share
 	tar -C dist -zcvf $@ $(notdir $(DIR))
+
+dist/man/%.gz: export BUILD_DATE = $(shell date --iso-8601)
+dist/man/%.gz: man/% | dist/man/man1
+	cat $< | envsubst '$${BUILD_DATE}' > dist/man/$*
+	gzip -f dist/man/$*
+
+dist/man/man1 doc/man1:
+	mkdir -p $@
 
 dist/plugins.tar.bz:
 	tar xvf $@ plugins/
