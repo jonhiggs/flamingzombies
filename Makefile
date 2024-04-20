@@ -30,7 +30,7 @@ dist/%.tar.gz: gorelease_build
 dist/plugins.tar.bz:
 	tar xvf $@ plugins/
 
-gorelease_build:
+gorelease_build: test
 	git tag -a $(VERSION) -m "$(MESSAGE)"
 	git push origin $(VERSION)
 	goreleaser build --clean
@@ -42,7 +42,7 @@ gotest:
 	go test ./lib/fz
 
 shellcheck:
-	shellcheck -s sh plugins/{task,notifier,gates}/*
+	shellcheck -s sh libexec/{task,notifier,gates}/*
 
 clean:
 	rm -Rf ./dist
