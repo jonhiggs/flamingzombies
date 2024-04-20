@@ -1,12 +1,12 @@
 package daemon
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"net"
+
+	"git.altos/flamingzombies/lib/fz"
 )
 
 var (
@@ -15,7 +15,7 @@ var (
 	port   = flag.Int("p", 5891, "Port")
 )
 
-func Listen() {
+func Listen(c *fz.Config) {
 	// compose server address from host and port
 	addr := fmt.Sprintf("%s:%d", *host, *port)
 	// launch TCP server
@@ -34,30 +34,16 @@ func Listen() {
 		if err != nil {
 			log.Printf("Error accepting connection from client: %s", err)
 		} else {
-			go processClient(conn)
+			go processClient(conn, c)
 		}
 	}
 }
 
-func processClient(conn net.Conn) error {
+func processClient(conn net.Conn, c *fz.Config) {
 	defer conn.Close()
 
-	fmt.Fprintf(conn, "# ")
-
-	buff := make([]byte, 1024)
-	c := bufio.NewReader(conn)
-
-	for {
-		size, err := c.ReadByte()
-		if err != nil {
-			return err
-		}
-
-		// read the full message, or return an error
-		_, err = io.ReadFull(c, buff[:int(size)])
-		if err != nil {
-			return err
-
-		}
+	for _, t := range c.Tasks {
+		fmt.Fprintf(conn, "%s\t%s\t%032b\t%d\t%d\n", t.Name, t.State(), t.History, t.LastRun.Unix(), t.LastOk.Unix())
 	}
+
 }

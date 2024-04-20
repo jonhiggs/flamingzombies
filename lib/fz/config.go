@@ -118,7 +118,7 @@ func ReadConfig() Config {
 		}
 
 		// start the history in an unknown state
-		config.Tasks[i].history = 0b10
+		config.Tasks[i].History = 0b10
 
 		// validate the inputs
 		if config.Tasks[i].Retries > 32 {

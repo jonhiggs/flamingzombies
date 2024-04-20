@@ -9,43 +9,43 @@ notifiers = [
 ]
 priority = 3
 
+#[[task]]
+#name = "localhost:ssh"
+#command = "/usr/lib/nagios/plugins/check_ssh"
+#args = [ "-t", "5", "-r", "9.7", "1.2.3.4"]
+#timeout_seconds = 6
+
 [[task]]
-name = "localhost:ssh"
-command = "/usr/lib/nagios/plugins/check_ssh"
-args = [ "-t", "5", "-r", "9.7", "1.2.3.4"]
-timeout_seconds = 6
+name = "flappy"
+command = "plugins/task/flappy"
+frequency_seconds = 1
+error_body = """
+flappy has entered an error state
+"""
+recover_body = """
+flappy has recovered
+"""
 
-#[[task]]
-#name = "flappy"
-#command = "plugins/task/flappy"
-#frequency_seconds = 1
-#error_body = """
-#flappy has entered an error state
-#"""
-#recover_body = """
-#flappy has recovered
-#"""
+[[task]]
+name = "whoami"
+command = "/usr/bin/whoami"
+args = ["--help"]
+frequency_seconds = 1
+retry_frequency_seconds = 1
 
-#[[task]]
-#name = "whoami"
-#command = "whoami"
-#args = ["--help"]
-#frequency_seconds = 1
-#retry_frequency_seconds = 1
-#
 #[[task]]
 #name = "ping.localhost"
 #command = "ping"
 #args = [ "-A", "-c3", "127.0.0.1" ]
 #frequency_seconds = 3
-
+#
 #[[task]]
 #name = "sleep"
 #command = "sleep"
 #args = [ "4" ]
 #frequency_seconds = 1
 #timeout_seconds = 1
-
+#
 #[[task]]
 #name = "false"
 #command = "false"

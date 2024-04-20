@@ -27,9 +27,13 @@ type Task struct {
 	RecoverBody           string   `toml:"recover_body"`            // the body of the notification when recovering from an error state
 	UnknownExitCode       int      `toml:"unknown_exit_code"`       // the exit code indicating that a measurement could not be taken
 
-	history      uint32     // represented in binary. Successes are high
-	measurements uint32     // the bits in the history with a recorded value. Needed to understand a history of 0
-	mutex        sync.Mutex // lock to ensure one task runs at a time
+	// public, but unconfigurable
+	LastRun      time.Time
+	LastOk       time.Time
+	History      uint32 // represented in binary. Successes are high
+	Measurements uint32 // the bits in the history with a recorded value. Needed to understand a history of 0
+
+	mutex sync.Mutex // lock to ensure one task runs at a time
 }
 
 func (t Task) Hash() uint32 {
@@ -84,6 +88,7 @@ func (t *Task) Run() bool {
 	cmd := exec.CommandContext(ctx, t.Command, t.ExpandArgs()...)
 
 	err := cmd.Run()
+	t.LastRun = time.Now()
 
 	if ctx.Err() == context.DeadlineExceeded {
 		log.WithFields(log.Fields{
@@ -131,6 +136,7 @@ func (t *Task) Run() bool {
 		return false
 	case 0:
 		t.RecordStatus(true)
+		t.LastOk = time.Now()
 	default:
 		t.RecordStatus(false)
 	}
@@ -160,30 +166,30 @@ func (t *Task) RecordStatus(b bool) {
 		"task_hash": t.Hash(),
 	}).Trace(fmt.Sprintf("recording status %v", b))
 
-	t.history = t.history << 1
+	t.History = t.History << 1
 	if b {
-		t.history += 1
+		t.History += 1
 	}
 
-	t.measurements = t.measurements << 1
-	t.measurements += 1
+	t.Measurements = t.Measurements << 1
+	t.Measurements += 1
 
 	log.WithFields(log.Fields{
 		"file":      "lib/task.go",
 		"task_name": t.Name,
 		"task_hash": t.Hash(),
-	}).Trace(fmt.Sprintf("history is %b", t.history))
+	}).Trace(fmt.Sprintf("history is %b", t.History))
 
 }
 
 // extract the current state from the history
 func (t Task) State() State {
 	// if there aren't enough measurements, return STATE_UNKNOWN
-	if t.retryMask() > t.measurements {
+	if t.retryMask() > t.Measurements {
 		return STATE_UNKNOWN
 	}
 
-	v := t.history & t.retryMask()
+	v := t.History & t.retryMask()
 
 	if v == 0 {
 		return STATE_FAIL
@@ -198,8 +204,8 @@ func (t Task) State() State {
 
 // step back though the data to find the previous state
 func (t Task) LastState() State {
-	h := t.history >> t.Retries
-	m := t.measurements >> t.Retries
+	h := t.History >> t.Retries
+	m := t.Measurements >> t.Retries
 
 	mask := t.retryMask()
 
@@ -228,8 +234,8 @@ func (t Task) StateChanged() bool {
 
 	// shift back to the last record. if we had the data to raise an alert,
 	// then assume we did.
-	l := (t.history >> 1) & t.retryMask()
-	if l == (t.history & t.retryMask()) {
+	l := (t.History >> 1) & t.retryMask()
+	if l == (t.History & t.retryMask()) {
 		return false
 	}
 

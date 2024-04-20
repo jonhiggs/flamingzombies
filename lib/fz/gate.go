@@ -29,8 +29,8 @@ func (g Gate) IsOpen(t *Task) bool {
 		fmt.Sprintf("PRIORITY=%d", t.Priority),
 		fmt.Sprintf("STATE=%s", t.State()),
 		fmt.Sprintf("STATE_CHANGED=%v", t.StateChanged()),
-		fmt.Sprintf("HISTORY=%d", t.history),
-		fmt.Sprintf("MEASUREMENTS=%d", t.measurements),
+		fmt.Sprintf("HISTORY=%d", t.History),
+		fmt.Sprintf("MEASUREMENTS=%d", t.Measurements),
 	}
 
 	log.WithFields(log.Fields{
