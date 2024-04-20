@@ -40,7 +40,7 @@ gorelease_build: test
 	git status status 2>&1 | grep -q "working tree clean"
 	git branch | grep -q "* master"
 	grep -q '^## $(VERSION)$$' CHANGELOG.md
-	git tag -a $(VERSION)
+	git tag -a $(VERSION) -m "release of $(VERSION)"
 	git push origin $(VERSION)
 	goreleaser build --clean
 	goreleaser build --snapshot --clean
