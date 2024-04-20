@@ -38,9 +38,9 @@ type Config struct {
 var config Config
 
 func ReadConfig() Config {
-	file, err := os.Open("config.toml")
+	file, err := os.Open(os.Getenv("FZ_CONFIG_FILE"))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error opening config.toml")
+		fmt.Fprintf(os.Stderr, "Error opening configuration file %s\n", os.Getenv("FZ_CONFIG_FILE"))
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -48,14 +48,14 @@ func ReadConfig() Config {
 
 	b, err := io.ReadAll(file)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error reading config.toml")
+		fmt.Fprintf(os.Stderr, "Error reading configuration file %s\n", os.Getenv("FZ_CONFIG_FILE"))
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 
 	err = toml.Unmarshal(b, &config)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Error parsing config.toml")
+		fmt.Fprintf(os.Stderr, "Error parsing configuration file %s\n", os.Getenv("FZ_CONFIG_FILE"))
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
