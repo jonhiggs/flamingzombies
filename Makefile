@@ -31,6 +31,8 @@ dist/plugins.tar.bz:
 	tar xvf $@ plugins/
 
 gorelease_build: test
+	git status status 2>&1 | grep -q "working tree clean"
+	git branch | grep -q "* master"
 	git tag -a $(VERSION) -m "$(MESSAGE)"
 	git push origin $(VERSION)
 	goreleaser build --clean
