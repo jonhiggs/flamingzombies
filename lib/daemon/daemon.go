@@ -3,10 +3,11 @@ package daemon
 import (
 	"flag"
 	"fmt"
-	"log"
 	"net"
 
 	"git.altos/flamingzombies/lib/fz"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -16,18 +17,16 @@ var (
 )
 
 func Listen(c *fz.Config) {
-	// compose server address from host and port
 	addr := fmt.Sprintf("%s:%d", *host, *port)
-	// launch TCP server
 	listener, err := net.Listen("tcp", addr)
 
 	if err != nil {
-		// if we can't launch server for some reason,
-		// we can't do anything about it, just panic!
 		panic(err)
 	}
 
-	log.Printf("Listening for connections on %s", listener.Addr().String())
+	log.WithFields(log.Fields{
+		"file": "lib/daemon/daemon.go",
+	}).Info(fmt.Sprintf("Listening for connections on %s", listener.Addr().String()))
 
 	for {
 		conn, err := listener.Accept()

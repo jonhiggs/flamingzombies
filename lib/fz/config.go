@@ -123,7 +123,7 @@ func ReadConfig() Config {
 		// validate the inputs
 		if config.Tasks[i].Retries > 32 {
 			log.WithFields(log.Fields{
-				"file":      "lib/config.go",
+				"file":      "lib/fz/config.go",
 				"task_name": t.Name,
 				"task_hash": t.Hash(),
 			}).Fatal("cannot retry more than 32 times")
@@ -131,7 +131,7 @@ func ReadConfig() Config {
 
 		if config.Tasks[i].FrequencySeconds < 1 {
 			log.WithFields(log.Fields{
-				"file":      "lib/config.go",
+				"file":      "lib/fz/config.go",
 				"task_name": t.Name,
 				"task_hash": t.Hash(),
 			}).Fatal("frequency_seconds must be greater than 1")
@@ -139,7 +139,7 @@ func ReadConfig() Config {
 
 		if config.Tasks[i].TimeoutSeconds > config.Tasks[i].FrequencySeconds {
 			log.WithFields(log.Fields{
-				"file":      "lib/config.go",
+				"file":      "lib/fz/config.go",
 				"task_name": t.Name,
 				"task_hash": t.Hash(),
 			}).Fatal(fmt.Sprintf("frequency_seconds (%d) must be shorter than the timeout_seconds (%d)", config.Tasks[i].FrequencySeconds, config.Tasks[i].TimeoutSeconds))
@@ -147,7 +147,7 @@ func ReadConfig() Config {
 
 		if config.Tasks[i].TimeoutSeconds > config.Tasks[i].RetryFrequencySeconds {
 			log.WithFields(log.Fields{
-				"file":      "lib/config.go",
+				"file":      "lib/fz/config.go",
 				"task_name": t.Name,
 				"task_hash": t.Hash(),
 			}).Fatal(fmt.Sprintf("retry_frequency_seconds (%d) must be shorter than the timeout_seconds (%d)", config.Tasks[i].RetryFrequencySeconds, config.Tasks[i].TimeoutSeconds))
@@ -155,7 +155,7 @@ func ReadConfig() Config {
 
 		if config.Tasks[i].Priority < 0 || config.Tasks[i].Priority > 100 {
 			log.WithFields(log.Fields{
-				"file":      "lib/config.go",
+				"file":      "lib/fz/config.go",
 				"task_name": t.Name,
 				"task_hash": t.Hash(),
 			}).Fatal("priority must be between 1 and 100")
@@ -166,7 +166,7 @@ func ReadConfig() Config {
 
 		if t.validate() != nil {
 			log.WithFields(log.Fields{
-				"file":      "lib/config.go",
+				"file":      "lib/fz/config.go",
 				"task_name": t.Name,
 				"task_hash": t.Hash(),
 			}).Fatal(err)

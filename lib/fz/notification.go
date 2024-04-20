@@ -25,7 +25,7 @@ func ProcessNotifications() {
 				for _, g := range n.Notifier.gates() {
 					if g.IsOpen(n.Task) == false {
 						log.WithFields(log.Fields{
-							"file":          "lib/notifier.go",
+							"file":          "lib/fz/notification.go",
 							"notifier_name": n.Notifier.Name,
 							"gate_name":     g.Name,
 						}).Debug(fmt.Sprintf("gate is closed"))
@@ -35,7 +35,7 @@ func ProcessNotifications() {
 				}
 
 				log.WithFields(log.Fields{
-					"file":          "lib/notifier.go",
+					"file":          "lib/fz/notification.go",
 					"notifier_name": n.Notifier.Name,
 				}).Info("sending notification")
 
@@ -47,7 +47,7 @@ func ProcessNotifications() {
 				stdin, err := cmd.StdinPipe()
 				if err != nil {
 					log.WithFields(log.Fields{
-						"file":          "lib/notifier.go",
+						"file":          "lib/fz/notification.go",
 						"notifier_name": n.Notifier.Name,
 					}).Error(err)
 				}
@@ -60,7 +60,7 @@ func ProcessNotifications() {
 				}
 
 				log.WithFields(log.Fields{
-					"file":          "lib/notifier.go",
+					"file":          "lib/fz/notification.go",
 					"notifier_name": n.Notifier.Name,
 				}).Trace(fmt.Sprintf("writing string to stdin: %s", n.body()))
 
@@ -71,12 +71,12 @@ func ProcessNotifications() {
 
 				if ctx.Err() == context.DeadlineExceeded {
 					log.WithFields(log.Fields{
-						"file":          "lib/notifier.go",
+						"file":          "lib/fz/notification.go",
 						"notifier_name": n.Notifier.Name,
 					}).Error(fmt.Sprintf("time out exceeded while executing notifier"))
 				} else if err != nil {
 					log.WithFields(log.Fields{
-						"file":          "lib/notifier.go",
+						"file":          "lib/fz/notification.go",
 						"notifier_name": n.Notifier.Name,
 					}).Error(err)
 				}

@@ -32,7 +32,7 @@ func (n Notifier) gates() []*Gate {
 
 		if !found {
 			log.WithFields(log.Fields{
-				"file":          "lib/notifier.go",
+				"file":          "lib/fz/notifier.go",
 				"notifier_name": n.Name,
 			}).Fatal(fmt.Sprintf("unknown gate '%s'", gName))
 		}

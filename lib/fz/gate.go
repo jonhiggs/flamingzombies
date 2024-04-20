@@ -34,7 +34,7 @@ func (g Gate) IsOpen(t *Task) bool {
 	}
 
 	log.WithFields(log.Fields{
-		"file":      "lib/gate.go",
+		"file":      "lib/fz/gate.go",
 		"gate_name": g.Name,
 	}).Trace(fmt.Sprintf("running"))
 
@@ -42,7 +42,7 @@ func (g Gate) IsOpen(t *Task) bool {
 
 	if ctx.Err() == context.DeadlineExceeded {
 		log.WithFields(log.Fields{
-			"file":      "lib/gate.go",
+			"file":      "lib/fz/gate.go",
 			"gate_name": g.Name,
 		}).Error(fmt.Sprintf("time out exceeded while executing command"))
 
@@ -52,7 +52,7 @@ func (g Gate) IsOpen(t *Task) bool {
 	if err != nil {
 		if os.IsPermission(err) {
 			log.WithFields(log.Fields{
-				"file":      "lib/task.go",
+				"file":      "lib/fz/gate.go",
 				"gate_name": g.Name,
 			}).Error(err)
 
@@ -62,7 +62,7 @@ func (g Gate) IsOpen(t *Task) bool {
 		exiterr, _ := err.(*exec.ExitError)
 
 		log.WithFields(log.Fields{
-			"file":      "lib/task.go",
+			"file":      "lib/fz/gate.go",
 			"gate_name": g.Name,
 		}).Debug(fmt.Sprintf("command exited with %d", exiterr.ExitCode()))
 
@@ -70,7 +70,7 @@ func (g Gate) IsOpen(t *Task) bool {
 	}
 
 	log.WithFields(log.Fields{
-		"file":      "lib/task.go",
+		"file":      "lib/fz/gate.go",
 		"gate_name": g.Name,
 	}).Debug(fmt.Sprintf("command exited with %d", 0))
 	return true

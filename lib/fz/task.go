@@ -78,7 +78,7 @@ func (t *Task) Run() bool {
 	defer t.mutex.Unlock()
 
 	log.WithFields(log.Fields{
-		"file":      "lib/task.go",
+		"file":      "lib/fz/task.go",
 		"task_name": t.Name,
 		"task_hash": t.Hash(),
 	}).Info("executing task")
@@ -92,7 +92,7 @@ func (t *Task) Run() bool {
 
 	if ctx.Err() == context.DeadlineExceeded {
 		log.WithFields(log.Fields{
-			"file":      "lib/task.go",
+			"file":      "lib/fz/task.go",
 			"task_name": t.Name,
 			"task_hash": t.Hash(),
 		}).Error(fmt.Sprintf("time out exceeded while executing command"))
@@ -103,7 +103,7 @@ func (t *Task) Run() bool {
 	if err != nil {
 		if os.IsPermission(err) {
 			log.WithFields(log.Fields{
-				"file":      "lib/task.go",
+				"file":      "lib/fz/task.go",
 				"task_name": t.Name,
 				"task_hash": t.Hash(),
 			}).Error(err)
@@ -121,7 +121,7 @@ func (t *Task) Run() bool {
 	}
 
 	log.WithFields(log.Fields{
-		"file":      "lib/task.go",
+		"file":      "lib/fz/task.go",
 		"task_name": t.Name,
 		"task_hash": t.Hash(),
 	}).Debug(fmt.Sprintf("command exited with %d", exitCode))
@@ -129,7 +129,7 @@ func (t *Task) Run() bool {
 	switch exitCode {
 	case t.UnknownExitCode:
 		log.WithFields(log.Fields{
-			"file":      "lib/task.go",
+			"file":      "lib/fz/task.go",
 			"task_name": t.Name,
 			"task_hash": t.Hash(),
 		}).Info(fmt.Sprintf("command exited with 'unknown_exit_code' (%d). The result will be disregarded.", exitCode))
@@ -147,7 +147,7 @@ func (t *Task) Run() bool {
 			for i, n := range config.Notifiers {
 				if n.Name == name {
 					log.WithFields(log.Fields{
-						"file":      "lib/task.go",
+						"file":      "lib/fz/task.go",
 						"task_name": t.Name,
 						"task_hash": t.Hash(),
 					}).Debug(fmt.Sprintf("raising notification. is %s, was %s", t.State(), t.LastState()))
@@ -161,7 +161,7 @@ func (t *Task) Run() bool {
 
 func (t *Task) RecordStatus(b bool) {
 	log.WithFields(log.Fields{
-		"file":      "lib/task.go",
+		"file":      "lib/fz/task.go",
 		"task_name": t.Name,
 		"task_hash": t.Hash(),
 	}).Trace(fmt.Sprintf("recording status %v", b))
@@ -175,7 +175,7 @@ func (t *Task) RecordStatus(b bool) {
 	t.Measurements += 1
 
 	log.WithFields(log.Fields{
-		"file":      "lib/task.go",
+		"file":      "lib/fz/task.go",
 		"task_name": t.Name,
 		"task_hash": t.Hash(),
 	}).Trace(fmt.Sprintf("history is %b", t.History))
@@ -277,7 +277,7 @@ func (t Task) notifiers() []*Notifier {
 
 		if !found {
 			log.WithFields(log.Fields{
-				"file":      "lib/task.go",
+				"file":      "lib/fz/task.go",
 				"task_name": t.Name,
 				"task_hash": t.Hash(),
 			}).Fatal(fmt.Sprintf("unknown notifier '%s'", nName))
