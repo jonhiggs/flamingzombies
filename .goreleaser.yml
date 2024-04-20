@@ -1,0 +1,11 @@
+project_name: flamingzombies
+
+builds:
+  - id: fz
+    main: ./cmd/fz/fz.go
+    binary: fz
+    goos:
+      - linux
+      - openbsd
+    goarch:
+      - amd64
