@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-if [[ ${TIMEOUT:-0} -lt 2 ]]; then
+#!/bin/sh
+if [ "${TIMEOUT:-0}" -lt 2 ]; then
   echo "timeout_seconds cannot be less than 2" >&2
   exit 1
 fi

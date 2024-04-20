@@ -1,8 +1,8 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # spend 20 seconds up, and 20 seconds down.
 
-if [[ $(( $(date +%s) % 40 )) -lt 20 ]]; then
+if [ $(( $(date +%s) % 40 )) -lt 20 ]; then
   exit 0
 else
   exit 1

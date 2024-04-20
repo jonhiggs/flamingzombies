@@ -1,11 +1,12 @@
 SHELL := /bin/bash
 
-
-ifndef MESSAGE
-  $(error MESSAGE was not provided)
-endif
-ifndef VERSION
-  $(error VERSION was not provided)
+ifeq ($(findstring release,$(MAKECMDGOALS)),release)
+  ifndef MESSAGE
+    $(error MESSAGE was not provided)
+  endif
+  ifndef VERSION
+    $(error VERSION was not provided)
+  endif
 endif
 
 TAG := v$(VERSION)
@@ -38,6 +39,14 @@ gorelease_build:
 	git push origin $(TAG)
 	goreleaser build --clean
 	goreleaser build --snapshot --clean
+
+test: gotest shellcheck
+
+gotest:
+	go test ./lib/fz
+
+shellcheck:
+	shellcheck -s sh plugins/{task,notifier,gates}/*
 
 clean:
 	rm -Rf ./dist

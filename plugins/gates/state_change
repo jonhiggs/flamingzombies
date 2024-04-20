@@ -1,3 +1,2 @@
-#!/usr/bin/env bash
-[[ "${STATE_CHANGED}" == "true" ]]
-exit $?
+#!/bin/sh
+[ "${STATE_CHANGED}" = "true" ]

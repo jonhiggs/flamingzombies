@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 #
 # In the example:
 #
@@ -16,12 +16,12 @@ working_device_count="${3:-${active_device_count}}"
 spare_device_count="${4:-0}"
 failed_device_count="${4:-0}"
 
-mdadm --detail "${md_dev}"                              \
-  | awk -F' : '                                         \
-        -v active_device_count=${active_device_count}   \
-        -v working_device_count=${working_device_count} \
-        -v spare_device_count=${spare_device_count}     \
-        -v failed_device_count=${failed_device_count}   \
+mdadm --detail "${md_dev}"                                \
+  | awk -F' : '                                           \
+        -v active_device_count="${active_device_count}"   \
+        -v working_device_count="${working_device_count}" \
+        -v spare_device_count="${spare_device_count}"     \
+        -v failed_device_count="${failed_device_count}"   \
     '
       ($1~/Active Devices/) { if (int($2) != active_device_count ) { exit 1 }
       ($1~/Working Devices/) { if (int($2) != working_device_count ) { exit 1 }

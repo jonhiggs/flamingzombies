@@ -1,3 +1,2 @@
-#!/usr/bin/env bash
-[[ "${PRIORITY}" -le "$1" ]]
-exit $?
+#!/bin/sh
+[ "${PRIORITY}" -le "$1" ]
