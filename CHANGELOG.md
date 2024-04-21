@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.0.15
+
+- Improvements to the generated OpenBSD artifact
+- Add a configtest mode.
+
 ## v0.0.14
 
 - Remove dependency on goreleaser
