@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/jonhiggs/flamingzombies/lib/daemon"
 	"github.com/jonhiggs/flamingzombies/lib/fz"
 	"nullprogram.com/x/optparse"
 )
@@ -72,9 +71,9 @@ func init() {
 
 	fz.ProcessNotifications()
 
-	if config.Listen() {
-		go daemon.Listen(&config)
-	}
+	//if config.Listen() {
+	//	go daemon.Listen(&config)
+	//}
 }
 
 func main() {
