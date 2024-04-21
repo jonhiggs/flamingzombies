@@ -8,8 +8,8 @@ artifacts := dist/linux/amd64/flamingzombies-$(VERSION).tar.gz \
 gitsha := $(shell git rev-parse HEAD)
 
 release: release_notes.txt $(artifacts)
-	#gh release create $(VERSION) -F release_notes.txt
-	#gh release upload $(VERSION) $(artifacts)
+	gh release create $(VERSION) -F release_notes.txt
+	gh release upload $(VERSION) $(artifacts)
 
 release_notes.txt: CHANGELOG.md
 	sed -n '/^## $(VERSION)$$/,/##/ { /^#/d; /^\w*$$/d; p }' $< > $@

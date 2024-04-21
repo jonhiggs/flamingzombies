@@ -1,8 +1,8 @@
 # CHANGELOG
 
-## v0.0.11
+## v0.0.12
 
-- Remove support for fetching state across the network. It breaks on OpenBSD.
+- Fix crashes on OpenBSD
 
 ## v0.0.10
 
