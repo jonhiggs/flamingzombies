@@ -9,7 +9,9 @@ gitsha := $(shell git rev-parse HEAD)
 
 release: release_notes.txt $(artifacts)
 	gh release create $(VERSION) -F release_notes.txt
-	gh release upload $(VERSION) $(artifacts)
+	cp dist/linux/amd64/flamingzombies-$(VERSION).tar.gz dist/flamingzombies-$(VERSION)-linux-amd64.tar.gz
+	cp dist/openbsd/amd64/flamingzombies-$(VERSION).tar.gz dist/flamingzombies-$(VERSION)-openbsd-amd64.tar.gz
+	gh release upload $(VERSION) dist/flamingzombies-$(VERSION)-*.tar.gz
 
 release_notes.txt: CHANGELOG.md
 	sed -n '/^## $(VERSION)$$/,/##/ { /^#/d; /^\w*$$/d; p }' $< > $@
