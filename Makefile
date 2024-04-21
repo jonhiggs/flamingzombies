@@ -19,9 +19,10 @@ release_notes.txt: CHANGELOG.md
 dist/%.tar.gz: dist/%/bin/fz dist/man/man1/fz.1.gz
 	mkdir -p dist/$*/share
 	mkdir -p dist/etc
-	cp -r dist/man dist/$*/share
-	cp -r libexec/ dist/$*
 	touch dist/etc/flamingzombies.sample.toml
+	cp -r dist/man dist/$*/share
+	cp -r dist/etc dist/$*/etc
+	cp -r libexec/ dist/$*
 	tar -zvc \
 		-C $(dir dist/$*) \
 		-f $@ \
@@ -36,6 +37,7 @@ dist/openbsd/amd64/flamingzombies-%/bin/fz:
 	mkdir -p $$(dirname $@)
 	ssh janx build_flamingzombies/build $(gitsha)
 	wget http://artifacts.altos/flamingzombies/openbsd/fz-$*-amd64 -O $@
+	chmod 755 $@
 
 dist/man/%.gz: export BUILD_DATE = $(shell date --iso-8601)
 dist/man/%.gz: man/% | dist/man/man1
