@@ -45,14 +45,6 @@ dist/man/%.gz: man/% | dist/man/man1
 dist/man/man1 doc/man1:
 	mkdir -p $@
 
-#gorelease_build: test
-#	git status status 2>&1 | grep -q "working tree clean"
-#	git branch | grep -q "* master"
-#	grep -q '^## $(VERSION)$$' CHANGELOG.md
-#	git tag -a $(VERSION) -m "release of $(VERSION)"
-#	git push origin $(VERSION)
-#	goreleaser build --snapshot --clean
-
 test: gotest shellcheck
 
 gotest:

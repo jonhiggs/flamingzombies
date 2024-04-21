@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.0.14
+
+- Remove dependency on goreleaser
+
 ## v0.0.13
 
 - Fix crashes on OpenBSD
