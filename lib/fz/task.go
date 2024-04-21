@@ -316,7 +316,9 @@ func (t Task) ExpandArgs() []string {
 
 func (t Task) validate() error {
 	if _, err := os.Stat(t.Command); os.IsNotExist(err) {
-		return fmt.Errorf("task command not found")
+		if _, err := os.Stat(fmt.Sprintf("%s/%s", config.Directory, t.Command)); os.IsNotExist(err) {
+			return fmt.Errorf("task command not found")
+		}
 	}
 
 	return nil
