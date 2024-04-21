@@ -47,7 +47,8 @@ dist/man/man1 doc/man1:
 	mkdir -p $@
 
 prerelease_tests: test
-	git branch | grep -q "* master"
+	! git rev-parse $(VERSION) &>/dev/null
+	git status | grep -q "On branch master"
 	git status | grep -q "working tree clean"
 
 test: gotest shellcheck
