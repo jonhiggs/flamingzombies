@@ -2,7 +2,8 @@ SHELL := /bin/bash
 
 VERSION = $(shell cat cmd/fz/fz.go | awk '/const VERSION/ { gsub(/"/,"",$$NF); print $$NF }')
 
-artifacts := dist/linux/amd64/flamingzombies-$(VERSION).tar.gz \
+artifacts := dist/openbsd/amd64/flamingzombies-$(VERSION)/etc/rc.openbsd \
+             dist/linux/amd64/flamingzombies-$(VERSION).tar.gz \
              dist/openbsd/amd64/flamingzombies-$(VERSION).tar.gz
 
 gitsha := $(shell git rev-parse HEAD)
@@ -16,6 +17,7 @@ release: prerelease_tests release_notes.txt $(artifacts)
 release_notes.txt: CHANGELOG.md
 	sed -n '/^## $(VERSION)$$/,/##/ { /^#/d; /^\w*$$/d; p }' $< > $@
 
+dist/openbsd/amd64/flamingzombies-$(VERSION).tar.gz: dist/openbsd/amd64/flamingzombies-$(VERSION)/etc/rc.openbsd
 dist/%.tar.gz: dist/%/bin/fz dist/man/man1/fz.1.gz
 	mkdir -p dist/$*/share
 	mkdir -p dist/etc
@@ -44,7 +46,12 @@ dist/man/%.gz: man/% | dist/man/man1
 	cat $< | envsubst '$${BUILD_DATE}' > dist/man/$*
 	gzip -f dist/man/$*
 
-dist/man/man1 doc/man1:
+dist/openbsd/amd64/flamingzombies-%/etc/rc.openbsd: TIMESTAMP = $(shell date -u '+%Y/%m/%d %H:%M:%S')
+dist/openbsd/amd64/flamingzombies-%/etc/rc.openbsd: etc/rc.openbsd
+	mkdir -p $(dir $@)
+	cat $< | VERSION="$(VERSION)" TIMESTAMP="$(TIMESTAMP)" envsubst '$${TIMESTAMP} $${VERSION}' > $@
+
+dist/man/man1 doc/man1 dist/etc:
 	mkdir -p $@
 
 prerelease_tests: test
