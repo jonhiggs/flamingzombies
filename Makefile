@@ -33,7 +33,6 @@ dist/linux/amd64/flamingzombies-%/bin/fz:
 	mv fz $@
 
 dist/openbsd/amd64/flamingzombies-%/bin/fz:
-	git push
 	mkdir -p $$(dirname $@)
 	ssh janx build_flamingzombies/build $(gitsha)
 	wget http://artifacts.altos/flamingzombies/openbsd/fz-$*-amd64 -O $@
@@ -47,6 +46,7 @@ dist/man/man1 doc/man1:
 	mkdir -p $@
 
 prerelease_tests: test
+	git push
 	git fetch --tags
 	! git rev-parse $(VERSION) &>/dev/null
 	git status | grep -q "On branch master"
