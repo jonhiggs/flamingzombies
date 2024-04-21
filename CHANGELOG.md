@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.0.11
+
+- Remove support for fetching state across the network. It breaks on OpenBSD.
+
 ## v0.0.10
 
 - License it under BSD-2-Clause

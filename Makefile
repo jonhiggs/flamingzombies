@@ -42,7 +42,6 @@ gorelease_build: test
 	grep -q '^## $(VERSION)$$' CHANGELOG.md
 	git tag -a $(VERSION) -m "release of $(VERSION)"
 	git push origin $(VERSION)
-	goreleaser build --clean
 	goreleaser build --snapshot --clean
 
 test: gotest shellcheck
