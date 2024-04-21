@@ -14,6 +14,7 @@ import (
 const VERSION = "v0.0.14"
 
 var config fz.Config
+var configtestMode = false
 
 func init() {
 	if os.Getenv("FZ_CONFIG_FILE") == "" {
@@ -34,6 +35,7 @@ func init() {
 
 	options := []optparse.Option{
 		{"config", 'c', optparse.KindRequired},
+		{"configtest", 'n', optparse.KindNone},
 		{"directory", 'C', optparse.KindRequired},
 		{"help", 'h', optparse.KindNone},
 		{"loglevel", 'l', optparse.KindRequired},
@@ -49,6 +51,8 @@ func init() {
 		switch result.Long {
 		case "config":
 			os.Setenv("FZ_CONFIG_FILE", result.Optarg)
+		case "configtest":
+			configtestMode = true
 		case "loglevel":
 			os.Setenv("FZ_LOG_LEVEL", result.Optarg)
 		case "directory":
@@ -68,6 +72,11 @@ func init() {
 		fz.StartLogger(os.Getenv("FZ_LOG_LEVEL"))
 	} else {
 		fz.StartLogger(config.LogLevel)
+	}
+
+	if configtestMode {
+		fmt.Println("The configuration is valid")
+		os.Exit(0)
 	}
 
 	fz.ProcessNotifications()
@@ -102,6 +111,7 @@ func usage() {
 	fmt.Println("  -C, --directory <path>  Change to directory")
 	fmt.Println("  -h, --help              This help")
 	fmt.Println("  -l, --loglevel <level>  Override the log level")
+	fmt.Println("  -n, --configtest        Test validity of the configuration")
 	fmt.Println("  -V, --version           Version")
 	os.Exit(0)
 }
