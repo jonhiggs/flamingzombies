@@ -51,6 +51,7 @@ prerelease_tests: test
 	! git rev-parse $(VERSION) &>/dev/null
 	git status | grep -q "On branch master"
 	git status | grep -q "working tree clean"
+	grep -q "^## $(VERSION)$$" CHANGELOG.md
 
 test: gotest shellcheck
 
