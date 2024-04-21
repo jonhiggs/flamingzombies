@@ -7,7 +7,7 @@ artifacts := dist/linux/amd64/flamingzombies-$(VERSION).tar.gz \
 
 gitsha := $(shell git rev-parse HEAD)
 
-release: release_notes.txt $(artifacts)
+release: prerelease_tests release_notes.txt $(artifacts)
 	gh release create $(VERSION) -F release_notes.txt
 	cp dist/linux/amd64/flamingzombies-$(VERSION).tar.gz dist/flamingzombies-$(VERSION)-linux-amd64.tar.gz
 	cp dist/openbsd/amd64/flamingzombies-$(VERSION).tar.gz dist/flamingzombies-$(VERSION)-openbsd-amd64.tar.gz
@@ -33,6 +33,7 @@ dist/linux/amd64/flamingzombies-%/bin/fz:
 	mv fz $@
 
 dist/openbsd/amd64/flamingzombies-%/bin/fz:
+	git push
 	mkdir -p $$(dirname $@)
 	ssh janx build_flamingzombies/build $(gitsha)
 	wget http://artifacts.altos/flamingzombies/openbsd/fz-$*-amd64 -O $@
@@ -44,6 +45,10 @@ dist/man/%.gz: man/% | dist/man/man1
 
 dist/man/man1 doc/man1:
 	mkdir -p $@
+
+prerelease_tests: test
+	git branch | grep -q "* master"
+	git status | grep -q "working tree clean"
 
 test: gotest shellcheck
 
