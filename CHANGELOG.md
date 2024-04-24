@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.0.18
+
+- Release a tarball of plugins
+
 ## v0.0.17
 
 - Test a release

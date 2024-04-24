@@ -2,9 +2,9 @@ SHELL := /bin/bash
 
 VERSION = $(shell cat cmd/fz/fz.go | awk '/const VERSION/ { gsub(/"/,"",$$NF); print $$NF }')
 
-release: prerelease_tests release_notes.txt dist/fz_openbsd_amd64 dist/fz_linux_amd64
+release: prerelease_tests release_notes.txt dist/fz_openbsd_amd64 dist/fz_linux_amd64 dist/plugins.tar.gz
 	gh release create $(VERSION) -F release_notes.txt
-	gh release upload $(VERSION) dist/fz_*
+	gh release upload $(VERSION) dist/fz_* dist/plugins.tar.gz
 
 release_notes.txt: CHANGELOG.md
 	sed -n '/^## $(VERSION)$$/,/##/ { /^#/d; /^\w*$$/d; p }' $< > $@
@@ -20,6 +20,12 @@ dist/%.tar.gz: dist/%/bin/fz dist/man/man1/fz.1.gz
 		-C $(dir dist/$*) \
 		-f $@ \
 		flamingzombies-$(VERSION)/
+
+dist/plugins.tar.gz: libexec | dist
+	mkdir -p dist/flamingzombies
+	cp -aux $</* dist/flamingzombies
+	tar -C ./dist -zcvf $@ flamingzombies
+	rm -Rf dist/flamingzombies
 
 dist/fz_linux_amd64: | dist
 	mkdir -p $$(dirname $@)
