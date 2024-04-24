@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.0.17
+
+- Test a release
+
 ## v0.0.16
 
 - Simplify the release logic

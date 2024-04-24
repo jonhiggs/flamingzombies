@@ -11,7 +11,7 @@ import (
 	"nullprogram.com/x/optparse"
 )
 
-const VERSION = "v0.0.16"
+const VERSION = "v0.0.17"
 
 var config fz.Config
 var configtestMode = false
