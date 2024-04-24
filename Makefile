@@ -4,7 +4,7 @@ VERSION = $(shell cat cmd/fz/fz.go | awk '/const VERSION/ { gsub(/"/,"",$$NF); p
 
 release: prerelease_tests release_notes.txt dist/fz_openbsd_amd64 dist/fz_linux_amd64
 	gh release create $(VERSION) -F release_notes.txt
-	gh release upload $(VERSION) $(artifacts)
+	gh release upload $(VERSION) dist/fz_*
 
 release_notes.txt: CHANGELOG.md
 	sed -n '/^## $(VERSION)$$/,/##/ { /^#/d; /^\w*$$/d; p }' $< > $@
