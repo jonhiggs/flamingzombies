@@ -1,10 +1,18 @@
 #!/bin/sh
 if [ "${TIMEOUT:-0}" -lt 2 ]; then
-  echo "timeout_seconds cannot be less than 2" >&2
+  echo "timeout_seconds cannot be less than '2' seconds" >&2
   exit 1
 fi
 
 ADDRESS="$1"
 COUNT="${2:-3}"
+DEADLINE="$((TIMEOUT - 1))"
 
-ping -W 1 -w "$((TIMEOUT - 1))" -c "${COUNT}" -A "${ADDRESS}"
+if ping --version 2>&1 | grep -q BusyBox; then
+  ARGS="-W 1 -w ${DEADLINE} -c \"${COUNT}\" -A \"${ADDRESS}\""
+else
+  ARGS="-f -c ${COUNT} -w ${DEADLINE}"
+fi
+
+# shellcheck disable=SC2086
+ping ${ARGS} ${ADDRESS}
