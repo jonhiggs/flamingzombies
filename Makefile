@@ -28,7 +28,7 @@ dist/fz_linux_amd64: | dist
 	mv fz $@
 
 dist/fz_openbsd_amd64: gitsha := $(shell git rev-parse HEAD)
-dist/fz_openbsd_amd64: | dist
+dist/fz_openbsd_amd64: prerelease_tests | dist
 	ssh janx build_flamingzombies/build $(gitsha)
 	wget http://artifacts.altos/flamingzombies/openbsd/$(VERSION)/fz \
 		-O $@
@@ -43,6 +43,7 @@ dist/man/man1 doc/man1 dist:
 	mkdir -p $@
 
 prerelease_tests: test
+	git status | grep -q "nothing to commit"
 	git push
 	git fetch --tags
 	! git rev-parse $(VERSION) &>/dev/null
