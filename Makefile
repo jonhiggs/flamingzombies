@@ -6,7 +6,8 @@ release: prerelease_tests release_notes.txt dist/fz_openbsd_amd64 dist/fz_linux_
 	gh release create $(VERSION) -F release_notes.txt
 	gh release upload $(VERSION) dist/fz_* dist/plugins.tar.gz
 
-devrelease: predevrelease_tests dist/fz_openbsd_amd64 dist/fz_linux_amd64 dist/plugins.tar.gz
+devrelease: predevrelease_tests dist/fz_linux_amd64 dist/plugins.tar.gz
+	ssh janx build_flamingzombies/build $(gitsha)
 	scp dist/fz_* janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
 	scp dist/plugins.tar.gz janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
 
@@ -63,8 +64,6 @@ prerelease_tests: test
 predevrelease_tests: test
 	git status | grep -q "nothing to commit"
 	git push
-	git fetch --tags
-	! git rev-parse $(VERSION) &>/dev/null
 	git status | grep -q "working tree clean"
 
 test: gotest shellcheck
