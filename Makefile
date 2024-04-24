@@ -2,8 +2,7 @@ SHELL := /bin/bash
 
 VERSION = $(shell cat cmd/fz/fz.go | awk '/const VERSION/ { gsub(/"/,"",$$NF); print $$NF }')
 
-release: artifacts := dist/fz_openbsd_amd64 dist/fz_linux_amd64
-release: prerelease_tests release_notes.txt $(artifacts)
+release: prerelease_tests release_notes.txt dist/fz_openbsd_amd64 dist/fz_linux_amd64
 	gh release create $(VERSION) -F release_notes.txt
 	gh release upload $(VERSION) $(artifacts)
 
