@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.0.16
+
+- Simplify the release logic
+
 ## v0.0.15
 
 - Improvements to the generated OpenBSD artifact

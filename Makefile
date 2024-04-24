@@ -2,22 +2,14 @@ SHELL := /bin/bash
 
 VERSION = $(shell cat cmd/fz/fz.go | awk '/const VERSION/ { gsub(/"/,"",$$NF); print $$NF }')
 
-artifacts := dist/openbsd/amd64/flamingzombies-$(VERSION)/etc/rc.openbsd \
-             dist/linux/amd64/flamingzombies-$(VERSION).tar.gz \
-             dist/openbsd/amd64/flamingzombies-$(VERSION).tar.gz
-
-gitsha := $(shell git rev-parse HEAD)
-
+release: artifacts := dist/fz_openbsd_amd64 dist/fz_linux_amd64
 release: prerelease_tests release_notes.txt $(artifacts)
 	gh release create $(VERSION) -F release_notes.txt
-	cp dist/linux/amd64/flamingzombies-$(VERSION).tar.gz dist/flamingzombies-$(VERSION)-linux-amd64.tar.gz
-	cp dist/openbsd/amd64/flamingzombies-$(VERSION).tar.gz dist/flamingzombies-$(VERSION)-openbsd-amd64.tar.gz
-	gh release upload $(VERSION) dist/flamingzombies-$(VERSION)-*.tar.gz
+	gh release upload $(VERSION) $(artifacts)
 
 release_notes.txt: CHANGELOG.md
 	sed -n '/^## $(VERSION)$$/,/##/ { /^#/d; /^\w*$$/d; p }' $< > $@
 
-dist/openbsd/amd64/flamingzombies-$(VERSION).tar.gz: dist/openbsd/amd64/flamingzombies-$(VERSION)/etc/rc.openbsd
 dist/%.tar.gz: dist/%/bin/fz dist/man/man1/fz.1.gz
 	mkdir -p dist/$*/share
 	mkdir -p dist/etc
@@ -30,15 +22,16 @@ dist/%.tar.gz: dist/%/bin/fz dist/man/man1/fz.1.gz
 		-f $@ \
 		flamingzombies-$(VERSION)/
 
-dist/linux/amd64/flamingzombies-%/bin/fz:
+dist/fz_linux_amd64: | dist
 	mkdir -p $$(dirname $@)
 	go build ./cmd/fz/fz.go
 	mv fz $@
 
-dist/openbsd/amd64/flamingzombies-%/bin/fz:
-	mkdir -p $$(dirname $@)
+dist/fz_openbsd_amd64: gitsha := $(shell git rev-parse HEAD)
+dist/fz_openbsd_amd64: | dist
 	ssh janx build_flamingzombies/build $(gitsha)
-	wget http://artifacts.altos/flamingzombies/openbsd/fz-$*-amd64 -O $@
+	wget http://artifacts.altos/flamingzombies/openbsd/$(VERSION)/fz \
+		-O $@
 	chmod 755 $@
 
 dist/man/%.gz: export BUILD_DATE = $(shell date --iso-8601)
@@ -46,12 +39,7 @@ dist/man/%.gz: man/% | dist/man/man1
 	cat $< | envsubst '$${BUILD_DATE}' > dist/man/$*
 	gzip -f dist/man/$*
 
-dist/openbsd/amd64/flamingzombies-%/etc/rc.openbsd: TIMESTAMP = $(shell date -u '+%Y/%m/%d %H:%M:%S')
-dist/openbsd/amd64/flamingzombies-%/etc/rc.openbsd: etc/rc.openbsd
-	mkdir -p $(dir $@)
-	cat $< | VERSION="$(VERSION)" TIMESTAMP="$(TIMESTAMP)" envsubst '$${TIMESTAMP} $${VERSION}' > $@
-
-dist/man/man1 doc/man1 dist/etc:
+dist/man/man1 doc/man1 dist:
 	mkdir -p $@
 
 prerelease_tests: test
@@ -71,4 +59,4 @@ shellcheck:
 	shellcheck -s sh libexec/{task,notifier,gates}/*
 
 clean:
-	rm -Rf ./dist
+	rm -Rf ./dist release_notes.txt

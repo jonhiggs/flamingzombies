@@ -80,3 +80,7 @@ The configuration is fetched from the supplied TOML file.
 Tasks can run as frequently has every second.
 
 
+
+---
+
+The OpenBSD rc script can be found at: https://gist.github.com/jonhiggs/b3949cb5f7fd51997023c4c006eca2d5
