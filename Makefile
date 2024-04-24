@@ -10,6 +10,7 @@ devrelease: predevrelease_tests dist/fz_linux_amd64 dist/plugins.tar.gz
 	ssh janx build_flamingzombies/build $(gitsha)
 	scp dist/fz_* janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
 	scp dist/plugins.tar.gz janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
+	scp scripts/openbsd_rc janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
 
 release_notes.txt: CHANGELOG.md
 	sed -n '/^## $(VERSION)$$/,/##/ { /^#/d; /^\w*$$/d; p }' $< > $@
