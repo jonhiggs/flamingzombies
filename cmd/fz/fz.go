@@ -11,7 +11,7 @@ import (
 	"nullprogram.com/x/optparse"
 )
 
-const VERSION = "v0.0.18"
+const VERSION = "v0.0.19"
 
 var config fz.Config
 var configtestMode = false
@@ -31,6 +31,10 @@ func init() {
 
 	if os.Getenv("FZ_LOG_FILE") == "" {
 		os.Setenv("FZ_LOG_FILE", "stdout")
+	}
+
+	if os.Getenv("FZ_LISTEN") == "" {
+		os.Setenv("FZ_LISTEN", "127.0.0.1:5891")
 	}
 
 	options := []optparse.Option{
@@ -61,7 +65,7 @@ func init() {
 			usage()
 			return
 		case "version":
-			fmt.Printf("flamingzombies %s\n", VERSION)
+			fmt.Printf("fz %s\n", VERSION)
 			os.Exit(0)
 		}
 	}

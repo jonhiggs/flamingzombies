@@ -1,8 +1,10 @@
 package daemon
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/jonhiggs/flamingzombies/lib/fz"
 
@@ -33,8 +35,43 @@ func Listen(c *fz.Config) {
 func processClient(conn net.Conn, c *fz.Config) {
 	defer conn.Close()
 
-	fmt.Fprintf(conn, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", "name", "state", "history", "execution_count", "ok_count", "error_count", "last_run", "last_ok")
+	type taskJsonline struct {
+		Name           string    `json:"name"`
+		State          string    `json:"state"`
+		LastRun        time.Time `json:"last_run"`
+		LastOk         time.Time `json:"last_ok"`
+		Measurements   []bool    `json:"measurements"`
+		ExecutionCount int       `json:"execution_count"`
+		OKCount        int       `json:"ok_count"`
+		FailCount      int       `json:"fail_count"`
+		ErrorCount     int       `json:"error_count"`
+	}
+
 	for _, t := range c.Tasks {
-		fmt.Fprintf(conn, "%s\t%s\t%032b\t%d\t%d\t%d\t%d\t%d\n", t.Name, t.State(), t.History, t.ExecutionCount, t.OKCount, t.ErrorCount, t.LastRun.Unix(), t.LastOk.Unix())
+		d := taskJsonline{
+			Name:           t.Name,
+			State:          fmt.Sprintf("%s", t.State()),
+			LastRun:        t.LastRun,
+			LastOk:         t.LastOk,
+			Measurements:   []bool{},
+			ExecutionCount: t.ExecutionCount,
+			OKCount:        t.OKCount,
+			FailCount:      t.FailCount,
+			ErrorCount:     t.ErrorCount,
+		}
+
+		h := t.History
+		m := t.Measurements
+		for h != 0 {
+			d.Measurements = append(d.Measurements, (1&h) == 1)
+			h = h >> 1
+			m = m >> 1
+		}
+
+		tjl, err := json.Marshal(d)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Fprintln(conn, string(tjl))
 	}
 }

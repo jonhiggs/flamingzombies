@@ -2,6 +2,7 @@
 
 ## v0.0.19
 
+- Add fzctl to check the daemon state
 - Add scripts for testing HTTP
 
 ## v0.0.18

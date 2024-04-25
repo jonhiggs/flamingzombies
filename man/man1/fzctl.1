@@ -1,0 +1,28 @@
+.Dd ${BUILD_DATE}
+.Dt fzctl 1
+.Os
+.Sh NAME
+.Nm fzctl
+.Nd Run commands against an fz daemon.
+.Sh SYNOPSIS
+.Nm fzctl
+[\fI\,options\/\fR] \fI\,command\/\fR [\fI\,subcommand\fR]...
+.Sh DESCRIPTION
+Control an
+.Nm fz
+daemon, or query its internal state.
+.Pp
+.Bl -tag -width Ds
+.It Fl c, Li --config
+The
+.Nm fz
+configuration file. It will connect to the
+.Xr listen_address
+unless the --host flag was supplied.
+.It Fl H, Li --host
+The IP address and port of the
+.Nm fz
+daemon to connect to. The default value is 127.0.0.1:5891.
+.It Fl V, Li --version
+Print the version information.
+.El
