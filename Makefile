@@ -7,7 +7,7 @@ release: prerelease_tests release_notes.txt dist/fz_openbsd_amd64 dist/fz_linux_
 	gh release upload $(VERSION) dist/fz_* dist/plugins.tar.gz
 
 devrelease: clean predevrelease_tests dist/fz_linux_amd64 dist/plugins.tar.gz
-	ssh janx build_flamingzombies/build $(gitsha)
+	ssh janx build_flamingzombies/build_dev $(gitsha)
 	scp dist/fz_* janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
 	scp dist/plugins.tar.gz janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
 	scp scripts/openbsd_rc janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
