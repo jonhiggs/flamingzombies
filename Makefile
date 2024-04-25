@@ -62,6 +62,7 @@ gotest:
 
 shellcheck:
 	shellcheck -s sh libexec/{task,notifier,gates}/*
+	[[ $$(find libexec/ ! -executable ! -name README.md) = "" ]]
 
 clean:
 	rm -Rf ./dist release_notes.txt

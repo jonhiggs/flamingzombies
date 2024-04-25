@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.0.19
+
+- Add scripts for testing HTTP
+
 ## v0.0.18
 
 - Release a tarball of plugins
