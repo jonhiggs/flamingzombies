@@ -15,18 +15,6 @@ devrelease: clean predevrelease_tests dist/fz_linux_amd64 dist/plugins.tar.gz
 release_notes.txt: CHANGELOG.md
 	sed -n '/^## $(VERSION)$$/,/##/ { /^#/d; /^\w*$$/d; p }' $< > $@
 
-dist/%.tar.gz: dist/%/bin/fz dist/man/man1/fz.1.gz
-	mkdir -p dist/$*/share
-	mkdir -p dist/etc
-	touch dist/etc/flamingzombies.sample.toml
-	cp -r dist/man dist/$*/share
-	cp -r dist/etc dist/$*/etc
-	cp -r libexec/ dist/$*
-	tar -zvc \
-		-C $(dir dist/$*) \
-		-f $@ \
-		flamingzombies-$(VERSION)/
-
 dist/plugins.tar.gz: libexec | dist
 	mkdir -p dist/flamingzombies
 	cp -aux $</* dist/flamingzombies
