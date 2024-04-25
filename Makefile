@@ -35,7 +35,7 @@ dist/plugins.tar.gz: libexec | dist
 
 dist/fz_linux_amd64: | dist
 	mkdir -p $$(dirname $@)
-	go build ./cmd/fz/fz.go
+	CGO_ENABLED=0 go build ./cmd/fz/fz.go
 	mv fz $@
 
 dist/fz_openbsd_amd64: gitsha := $(shell git rev-parse HEAD)
