@@ -74,7 +74,7 @@ func ReadConfig() Config {
 	}
 
 	if config.ListenAddress == "" {
-		config.LogLevel = os.Getenv("FZ_HOST")
+		config.LogLevel = os.Getenv("FZ_LISTEN")
 	}
 
 	for i, t := range config.Tasks {
