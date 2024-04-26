@@ -2,11 +2,13 @@
 .Dt fz 1
 .Os
 .Sh NAME
-.Nm flamingzombies
+.Nm fz
 .Nd A monitoring scheduler to detect failure and raise alerts.
 .Sh SYNOPSIS
-.Nm fz
-[\fI\,FILE\/\fR]...
+.Nm
+.Op Fl n
+.Op Fl c Ar file
+.Op Fl l Ar error/warn/info/trace/debug
 .Sh DESCRIPTION
 The
 .Nm
@@ -31,6 +33,9 @@ The level of logs that will be emitted. Valid options are error, info, debug or 
 .It Fl V, Li --version
 Print the version information.
 .El
+.Sh SEE ALSO
+.Xr fzctl 1 ,
+.Xr flamingzombies.toml 5
 .Sh "BUGS"
 .Nm flamingzombies
 is still very immature. I'm sure it still has many bugs and missing features.

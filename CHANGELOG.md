@@ -4,6 +4,7 @@
 
 - Add fzctl to check the daemon state
 - Add scripts for testing HTTP
+- Slight improvements to the man pages
 
 ## v0.0.18
 

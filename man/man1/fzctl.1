@@ -5,8 +5,15 @@
 .Nm fzctl
 .Nd Run commands against an fz daemon.
 .Sh SYNOPSIS
-.Nm fzctl
-[\fI\,options\/\fR] \fI\,command\/\fR [\fI\,subcommand\fR]...
+.Nm
+.Op options
+.Ar list
+.Op ok|fail|unknown
+.Nm
+.Op options
+.Ar show
+.Ar task
+.Op task...
 .Sh DESCRIPTION
 Control an
 .Nm fz
@@ -26,3 +33,6 @@ daemon to connect to. The default value is 127.0.0.1:5891.
 .It Fl V, Li --version
 Print the version information.
 .El
+.Sh SEE ALSO
+.Xr fz 1 ,
+.Xr flamingzombies.toml 5
