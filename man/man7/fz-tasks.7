@@ -1,0 +1,83 @@
+.Dd 2024-05-01
+.Dt fz-tasks 7
+.Os
+.Sh NAME
+.Nm fz-tasks
+.Nd A development guide to create your own fz tasks.
+.Sh DESCRIPTION
+Tasks are typically short scripts that measure whether or not a condition is true.
+.Sh ENVIRONMENT
+Tasks are executed with metadata inserted into the environment. These values are:
+.Bl -tag -width TIMEOUT
+.It Cm TIMEOUT
+The number of seconds the task may run before
+.Xr fz
+times out the script.
+.Sh EXIT CODES
+The following exit codes are supported:
+.Pp
+.Bl -tag -width XX
+.It Cm 0
+The task measured ok
+.It Cm 3
+A measurement could not be taken.
+.It Cm 124
+A measurement could not be taken because of a timeout. This is mostly a convenience that aligns with the default exit code of the
+.Xr timeout 1
+command.
+.El
+.Pp
+Any other exit code is a failure.
+.Sh CONSIDERATIONS
+When writing tasks, ensure the script exits before the
+.Xr fz
+timeout. If your script is timed out, no status will be recorded the task will not be executed again until the
+.Ar frequency
+elapses again.
+.Pp
+An error will be logged, but this situation can stall the task. It is a serious issue, but can be easily avoided by running your slow-running command with
+.Xr timeout 1
+\&.
+.Pp
+You could get meta, and write a task to check that the
+.Xr fz
+log_file doesn't contain any errors, but that is out of the scope of this document.
+.Pp
+Each task should check just one thing. If it cannot conduct its test for any reason, return the
+.Ar unknown_status_code
+rather than fail the test. Following this recommendation will reduce the chance of alert storms when hosts fail.
+.Sh EXAMPLES
+A very simple task to check the existence of a file:
+.Bd -literal -offset indent
+#!/bin/sh
+[ -f "$1" ]
+.Ed
+.Pp
+This script will exit 0 if the file exists, or 1 if it does not. This is a useful and completely valid task.
+.Pp
+Next, is a more complicated example that checks that a URL returns a 200 status code.
+.Bd -literal -offset indent
+#!/bin/sh
+if [[ ${TIMEOUT} -lt 1 ]]; then
+    echo "Task TIMEOUT is configured too low" >&2
+    exit 1
+fi
+
+timeout 1 sh -c 'curl -v http://www.google.com 2>&1 >/dev/null | grep -q "HTTP/1.1 200"'
+.Ed
+.Pp
+I'm intentionally avoiding many features of curl to demonstrate how to safely manage more variable runtime conditions using plain shell scripts.
+.Pp
+Firstly I'm checking that the timeout isn't too low. If it is, the task timeout will be be reached and no measurement will taken. The error is directed to stderr so that is injected into the
+.Xr fz
+logs. Any output on stdout is thought to be insignificant and is ignored.
+.Pp
+The
+.Xr timeout 1
+command ensures that curl cannot execute for longer than a second. If it does, the exit code 3 is return indicating that a measurement could not be taken and that it should enter its retry loop. The timeout configured on the task must be higher than one second
+.Pp
+We then make an HTTP request to Google, throw away the response body and check that the headers contain "HTTP/1.1 200".
+.Pp
+If the task times out an exit code of 127 will be returned, otherwise 0 or 1 will be returned according to the result of grep.
+.Sh CONTRIBUTING
+If you intend to contribute your tasks back to upstream, please ensure they're written in POSIX shell and follow all of the above advise.

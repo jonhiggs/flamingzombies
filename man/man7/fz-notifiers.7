@@ -1,0 +1,48 @@
+.Dd 2024-05-01
+.Dt fz-notifiers 7
+.Os
+.Sh NAME
+.Nm fz-notifiers
+.Nd A development guide to create your own fz notifiers.
+.Sh DESCRIPTION
+Notifiers are responsible for raising alerts. Every execution results in an alert and gates govern the exact conditions in which notifiers may execute.
+.Pp
+.Xr fz
+does not perform any retries when notifiers fail so they must be reliable and mustn't time out. If a notifier depends on network resources, it's highly recommended that it handles its own retries.
+.Pp
+The notifier receives the alert body via stdin which contains the task's
+.Ar error_body
+when the state changes from ok to fail, or its
+.Ar recover_body
+when changing from fail to ok.
+.Pp
+It is expected that many tasks will share the same notifier, so it must handle concurrent executions.
+.Sh ENVIRONMENT
+Notifiers are executed with the metadata of the task that triggered the notifier inserted into the environment. These values are:
+.Bl -tag -width LAST_STATE
+.It Cm LAST_STATE
+The last state.
+.Op ok, fail
+.It Cm PRIORITY
+The
+.Ar priority
+of the task that triggered the notifier.
+.It Cm STATE
+The current state.
+.Op ok, fail
+.It Cm NAME
+The name of the task that the alert is for.
+.El
+.Sh EXIT CODES
+The following exit codes are supported:
+.Pp
+.Bl -tag -width XX
+.It Cm 0
+The notifier executed without error.
+.El
+.Pp
+Any other exit code states that the notifier failed and
+.Xr fz
+will log an error.
+.Sh CONSIDERATIONS
+If you require more reliability than a script on a single host is capable of, you can offload the work to something else by treating the notifier as a wrapper script. For example, the wrapper might queue the message on a highly redundant service that does meet the reliability requirements.

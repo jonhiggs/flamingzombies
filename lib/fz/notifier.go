@@ -12,7 +12,7 @@ type Notifier struct {
 	Command        string
 	Args           []string
 	GateNames      []string `toml:"gates"`
-	TimeoutSeconds int      `toml:"timeout_seconds"`
+	TimeoutSeconds int      `toml:"timeout"`
 }
 
 func (n Notifier) timeout() time.Duration {

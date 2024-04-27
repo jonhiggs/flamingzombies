@@ -16,11 +16,11 @@ const DEFAULT_PRIORITY = 5
 const DEFAULT_UNKNOWN_EXIT_CODE = 3 // straight from Nagios
 
 type Defaults struct {
-	FrequencySeconds      int      `toml:"frequency_seconds"`
+	FrequencySeconds      int      `toml:"frequency"`
 	NotifierNames         []string `toml:"notifiers"`
 	Retries               int      `toml:"retries"`
-	RetryFrequencySeconds int      `toml:"retry_frequency_seconds"`
-	TimeoutSeconds        int      `toml:"timeout_seconds"` // better to put the timeout into the commmand
+	RetryFrequencySeconds int      `toml:"retry_frequency"`
+	TimeoutSeconds        int      `toml:"timeout"` // better to put the timeout into the commmand
 	Priority              int      `toml:"priority"`
 	UnknownExitCode       int      `toml:"unknown_exit_code`
 }

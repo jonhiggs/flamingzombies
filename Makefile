@@ -49,12 +49,7 @@ dist/fzctl_openbsd_amd64: prerelease_tests | dist
 		-O $@
 	chmod 755 $@
 
-dist/man/%.gz: export BUILD_DATE = $(shell date --iso-8601)
-dist/man/%.gz: man/% | dist/man/man1
-	cat $< | envsubst '$${BUILD_DATE}' > dist/man/$*
-	gzip -f dist/man/$*
-
-dist/man/man1 doc/man1 dist:
+dist:
 	mkdir -p $@
 
 prerelease_tests: test
@@ -66,6 +61,7 @@ prerelease_tests: test
 	git status | grep -q "On branch master"
 	git status | grep -q "working tree clean"
 	grep -q "^## $(VERSION)$$" CHANGELOG.md
+	./man/test.sh
 
 predevrelease_tests: test
 	git status | grep -q "nothing to commit"

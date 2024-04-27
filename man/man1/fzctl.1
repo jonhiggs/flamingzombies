@@ -1,4 +1,4 @@
-.Dd ${BUILD_DATE}
+.Dd 2024-05-01
 .Dt fzctl 1
 .Os
 .Sh NAME
@@ -32,6 +32,14 @@ The IP address and port of the
 daemon to connect to. The default value is 127.0.0.1:5891.
 .It Fl V, Li --version
 Print the version information.
+.El
+.Sh ENVIRONMENT
+Some settings can also be supplied with environment variables, but if a command arguments is provided it will take precedence.
+.Bl -tag -width Ds
+.It Ic FZ_LISTEN
+The network address that the
+.Xr fz 1
+daemon is listening on.
 .El
 .Sh SEE ALSO
 .Xr fz 1 ,

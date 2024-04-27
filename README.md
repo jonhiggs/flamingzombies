@@ -1,6 +1,6 @@
 # Flaming Zombies
 
-A scheduler for performing monitoring checks, detecting failure and raising alerts.
+A simple, lightweight monitoring daemon for performing checks, detecting failure and raising alerts.
 
 ---
 
@@ -8,79 +8,106 @@ THIS IS STILL A WORK IN PROGRESS
 
 ---
 
+Flaming Zombies ties together three components with three distinct responsibilities; `tasks`, `notifiers` and `gates`.
 
-tasks -> gate -> notifier
+* [`tasks`](libexec/task) check whether a condition is true or false, like if a host responds to pings?
+* [`notifiers`](libexec/notifier) raise alerts.
+* [`gates`](libexec/gate) control when a `notifier` may execute.
 
-
-Tasks are ran on a supplied schedule. The state of the task is supplied to one or more gates which determine whether the notifier should raise an alert. Tasks, Gates and Notifiers are all expected to be supplied by the user as short scripts (or complicated problems, if you prefer).
-
-
-## Tasks
-
-They define the test that is being performed.
-
-A simple task definition might look like this:
-
-```toml
-[[task]]
-name = "disk_percent_free_root"
-command ="plugins/disk_free"
-args = [ "/", "90" ]
-frequency_seconds = 60
-timeout_seconds = 5
+```mermaid
+sequenceDiagram
+    task->>+notifier: new measurement
+    notifier->>gate: are you open?
+    gate->>+notifier: no
+    task->>+notifier: new measurement
+    notifier->>gate: are you open?
+    gate->>+notifier: yes
+    notifier->>Human: notification sent
 ```
 
-This tasks does nothing but sleep for four seconds every minute. The name of the task is `sleep`. It's only used to make the logs a little easier to debug. The command that is run will be `sleep 4`.
+You're expected to have many tasks. Each task can have one or more notifiers. Each notifier can have one or more gates.
 
-This task a little pointless since it will never fail.
+And that is the basis of Flaming Zombies.
 
+## Documentation
 
+The complete documentation is available in the [man pages](./man). You can read them in your shell before they're installed using using the command:
 
-Tasks are scheduled. When they change state, the configured notifier is executed.
-
-Both a task and a notifier is a stand-alone script or program which the user is expected to supply.
-
-
-A simple example to alert if the disk is too full:
-
-```bash
-#!/usr/bin/env bash
-[[ $(df -P | awk -v fs=$1'($6==fs) { print int($5) }') -gt $2 ]]
 ```
-
-And you would configure a task to perform the check like so:
-
-```toml
-[[task]]
-name = "disk_free:/"
-command = "plugins/task/df"
-args = [ "/", "90" ]
-frequency_seconds = 3600
-error_body = """
-the disk at / is more than 90% full
-"""
-recover_body = """
-the disk usage of / fallen below the threshold.
-"""
+curl https://raw.githubusercontent.com/jonhiggs/flamingzombies/master/man/man1/fz.1 | man /dev/stdin
 ```
-
-
-
-## Configuration
-
-The configuration is fetched from the supplied TOML file.
-
 
 ## Features
 
+* Made to be used at the command line.
+* Configured with flat files.
+* Completely documented in man pages.
+* Few dependencies.
+* Very easy to extend, and customise.
+* Liberal 2-clause BSD license.
+
+## Building
+
+Before you can build `fz` and `fzctl`, you'll need to have [Go](https://go.dev/doc/install) installed on your system.
+
+To build, run:
+
+```
+go build ./cmd/fzctl/fzctl.go
+go build ./cmd/fz/fz.go
+```
+
+That will produce the binaries for your system. The plugins are at `./libexec` and the man pages are at `./man`. Adapting the OpenBSD installation instructions should get you a long way to installing it on most UNIX-like system. You may find an init script for your operating system at `./scripts`. If you end up writing one, I would appreciate it if you could share it back.
 
 
-## Limitations
+## Installation
 
-Tasks can run as frequently has every second.
+Installation is intended to be very simple. Eventually, I'd like to provide installation packages, but until then a manual process will need to suffice.
 
+### OpenBSD
 
+The below sequence of commands will install the daemon on OpenBSD:
 
----
+```sh
+## fz
+wget https://github.com/jonhiggs/flamingzombies/releases/download/${VERSION}/fz_openbsd_${ARCH} \
+    -O /usr/local/bin/fz
 
-The OpenBSD rc script can be found at: https://gist.github.com/jonhiggs/b3949cb5f7fd51997023c4c006eca2d5
+chown root:wheel /usr/local/bin/fz
+chmod 755 /usr/local/bin/fz
+
+## fzctl
+wget https://github.com/jonhiggs/flamingzombies/releases/download/${VERSION}/fzctl_openbsd_${ARCH} \
+    -O /usr/local/bin/fzctl
+
+chown root:wheel /usr/local/bin/fzctl
+chmod 755 /usr/local/bin/fzctl
+
+## rc script
+wget https://raw.githubusercontent.com/jonhiggs/flamingzombies/master/scripts/openbsd_rc \
+    -O /etc/rc.d/flamingzombies
+
+chown root:wheel /etc/rc.d/flamingzombies
+chmod 755 /etc/rc.d/flamingzombies
+
+## plugins
+wget https://github.com/jonhiggs/flamingzombies/releases/download/${VERSION}/plugins.tar.gz \
+    -O /tmp/plugins.tar.gz
+
+tar -C /usr/local/libexec -zxvf /tmp/plugins.tar.gz
+rm /tmp/plugins.tar.gz
+
+## man pages
+for m in man1/fz.1 man1/fzctl.1 man5/flamingzombies.toml.5 man7/fz-gates.7 man7/fz-notifiers.7 man7/fz-tasks.7; do
+    wget https://raw.githubusercontent.com/jonhiggs/flamingzombies/master/man/$f \
+        -O /usr/local/man/$f
+done
+
+## config
+# create a configuration at /etc/flamingzombies.toml
+# see the flamingzombies.toml(5) man page.
+
+## enable the daemon
+rcctl enable flamingzombies
+rcctl set flamingzombies logger daemon.info
+```
