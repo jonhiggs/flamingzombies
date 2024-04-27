@@ -14,24 +14,24 @@ import (
 )
 
 type Task struct {
-	Name                  string   `toml:"name"`                    // friendly name
-	Command               string   `toml:"command"`                 // command
-	Args                  []string `toml:"args"`                    // command arguments
-	FrequencySeconds      int      `toml:"frequency_seconds"`       // how often to run
-	RetryFrequencySeconds int      `toml:"retry_frequency_seconds"` // how quickly to retry when state unknown
-	TimeoutSeconds        int      `toml:"timeout_seconds"`         // how long an execution may run
-	Retries               int      `toml:"retries"`                 // number of retries before changing the state
-	NotifierNames         []string `toml:"notifiers"`               // notifiers to trigger upon state change
-	Priority              int      `toml:"priority"`                // the priority of the notifications
-	ErrorBody             string   `toml:"error_body"`              // the body of the notification when entering an error state
-	RecoverBody           string   `toml:"recover_body"`            // the body of the notification when recovering from an error state
-	UnknownExitCode       int      `toml:"unknown_exit_code"`       // the exit code indicating that a measurement could not be taken
+	Name                  string   `toml:"name"`              // friendly name
+	Command               string   `toml:"command"`           // command
+	Args                  []string `toml:"args"`              // command arguments
+	FrequencySeconds      int      `toml:"frequency"`         // how often to run
+	RetryFrequencySeconds int      `toml:"retry_frequency"`   // how quickly to retry when state unknown
+	TimeoutSeconds        int      `toml:"timeout"`           // how long an execution may run
+	Retries               int      `toml:"retries"`           // number of retries before changing the state
+	NotifierNames         []string `toml:"notifiers"`         // notifiers to trigger upon state change
+	Priority              int      `toml:"priority"`          // the priority of the notifications
+	ErrorBody             string   `toml:"error_body"`        // the body of the notification when entering an error state
+	RecoverBody           string   `toml:"recover_body"`      // the body of the notification when recovering from an error state
+	UnknownExitCode       int      `toml:"unknown_exit_code"` // the exit code indicating that a measurement could not be taken
 
 	// public, but unconfigurable
 	LastRun        time.Time
 	LastOk         time.Time
 	History        uint32 // represented in binary. Successes are high
-	Measurements   uint32 // the bits in the history with a recorded value. Needed to understand a history of 0
+	HistoryMask    uint32 // the bits in the history with a recorded value. Needed to understand a history of 0
 	ExecutionCount int    // task was executed
 	OKCount        int    // task passed
 	FailCount      int    // task failed
@@ -186,8 +186,8 @@ func (t *Task) RecordStatus(b bool) {
 		t.History += 1
 	}
 
-	t.Measurements = t.Measurements << 1
-	t.Measurements += 1
+	t.HistoryMask = t.HistoryMask << 1
+	t.HistoryMask += 1
 
 	log.WithFields(log.Fields{
 		"file":      "lib/fz/task.go",
@@ -200,7 +200,7 @@ func (t *Task) RecordStatus(b bool) {
 // extract the current state from the history
 func (t Task) State() State {
 	// if there aren't enough measurements, return STATE_UNKNOWN
-	if t.retryMask() > t.Measurements {
+	if t.retryMask() > t.HistoryMask {
 		return STATE_UNKNOWN
 	}
 
@@ -220,7 +220,7 @@ func (t Task) State() State {
 // step back though the data to find the previous state
 func (t Task) LastState() State {
 	h := t.History >> t.Retries
-	m := t.Measurements >> t.Retries
+	m := t.HistoryMask >> t.Retries
 
 	mask := t.retryMask()
 

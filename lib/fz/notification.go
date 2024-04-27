@@ -54,10 +54,10 @@ func ProcessNotifications() {
 
 				cmd.Dir = config.Directory
 				cmd.Env = []string{
-					fmt.Sprintf("PRIORITY=%d", n.Task.Priority),
-					fmt.Sprintf("SUBJECT=%s", n.subject()),
-					fmt.Sprintf("STATE=%s", n.Task.State()),
 					fmt.Sprintf("LAST_STATE=%s", n.Task.LastState()),
+					fmt.Sprintf("NAME=%s", n.Task.Name),
+					fmt.Sprintf("PRIORITY=%d", n.Task.Priority),
+					fmt.Sprintf("STATE=%s", n.Task.State()),
 				}
 
 				log.WithFields(log.Fields{

@@ -11,10 +11,9 @@ import (
 )
 
 type Gate struct {
-	Name           string   `toml:"name"`            // friendly name
-	Command        string   `toml:"command"`         // command
-	Args           []string `toml:"args"`            // command arguments
-	TimeoutSeconds int      `toml:"timeout_seconds"` // how long an execution may run
+	Name    string   `toml:"name"`    // friendly name
+	Command string   `toml:"command"` // command
+	Args    []string `toml:"args"`    // command arguments
 }
 
 func (g Gate) IsOpen(t *Task) bool {
@@ -24,14 +23,14 @@ func (g Gate) IsOpen(t *Task) bool {
 
 	cmd.Dir = config.Directory
 	cmd.Env = []string{
-		fmt.Sprintf("FREQUENCY_SECONDS=%d", t.FrequencySeconds),
+		fmt.Sprintf("FREQUENCY=%d", t.FrequencySeconds),
 		fmt.Sprintf("TASK_COMMAND=%s", t.Command),
 		fmt.Sprintf("LAST_STATE=%s", t.LastState()),
 		fmt.Sprintf("PRIORITY=%d", t.Priority),
 		fmt.Sprintf("STATE=%s", t.State()),
 		fmt.Sprintf("STATE_CHANGED=%v", t.StateChanged()),
 		fmt.Sprintf("HISTORY=%d", t.History),
-		fmt.Sprintf("MEASUREMENTS=%d", t.Measurements),
+		fmt.Sprintf("HISTORY_MASK=%d", t.Measurements),
 	}
 
 	log.WithFields(log.Fields{

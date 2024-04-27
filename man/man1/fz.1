@@ -1,4 +1,4 @@
-.Dd ${BUILD_DATE}
+.Dd 2024-05-01
 .Dt fz 1
 .Os
 .Sh NAME
@@ -33,9 +33,18 @@ The level of logs that will be emitted. Valid options are error, info, debug or 
 .It Fl V, Li --version
 Print the version information.
 .El
+.Sh ENVIRONMENT
+Most settings can also be supplied with environment variables, but if a command arguments is provided it will take precedence. The supported environment variables are listed below and closely match the arguments documented above.
+.Bl -tag -width Ds
+.It Ic FZ_CONFIG_FILE
+.It Ic FZ_DIRECTORY
+.It Ic FZ_LISTEN
+.It Ic FZ_LOG_FILE
+.It Ic FZ_LOG_LEVEL
+.El
 .Sh SEE ALSO
 .Xr fzctl 1 ,
 .Xr flamingzombies.toml 5
 .Sh "BUGS"
 .Nm flamingzombies
-is still very immature. I'm sure it still has many bugs and missing features.
+is very immature. I'm sure it contains bugs and missing features.

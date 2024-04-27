@@ -1,0 +1,259 @@
+.Dd 2024-05-01
+.Dt flamingzombies.toml 5
+.Os
+.Sh NAME
+.Nm flamingzombies.toml
+.Nd fz configuration file
+.Sh DESCRIPTION
+The
+.Nm
+file describes the tasks to execute, and the action(s) to take
+when a task changes state.
+.Sh GENERAL SETTINGS
+The following setting affect the
+.Xr fz 1
+daemon and are unrelated to any single task:
+.Bl -tag -width Ds
+.It Ic directory = Ar path
+The working directory of the daemon. All tasks, notifiers and gates are executed using this as their working directory.
+.Pp
+By default,
+.Pa /usr/libexec/flamingzombies
+is used.
+.It Ic listen_address = Ar ip:port
+The network port to open for
+.Xr fzctl 1
+to query the state of the daemon.
+.Pp
+The internal state of each task is sent to any client connecting to this port. The output is formatted as JSON Lines with each line describing one task. No sensitive data is returned, and the client has no control over the daemon, but this may change in future versions. Limiting access to this port using a firewall is recommend.
+.Pp
+By default, port 127.0.0.1:5891 is used.
+.It Ic log_file = Ar path
+The path to write the daemon's logs. A value of
+.Pa stdout
+or a single dash (-) will route the logs to stdout.
+.It Ic log_level = Ar level
+The level at which the daemon logs. Any errors at or above the specified level are logged to the configured
+.Ic log_file.
+.Pp
+Valid levels are:
+.Bl -tag -width "error"
+.It Cm error
+Events which compromise the effectiveness of the service. For example, task timeouts and notifier errors.
+.It Cm warn
+Events which don't compromise the effectiveness of the service, but might indicate that something else is.
+.It Cm info
+Events that occur during normal operation.
+.It Cm debug
+Events that may help users in debugging.
+.It Cm trace
+Events that may help application developers in debugging.
+.El
+.Sh TASKS
+Tasks are the commands that check that a service or system is operational. They run periodically and trigger each of their notifiers after every new measurement is recorded.
+.Pp
+There is no limit to the number of tasks that can be specified in the configuration file.
+.Pp
+Two executions of a task cannot overlap (have a concurrency greater than one) because it must have a
+.Ar timeout
+lower than its
+.Ar frequency
+or
+.Ar retry_frequency
+\&.
+.Pp
+Tasks are randomly (yet consistently) distributed across time to prevent their executions from clustering at the beginning of minutes, hours and days.
+.Pp
+The number of
+.Ar retries
+sets window size for how many historic checks are considered when evaluating a task's state. If all values in the window are are successful or successful, then the task is in an
+.Ar ok
+or
+.Ar fail
+state, respectfully. Otherwise, state is
+.Ar unknown
+and more tests are required before any decision can be made.
+.Pp
+While a task is in an
+.Ar unknown
+state, it is re-executed at the
+.Ar retry_frequency
+rate.
+.Pp
+Flapping tasks can remain in an unknown state indefinitely. It is important to not to set the
+.Ar retry
+value too high. If you wish to defer notifications allowing time to auto-recover before raising an alarm, you're better off writing a notification gate rather than increasing the number of retries.
+.Pp
+The configuration options of a task are:
+.Bl -tag -width Ds
+.It Ic name = Ar task_name
+The name you have given to the task. This is used by
+.Xr fzctl 1
+to select which task to operate on.
+.It Ic command = Ar path
+The path to the task command to execute. This can be a fully qualified path, or one which is relative to the
+.Ar directory
+(See GENERAL_SETTINGS).
+.It Ic args = Op command_arguments...
+The command arguments to send to the
+.Ar command
+.It Ic frequency = Ar seconds
+The frequency in which to execute the task. If the task is in an
+.Ar unknown
+state, the check is executed at the
+.Ar retry_frequency
+rate, instead.
+.Pp
+It must have a value less than
+.Ar timeout
+to prevent concurrent executions of the task.
+.It Ic timeout = Ar seconds
+How long to allow the
+.Ar command
+to execute before it is terminated. If the timeout is exceeded, no value is recorded and an error is logged. Since no measurement is taken, the notifier is not triggered and there is no way to alert when in this condition. Timeouts are serious issues that must be prevented.
+.It Ic retries = Ar count
+How many times to retry perform a task to confirm a state change. Use for accounting for intermittent issues when collecting measurements, rather than as a way to smooth flapping alerts.
+.Pp
+.It Ic retry_frequency = Ar seconds
+The frequency a task is executed while its state is unknown. Must be less than the
+.Ar timeout
+.It Ic notifiers = Op notifiers...
+A list of notifiers to trigger when a task is executed. Every task execution triggers a notifier. Gates on the notifiers are used to suppress unwanted notifications.
+.It Ic priority = Ar number
+The priority is an integer greater than 1. What each value means up to the user. Typically, priority 1 is the most important and the importance decreasing as the number grows larger.
+.Pp
+The priority is part of the payload sent to notification gates and is otherwise unused.
+.It Ic error_body = Ar text
+This string of text is intended to be used by notifiers when raising failure alerts.
+.It Ic recover_body = Ar text
+This string of text is intended to be used by notifiers when raising recovery alerts.
+.It Ic unknown_exit_code = Ar number
+By default, an exit code of 3 denotes an unknown state. This follows the pattern set by Nagios, however unlike Nagios,
+.Xr fz
+doesn't differentiate between warning and critical exit codes.
+
+.Sh NOTIFIERS
+Notifiers raise alerts for tasks. They're triggered each time a task using it records a new measurement. Before executing the notifier command (which results in an alert being sent), each of its gates are check to be open (return exit code of zero). A notifier is only responsible for raising alerts, and should never attempt to control when alerts are sent.
+.Pp
+The configuration options of a notifier are:
+.Bl -tag -width Ds
+.It Ic name = Ar notifier_name
+The name of the notifier. This is the reference used in the tasks
+.Ar notifiers
+list.
+.It Ic command = Ar path
+The path of the notifier command to execute. This can be a fully qualified path, or one which is relative to the
+.Ar directory
+(See GENERAL_SETTINGS).
+.It Ic args = Op command_arguments...
+The command arguments to send to the
+.Ar command
+.It Ic gates = Op [gates...]...
+A list, of a lists of gates. The results of the innermost gates are ANDed together, and those results are ORed.
+.Pp
+So for the values:
+.Bd -literal -offset indent
+[open_gate, closed_gate], [closed_gate, closed_gate]
+.Ed
+.Pp
+The result would evaluate to false, because neither list has a complete set of true values. The notifier command will not get executed.
+.It Ic timeout = Ar seconds
+The number of seconds that a notifier can run before it times out. There is no retry logic for failed or timed out notifiers. These programs should be highly reliable, and manage their own retries. A notifier returning a non-zero exit code is a serious error that will be logged.
+.Sh GATES
+Gates provide fine-grained control over when an notifier may executed causing an alarm to be raised. One or more gates must be applied to each notifier otherwise an alarm will be raised on every check, since notifiers are triggered after the execution of every task.
+.Bl -tag -width Ds
+.It Ic name = Ar gate_name
+The name of the gate. Referenced when applying a gate to a notifier.
+.It Ic command = Ar path
+The path of the gate command to execute. This can be a fully qualified path, or one which is relative to the
+.Ar directory
+(See GENERAL_SETTINGS).
+.It Ic args = Op command_arguments...
+The command arguments sent to the
+.Ar command
+.Sh DEFAULTS
+Default task values can be specified so that they only need to be applied to the task if they differ from the default, minimising repetition.
+.Pp
+An example configuration:
+.Bd -literal -offset indent
+[defaults]
+retries = 5
+timeout = 1
+notifiers = [
+    "ntfy",
+    "email"
+]
+priority = 3
+frequency = 60
+.Ed
+.Pp
+Default values can be supplied for any task parameter.
+.Sh PLUGINS
+.Xr fz
+comes with many plugins that are ready to use.
+.Bl -tag -width Ds
+.It Cm task/disk_free Ar mount_point Ar threshold_percent
+Ensure that the mount point is not using more disk space than the threshold.
+.It Cm task/flappy
+This is a test task. It passes for 20 seconds, then fails for 20 seconds.
+.It Cm task/http_headers Ar url Op pattern...
+Query the URL and ensure that the response headers include all of the expected patterns.
+.It Cm task/http_resp_body Ar url Ar pattern
+Query the URL and ensure that the response body contains the expected pattern.
+.It Cm task/md_degraded Ar md_device Ar active_devices Op working_devices, spare_devices,  failed_devices
+Ensure that the md_device has the expected number of underlying block devices.
+.It Cm task/ping Ar host Op packets
+Ping the host with a number of packets. The task succeeds if all the expected packets are received.
+.It Cm task/port_open Ar host Ar port
+Check if host has an open port.
+.It Cm notifier/email
+Send notification using the local MTA.
+.It Cm notifier/ntfy Ar topic
+Send notification using the ntfy web service.
+.It Cm task/null
+A phony notifier for testing purposes.
+.It Cm gate/min_priority Ar priority
+Open the gate if it's less than the minimum priority.
+.It Cm gate/state_change
+Open the gate if state has changed from ok to fail or fail to ok.
+.El
+.Sh EXAMPLE
+.Pp
+A minimal configuration might look like this:
+.Bd -literal -offset indent
+[[task]]
+name = "ping:localhost"
+command = "task/ping"
+args = [ "127.0.0.1", "3"]
+frequency = 60
+timeout = 2
+retries = 5
+retry_frequency = 5
+notifiers = [ "example_notifier" ]
+
+[[notifier]]
+name = "example_notifier"
+command = "notifier/null"
+args = []
+timeout = 5
+gates = [ "state_change" ]
+
+[[gate]]
+name = "state_change"
+command = "gate/state_change"
+.Ed
+.Pp
+This will ping 127.0.0.1 every 60 seconds. When the state changes, retries are performed at a rate of once every 5 seconds until 5 consecutive executions agree on the new state.
+.Pp
+At the end of each task execution, the
+.Ar state_change
+gate of
+.Ar example_notifier
+is executed. The behaviour of this gate is to be open when state either changes from ok to fail, or from fail to ok. When the gate is open, the
+.Ar notifier/null
+notifier is executed.
+.Sh SEE ALSO
+.Xr fz 1 ,
+.Xr fzctl 1
+TOML docs: https://toml.io/en/
+JSON Lines: https://jsonlines.org/
