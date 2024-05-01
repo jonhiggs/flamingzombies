@@ -1,9 +1,11 @@
 #!/bin/sh
 
-# spend 20 seconds up, and 20 seconds down.
+# spend 10 seconds up, and 10 seconds down.
 
-if [ $(( $(date +%s) % 40 )) -lt 20 ]; then
+if [ $(( $(date +%s) % 20 )) -le 10 ]; then
   exit 0
 else
+  echo "i'm a flappy error" >&2
+  echo "i'm a flappy info"
   exit 1
 fi
