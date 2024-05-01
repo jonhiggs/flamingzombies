@@ -1,5 +1,6 @@
 log_file = "-"
 log_level = "debug"
+directory = "/home/jon/src/flamingzombies/libexec"
 
 listen_address = "127.0.0.1:5891"
 
@@ -19,7 +20,7 @@ priority = 3
 
 [[task]]
 name = "flappy"
-command = "libexec/task/flappy"
+command = "task/flappy"
 frequency = 1
 error_body = """
 flappy has entered an error state
@@ -28,12 +29,12 @@ recover_body = """
 flappy has recovered
 """
 
-[[task]]
-name = "whoami"
-command = "/usr/bin/whoami"
-args = ["--help"]
-frequency = 1
-retry_frequency = 1
+#[[task]]
+#name = "whoami"
+#command = "/usr/bin/whoami"
+#args = ["--help"]
+#frequency = 1
+#retry_frequency = 1
 
 #[[task]]
 #name = "ping.localhost"
@@ -56,11 +57,11 @@ retry_frequency = 1
 
 [[notifier]]
 name = "logger"
-command = "libexec/notifier/logger"
+command = "notifier/null"
 timeout = 5
 gates = ["state_change"]
 
 [[gate]]
 name = "state_change"
-command = "libexec/gates/state_change"
+command = "gate/state_change"
 timeout = 1
