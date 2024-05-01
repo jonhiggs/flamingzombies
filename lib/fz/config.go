@@ -183,6 +183,25 @@ func ReadConfig() Config {
 		}
 	}
 
+	for _, n := range config.Notifiers {
+		if err = n.validate(); err != nil {
+			log.WithFields(log.Fields{
+				"file":          "lib/fz/config.go",
+				"notifier_name": n.Name,
+			}).Fatal(err)
+		}
+
+	}
+
+	for _, g := range config.Gates {
+		if err = g.validate(); err != nil {
+			log.WithFields(log.Fields{
+				"file":      "lib/fz/config.go",
+				"gate_name": g.Name,
+			}).Fatal(err)
+		}
+	}
+
 	return config
 }
 

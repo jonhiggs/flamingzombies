@@ -2,6 +2,7 @@ package fz
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -39,4 +40,14 @@ func (n Notifier) gates() []*Gate {
 	}
 
 	return gs
+}
+
+func (n Notifier) validate() error {
+	if _, err := os.Stat(n.Command); os.IsNotExist(err) {
+		if _, err := os.Stat(fmt.Sprintf("%s/%s", config.Directory, n.Command)); os.IsNotExist(err) {
+			return fmt.Errorf("notifier command not found")
+		}
+	}
+
+	return nil
 }
