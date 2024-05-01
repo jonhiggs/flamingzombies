@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/jonhiggs/flamingzombies/lib/fz"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func Listen(c *fz.Config) {
@@ -18,14 +16,12 @@ func Listen(c *fz.Config) {
 		panic(err)
 	}
 
-	log.WithFields(log.Fields{
-		"file": "lib/daemon/daemon.go",
-	}).Info(fmt.Sprintf("Listening for connections on %s", listener.Addr().String()))
+	fz.Logger.Info(fmt.Sprintf("Listening for connections on %s", listener.Addr().String()))
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			log.Printf("Error accepting connection from client: %s", err)
+			fz.Logger.Error(fmt.Sprintf("Error accepting connection from client: %s", err))
 		} else {
 			go processClient(conn, c)
 		}

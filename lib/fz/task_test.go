@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+func init() {
+	StartLogger("info")
+}
+
 func TestTaskState(t *testing.T) {
 	tests := []struct {
 		name string

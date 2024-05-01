@@ -6,8 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type Gate struct {
@@ -33,46 +31,20 @@ func (g Gate) IsOpen(t *Task) bool {
 		fmt.Sprintf("HISTORY_MASK=%d", t.HistoryMask),
 	}
 
-	log.WithFields(log.Fields{
-		"file":      "lib/fz/gate.go",
-		"gate_name": g.Name,
-	}).Trace(fmt.Sprintf("running"))
-
 	err := cmd.Run()
 
 	if ctx.Err() == context.DeadlineExceeded {
-		log.WithFields(log.Fields{
-			"file":      "lib/fz/gate.go",
-			"gate_name": g.Name,
-		}).Error(fmt.Sprintf("time out exceeded while executing command"))
+		Logger.Error(fmt.Sprintf("time out exceeded while executing gate"), "gate", g.Name)
 
 		return false
 	}
 
 	if err != nil {
 		if os.IsPermission(err) {
-			log.WithFields(log.Fields{
-				"file":      "lib/fz/gate.go",
-				"gate_name": g.Name,
-			}).Error(err)
-
-			return false
+			Logger.Error(fmt.Sprint(err), "gate", g.Name)
 		}
-
-		exiterr, _ := err.(*exec.ExitError)
-
-		log.WithFields(log.Fields{
-			"file":      "lib/fz/gate.go",
-			"gate_name": g.Name,
-		}).Debug(fmt.Sprintf("command exited with %d", exiterr.ExitCode()))
-
 		return false
 	}
-
-	log.WithFields(log.Fields{
-		"file":      "lib/fz/gate.go",
-		"gate_name": g.Name,
-	}).Debug(fmt.Sprintf("command exited with %d", 0))
 	return true
 }
 

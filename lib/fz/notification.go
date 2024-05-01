@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type Notification struct {
@@ -24,20 +22,12 @@ func ProcessNotifications() {
 			case n := <-NotifyCh:
 				for _, g := range n.Notifier.gates() {
 					if g.IsOpen(n.Task) == false {
-						log.WithFields(log.Fields{
-							"file":          "lib/fz/notification.go",
-							"notifier_name": n.Notifier.Name,
-							"gate_name":     g.Name,
-						}).Debug(fmt.Sprintf("gate is closed"))
-
+						Logger.Debug("gate is closed", "gate", g.Name)
 						break C
 					}
 				}
 
-				log.WithFields(log.Fields{
-					"file":          "lib/fz/notification.go",
-					"notifier_name": n.Notifier.Name,
-				}).Info("sending notification")
+				Logger.Info("sending notification", "notifier", n.Notifier.Name)
 
 				ctx, cancel := context.WithTimeout(context.Background(), n.Notifier.timeout())
 				defer cancel()
@@ -46,10 +36,7 @@ func ProcessNotifications() {
 
 				stdin, err := cmd.StdinPipe()
 				if err != nil {
-					log.WithFields(log.Fields{
-						"file":          "lib/fz/notification.go",
-						"notifier_name": n.Notifier.Name,
-					}).Error(err)
+					Logger.Error(fmt.Sprint(err), "notifier", n.Notifier.Name)
 				}
 
 				cmd.Dir = config.Directory
@@ -59,11 +46,6 @@ func ProcessNotifications() {
 					fmt.Sprintf("PRIORITY=%d", n.Task.Priority),
 					fmt.Sprintf("STATE=%s", n.Task.State()),
 				}
-
-				log.WithFields(log.Fields{
-					"file":          "lib/fz/notification.go",
-					"notifier_name": n.Notifier.Name,
-				}).Trace(fmt.Sprintf("writing string to stdin: %s", n.body()))
 
 				io.WriteString(stdin, n.body())
 				stdin.Close()
@@ -80,19 +62,12 @@ func ProcessNotifications() {
 				err = cmd.Wait()
 
 				if ctx.Err() == context.DeadlineExceeded {
-					log.WithFields(log.Fields{
-						"file":          "lib/fz/notification.go",
-						"notifier_name": n.Notifier.Name,
-					}).Error(fmt.Sprintf("time out exceeded while executing notifier"))
+					Logger.Error(fmt.Sprintf("time out exceeded while executing notifier"), "notifier", n.Notifier.Name)
 				} else if err != nil {
 					exiterr, _ := err.(*exec.ExitError)
 					exitCode := exiterr.ExitCode()
 
-					log.WithFields(log.Fields{
-						"file":          "lib/fz/notification.go",
-						"notifier_name": n.Notifier.Name,
-						"exit_code":     exitCode,
-					}).Error(fmt.Sprintf("command returned stderr: %s", errorMessage))
+					Logger.Error(fmt.Sprintf("command returned stderr: %s", errorMessage), "notifier", n.Notifier.Name, "exit_code", exitCode)
 				}
 			}
 		}

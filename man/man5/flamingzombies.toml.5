@@ -1,4 +1,4 @@
-.Dd 2024-05-01
+.Dd 2024-05-02
 .Dt flamingzombies.toml 5
 .Os
 .Sh NAME
@@ -45,9 +45,7 @@ Events which don't compromise the effectiveness of the service, but might indica
 .It Cm info
 Events that occur during normal operation.
 .It Cm debug
-Events that may help users in debugging.
-.It Cm trace
-Events that may help application developers in debugging.
+Events that may help in debugging.
 .El
 .Sh TASKS
 Tasks are the commands that check that a service or system is operational. They run periodically and trigger each of their notifiers after every new measurement is recorded.

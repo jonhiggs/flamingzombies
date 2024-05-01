@@ -25,10 +25,6 @@ func init() {
 		os.Setenv("FZ_DIRECTORY", "/usr/libexec/flamingzombies")
 	}
 
-	if os.Getenv("FZ_LOG_FILE") == "" {
-		os.Setenv("FZ_LOG_FILE", "stdout")
-	}
-
 	if os.Getenv("FZ_LISTEN") == "" {
 		os.Setenv("FZ_LISTEN", "127.0.0.1:5891")
 	}

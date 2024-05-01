@@ -1,39 +1,28 @@
 package fz
 
 import (
+	"fmt"
+	"log/slog"
 	"os"
-
-	log "github.com/sirupsen/logrus"
 )
 
-func StartLogger(l string) {
-	log.SetFormatter(&log.TextFormatter{
-		DisableColors: true,
-		FullTimestamp: true,
-	})
+var Logger *slog.Logger
+var loggerLevel = new(slog.LevelVar)
 
-	if config.LogFile == "stdout" || config.LogFile == "-" {
-		log.SetOutput(os.Stdout)
-	} else if config.LogFile == "stderr" {
-		log.SetOutput(os.Stderr)
-	} else {
-		f, err := os.OpenFile(config.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-		if err != nil {
-			panic(err)
-		}
-		log.SetOutput(f)
-	}
+func StartLogger(l string) {
+	h := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: loggerLevel})
+	Logger = slog.New(h)
 
 	switch l {
-	case "trace":
-		log.SetLevel(log.TraceLevel)
 	case "debug":
-		log.SetLevel(log.DebugLevel)
+		loggerLevel.Set(slog.LevelDebug)
 	case "info":
-		log.SetLevel(log.InfoLevel)
+		loggerLevel.Set(slog.LevelInfo)
 	case "warn":
-		log.SetLevel(log.WarnLevel)
+		loggerLevel.Set(slog.LevelWarn)
 	case "error":
-		log.SetLevel(log.ErrorLevel)
+		loggerLevel.Set(slog.LevelError)
+	default:
+		panic(fmt.Sprintf("Invalid log level: %s", l))
 	}
 }
