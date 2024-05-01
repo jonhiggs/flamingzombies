@@ -75,3 +75,13 @@ func (g Gate) IsOpen(t *Task) bool {
 	}).Debug(fmt.Sprintf("command exited with %d", 0))
 	return true
 }
+
+func (g Gate) validate() error {
+	if _, err := os.Stat(g.Command); os.IsNotExist(err) {
+		if _, err := os.Stat(fmt.Sprintf("%s/%s", config.Directory, g.Command)); os.IsNotExist(err) {
+			return fmt.Errorf("gate command not found")
+		}
+	}
+
+	return nil
+}
