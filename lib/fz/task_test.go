@@ -12,14 +12,14 @@ func TestTaskState(t *testing.T) {
 		ta   Task
 		want State
 	}{
-		{"no_measurements", Task{Retries: 3, History: 0b0, Measurements: 0b0}, STATE_UNKNOWN},
-		{"few_measurements", Task{Retries: 3, History: 0b1, Measurements: 0b1}, STATE_UNKNOWN},
-		{"ok", Task{Retries: 3, History: 0b111, Measurements: 0b111}, STATE_OK},
-		{"fail", Task{Retries: 3, History: 0b000, Measurements: 0b111}, STATE_FAIL},
-		{"to_ok", Task{Retries: 3, History: 0b000111, Measurements: 0b111111}, STATE_OK},
-		{"to_fail", Task{Retries: 3, History: 0b111000, Measurements: 0b111111}, STATE_FAIL},
-		{"to_unknown", Task{Retries: 3, History: 0b11100, Measurements: 0b11111}, STATE_UNKNOWN},
-		{"big_test", Task{Retries: 3, History: 0b11000000000000000000001111111111, Measurements: 0b11111111111111111111111111111111}, STATE_OK},
+		{"no_measurements", Task{Retries: 3, History: 0b0, HistoryMask: 0b0}, STATE_UNKNOWN},
+		{"few_measurements", Task{Retries: 3, History: 0b1, HistoryMask: 0b1}, STATE_UNKNOWN},
+		{"ok", Task{Retries: 3, History: 0b111, HistoryMask: 0b111}, STATE_OK},
+		{"fail", Task{Retries: 3, History: 0b000, HistoryMask: 0b111}, STATE_FAIL},
+		{"to_ok", Task{Retries: 3, History: 0b000111, HistoryMask: 0b111111}, STATE_OK},
+		{"to_fail", Task{Retries: 3, History: 0b111000, HistoryMask: 0b111111}, STATE_FAIL},
+		{"to_unknown", Task{Retries: 3, History: 0b11100, HistoryMask: 0b11111}, STATE_UNKNOWN},
+		{"big_test", Task{Retries: 3, History: 0b11000000000000000000001111111111, HistoryMask: 0b11111111111111111111111111111111}, STATE_OK},
 	}
 
 	for _, tt := range tests {
@@ -38,16 +38,16 @@ func TestTaskLastState(t *testing.T) {
 		ta   Task
 		want State
 	}{
-		{"nothing", Task{Retries: 3, History: 0b0, Measurements: 0b0}, STATE_UNKNOWN},
-		{"few", Task{Retries: 3, History: 0b11, Measurements: 0b11}, STATE_UNKNOWN},
-		{"one_measure", Task{Retries: 3, History: 0b111, Measurements: 0b111}, STATE_UNKNOWN},
-		{"one_and_half_measures", Task{Retries: 3, History: 0b11111, Measurements: 0b11111}, STATE_UNKNOWN},
-		{"two_measures", Task{Retries: 3, History: 0b111111, Measurements: 0b111111}, STATE_OK},
-		{"ok_flap_fail", Task{Retries: 3, History: 0b11101010101000, Measurements: 0b11111111111111}, STATE_OK},
-		{"fail_flap_ok", Task{Retries: 3, History: 0b00010101010111, Measurements: 0b11111111111111}, STATE_FAIL},
-		{"fail_flap_fail", Task{Retries: 3, History: 0b00010101101000, Measurements: 0b11111111111111}, STATE_FAIL},
-		{"ok_fail_flap_fail", Task{Retries: 3, History: 0b11100010101101000, Measurements: 0b11111111111111111}, STATE_FAIL},
-		{"big_test", Task{Retries: 3, History: 0b11000000000000000000001111111111, Measurements: 0b11111111111111111111111111111111}, STATE_OK},
+		{"nothing", Task{Retries: 3, History: 0b0, HistoryMask: 0b0}, STATE_UNKNOWN},
+		{"few", Task{Retries: 3, History: 0b11, HistoryMask: 0b11}, STATE_UNKNOWN},
+		{"one_measure", Task{Retries: 3, History: 0b111, HistoryMask: 0b111}, STATE_UNKNOWN},
+		{"one_and_half_measures", Task{Retries: 3, History: 0b11111, HistoryMask: 0b11111}, STATE_UNKNOWN},
+		{"two_measures", Task{Retries: 3, History: 0b111111, HistoryMask: 0b111111}, STATE_OK},
+		{"ok_flap_fail", Task{Retries: 3, History: 0b11101010101000, HistoryMask: 0b11111111111111}, STATE_OK},
+		{"fail_flap_ok", Task{Retries: 3, History: 0b00010101010111, HistoryMask: 0b11111111111111}, STATE_FAIL},
+		{"fail_flap_fail", Task{Retries: 3, History: 0b00010101101000, HistoryMask: 0b11111111111111}, STATE_FAIL},
+		{"ok_fail_flap_fail", Task{Retries: 3, History: 0b11100010101101000, HistoryMask: 0b11111111111111111}, STATE_FAIL},
+		{"big_test", Task{Retries: 3, History: 0b11000000000000000000001111111111, HistoryMask: 0b11111111111111111111111111111111}, STATE_OK},
 	}
 
 	for _, tt := range tests {
@@ -66,17 +66,17 @@ func TestTaskStateChanged(t *testing.T) {
 		ta   Task
 		want bool
 	}{
-		{"nothing", Task{Retries: 3, History: 0b0, Measurements: 0b0}, false},
-		{"few", Task{Retries: 3, History: 0b11, Measurements: 0b11}, false},
-		{"one_measure", Task{Retries: 3, History: 0b111, Measurements: 0b111}, false},
-		{"one_and_half_measures", Task{Retries: 3, History: 0b11111, Measurements: 0b11111}, false},
-		{"two_measures", Task{Retries: 3, History: 0b111111, Measurements: 0b111111}, false},
-		{"ok_flap_fail", Task{Retries: 3, History: 0b11101010101000, Measurements: 0b11111111111111}, true},
-		{"fail_flap_ok", Task{Retries: 3, History: 0b00010101010111, Measurements: 0b11111111111111}, true},
-		{"fail_flap_fail", Task{Retries: 3, History: 0b00010101101000, Measurements: 0b11111111111111}, false},
-		{"ok_fail_flap_fail", Task{Retries: 3, History: 0b11100010101101000, Measurements: 0b11111111111111111}, false},
-		{"big_test", Task{Retries: 3, History: 0b11000000000000000000001111111111, Measurements: 0b11111111111111111111111111111111}, false},
-		{"unexpected_failure", Task{Retries: 5, History: 0b10000001111111111, Measurements: 0b10000001111111111}, false},
+		{"nothing", Task{Retries: 3, History: 0b0, HistoryMask: 0b0}, false},
+		{"few", Task{Retries: 3, History: 0b11, HistoryMask: 0b11}, false},
+		{"one_measure", Task{Retries: 3, History: 0b111, HistoryMask: 0b111}, false},
+		{"one_and_half_measures", Task{Retries: 3, History: 0b11111, HistoryMask: 0b11111}, false},
+		{"two_measures", Task{Retries: 3, History: 0b111111, HistoryMask: 0b111111}, false},
+		{"ok_flap_fail", Task{Retries: 3, History: 0b11101010101000, HistoryMask: 0b11111111111111}, true},
+		{"fail_flap_ok", Task{Retries: 3, History: 0b00010101010111, HistoryMask: 0b11111111111111}, true},
+		{"fail_flap_fail", Task{Retries: 3, History: 0b00010101101000, HistoryMask: 0b11111111111111}, false},
+		{"ok_fail_flap_fail", Task{Retries: 3, History: 0b11100010101101000, HistoryMask: 0b11111111111111111}, false},
+		{"big_test", Task{Retries: 3, History: 0b11000000000000000000001111111111, HistoryMask: 0b11111111111111111111111111111111}, false},
+		{"unexpected_failure", Task{Retries: 5, History: 0b10000001111111111, HistoryMask: 0b10000001111111111}, false},
 	}
 
 	for _, tt := range tests {
@@ -115,20 +115,20 @@ func TestTaskReady(t *testing.T) {
 		ts   time.Time
 		want bool
 	}{
-		{Task{Retries: 5, FrequencySeconds: 1, History: 0b11111, Measurements: 0b11111}, time.Unix(1712882669, 0), true},
-		{Task{Retries: 5, FrequencySeconds: 10, History: 0b11111, Measurements: 0b11111}, time.Unix(1712882670, 0), true},
-		{Task{Retries: 5, FrequencySeconds: 10, History: 0b11111, Measurements: 0b11111}, time.Unix(1712882669, 0), false},
-		{Task{Retries: 5, FrequencySeconds: 10, History: 0b01011, Measurements: 0b11111, RetryFrequencySeconds: 2}, time.Unix(1712882668, 0), true},
-		{Task{Retries: 5, FrequencySeconds: 10, History: 0b01011, Measurements: 0b11111, RetryFrequencySeconds: 2}, time.Unix(1712882669, 0), false},
+		{Task{Retries: 5, FrequencySeconds: 1, History: 0b11111, HistoryMask: 0b11111}, time.Unix(1712882669, 0), true},
+		{Task{Retries: 5, FrequencySeconds: 10, History: 0b11111, HistoryMask: 0b11111}, time.Unix(1712882670, 0), true},
+		{Task{Retries: 5, FrequencySeconds: 10, History: 0b11111, HistoryMask: 0b11111}, time.Unix(1712882669, 0), false},
+		{Task{Retries: 5, FrequencySeconds: 10, History: 0b01011, HistoryMask: 0b11111, RetryFrequencySeconds: 2}, time.Unix(1712882668, 0), true},
+		{Task{Retries: 5, FrequencySeconds: 10, History: 0b01011, HistoryMask: 0b11111, RetryFrequencySeconds: 2}, time.Unix(1712882669, 0), false},
 
 		// an unknown task should test at the frequency of RetryFrequencySeconds
-		{Task{Retries: 5, FrequencySeconds: 10, RetryFrequencySeconds: 1, History: 0b00001, Measurements: 0b00001}, time.Unix(1712882670, 0), true},
-		{Task{Retries: 5, FrequencySeconds: 10, RetryFrequencySeconds: 1, History: 0b00001, Measurements: 0b00001}, time.Unix(1712882671, 0), true},
-		{Task{Retries: 5, FrequencySeconds: 10, RetryFrequencySeconds: 10, History: 0b00001, Measurements: 0b00001}, time.Unix(1712882671, 0), false},
+		{Task{Retries: 5, FrequencySeconds: 10, RetryFrequencySeconds: 1, History: 0b00001, HistoryMask: 0b00001}, time.Unix(1712882670, 0), true},
+		{Task{Retries: 5, FrequencySeconds: 10, RetryFrequencySeconds: 1, History: 0b00001, HistoryMask: 0b00001}, time.Unix(1712882671, 0), true},
+		{Task{Retries: 5, FrequencySeconds: 10, RetryFrequencySeconds: 10, History: 0b00001, HistoryMask: 0b00001}, time.Unix(1712882671, 0), false},
 
 		// a passing task should test at FrequencySeconds
-		{Task{Retries: 5, FrequencySeconds: 60, RetryFrequencySeconds: 10, History: 0b11111, Measurements: 0b11111}, time.Unix(1712882670, 0), false},
-		{Task{Retries: 5, FrequencySeconds: 60, RetryFrequencySeconds: 10, History: 0b11111, Measurements: 0b11111}, time.Unix(1712882700, 0), true},
+		{Task{Retries: 5, FrequencySeconds: 60, RetryFrequencySeconds: 10, History: 0b11111, HistoryMask: 0b11111}, time.Unix(1712882670, 0), false},
+		{Task{Retries: 5, FrequencySeconds: 60, RetryFrequencySeconds: 10, History: 0b11111, HistoryMask: 0b11111}, time.Unix(1712882700, 0), true},
 	}
 
 	for _, tt := range tests {
@@ -146,7 +146,7 @@ func TestRecordStatus(t *testing.T) {
 	type testTask struct {
 		preRecord        bool
 		wantHistory      uint32
-		wantMeasurements uint32
+		wantHistoryMask  uint32
 		wantState        State
 		wantLastState    State
 		wantStateChanged bool
@@ -181,10 +181,10 @@ func TestRecordStatus(t *testing.T) {
 		})
 
 		t.Run(fmt.Sprintf("seq_%d:measurements", i), func(t *testing.T) {
-			got := ta.Measurements
+			got := ta.HistoryMask
 
-			if got != tt.wantMeasurements {
-				t.Errorf("got %b, want %b", got, tt.wantMeasurements)
+			if got != tt.wantHistoryMask {
+				t.Errorf("got %b, want %b", got, tt.wantHistoryMask)
 			}
 		})
 

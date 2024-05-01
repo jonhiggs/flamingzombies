@@ -15,7 +15,7 @@ func TestNotificationSubject(t *testing.T) {
 
 	t.Run("when_ok", func(t *testing.T) {
 		testTask.History = 0b111
-		testTask.Measurements = 0b111
+		testTask.HistoryMask = 0b111
 		want := testTask.RecoverBody
 		got := n.body()
 
@@ -26,7 +26,7 @@ func TestNotificationSubject(t *testing.T) {
 
 	t.Run("when_fail", func(t *testing.T) {
 		testTask.History = 0b000
-		testTask.Measurements = 0b111
+		testTask.HistoryMask = 0b111
 		want := testTask.ErrorBody
 		got := n.body()
 
@@ -37,7 +37,7 @@ func TestNotificationSubject(t *testing.T) {
 
 	t.Run("when_unknown", func(t *testing.T) {
 		testTask.History = 0b101
-		testTask.Measurements = 0b111
+		testTask.HistoryMask = 0b111
 		want := "The task flappy is in an unknown state"
 		got := n.body()
 

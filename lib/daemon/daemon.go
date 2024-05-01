@@ -61,7 +61,7 @@ func processClient(conn net.Conn, c *fz.Config) {
 		}
 
 		h := t.History
-		m := t.Measurements
+		m := t.HistoryMask
 		for h != 0 {
 			d.Measurements = append(d.Measurements, (1&h) == 1)
 			h = h >> 1

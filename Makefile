@@ -74,7 +74,7 @@ gotest:
 	go test ./lib/fz
 
 shellcheck:
-	shellcheck -s sh libexec/{task,notifier,gates}/*
+	shellcheck -s sh libexec/{task,notifier,gate}/*
 	[[ $$(find libexec/ ! -executable ! -name README.md) = "" ]]
 
 clean:

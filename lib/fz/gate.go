@@ -30,7 +30,7 @@ func (g Gate) IsOpen(t *Task) bool {
 		fmt.Sprintf("STATE=%s", t.State()),
 		fmt.Sprintf("STATE_CHANGED=%v", t.StateChanged()),
 		fmt.Sprintf("HISTORY=%d", t.History),
-		fmt.Sprintf("HISTORY_MASK=%d", t.Measurements),
+		fmt.Sprintf("HISTORY_MASK=%d", t.HistoryMask),
 	}
 
 	log.WithFields(log.Fields{
