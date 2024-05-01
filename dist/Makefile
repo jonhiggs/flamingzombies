@@ -10,7 +10,7 @@ $(BINS): GOOS = $(word 2,$(subst _, ,$@))
 $(BINS): GOARCH = $(word 3,$(subst _, ,$@))
 $(BINS):
 	docker run                                            \
-		--volume "$(PWD)/../:/go"                         \
+		--volume "$(shell pwd)/../:/go"                   \
 		--env "CGO_ENABLED=0"                             \
 		--env "GOOS=$(GOOS)"                              \
 		--env "GOARCH=$(GOARCH)"                          \

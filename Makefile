@@ -11,13 +11,13 @@ release: prerelease_tests release_notes.txt $(BINS) dist/plugins.tar.gz
 	gh release upload $(VERSION) dist/fz_* dist/fzctl_* dist/plugins.tar.gz
 
 devrelease: gitsha := $(shell git rev-parse HEAD)
-devrelease: clean predevrelease_tests $(BINS) dist/plugins.tar.gz
+devrelease: clean test $(BINS) dist/plugins.tar.gz
 	scp -r man/ janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
 	scp $(BINS) dist/plugins.tar.gz janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
 	scp scripts/openbsd_rc janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
 
 $(BINS) dist/plugins.tar.gz:
-	make -C dist $@
+	make -C dist $(notdir $@)
 
 release_notes.txt: CHANGELOG.md
 	sed -n '/^## $(VERSION)$$/,/##/ { /^#/d; /^\w*$$/d; p }' $< > $@
@@ -32,11 +32,6 @@ prerelease_tests: test
 	git status | grep -q "working tree clean"
 	grep -q "^## $(VERSION)$$" CHANGELOG.md
 	./man/test.sh
-
-predevrelease_tests: test
-	git status | grep -q "nothing to commit"
-	git push
-	git status | grep -q "working tree clean"
 
 test: gotest shellcheck
 
