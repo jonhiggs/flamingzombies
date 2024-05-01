@@ -127,11 +127,7 @@ The priority is part of the payload sent to notification gates and is otherwise 
 This string of text is intended to be used by notifiers when raising failure alerts.
 .It Ic recover_body = Ar text
 This string of text is intended to be used by notifiers when raising recovery alerts.
-.It Ic unknown_exit_code = Ar number
-By default, an exit code of 3 denotes an unknown state. This follows the pattern set by Nagios, however unlike Nagios,
-.Xr fz
-doesn't differentiate between warning and critical exit codes.
-
+.El
 .Sh NOTIFIERS
 Notifiers raise alerts for tasks. They're triggered each time a task using it records a new measurement. Before executing the notifier command (which results in an alert being sent), each of its gates are check to be open (return exit code of zero). A notifier is only responsible for raising alerts, and should never attempt to control when alerts are sent.
 .Pp

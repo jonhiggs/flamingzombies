@@ -43,9 +43,7 @@ You could get meta, and write a task to check that the
 .Xr fz
 log_file doesn't contain any errors, but that is out of the scope of this document.
 .Pp
-Each task should check just one thing. If it cannot conduct its test for any reason, return the
-.Ar unknown_status_code
-rather than fail the test. Following this recommendation will reduce the chance of alert storms when hosts fail.
+Each task should check just one thing. When a test cannot be executed, exit with 3 rather than fail the test. This reduces the chance of alert storms when hosts fail or similar issues occur that prevent tasks from executing.
 .Sh EXAMPLES
 A very simple task to check the existence of a file:
 .Bd -literal -offset indent

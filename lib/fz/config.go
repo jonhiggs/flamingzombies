@@ -13,7 +13,6 @@ const DEFAULT_RETRIES = 5
 const DEFAULT_TIMEOUT_SECONDS = 5
 const DEFAULT_FREQUENCY_SECONDS = 300
 const DEFAULT_PRIORITY = 5
-const DEFAULT_UNKNOWN_EXIT_CODE = 3 // straight from Nagios
 
 type Defaults struct {
 	FrequencySeconds      int      `toml:"frequency"`
@@ -22,7 +21,6 @@ type Defaults struct {
 	RetryFrequencySeconds int      `toml:"retry_frequency"`
 	TimeoutSeconds        int      `toml:"timeout"` // better to put the timeout into the commmand
 	Priority              int      `toml:"priority"`
-	UnknownExitCode       int      `toml:"unknown_exit_code`
 }
 
 type Config struct {
@@ -115,14 +113,6 @@ func ReadConfig() Config {
 				config.Tasks[i].Priority = DEFAULT_PRIORITY
 			} else {
 				config.Tasks[i].Priority = config.Defaults.Priority
-			}
-		}
-
-		if t.UnknownExitCode == 0 {
-			if config.Defaults.UnknownExitCode == 0 {
-				config.Tasks[i].UnknownExitCode = DEFAULT_UNKNOWN_EXIT_CODE
-			} else {
-				config.Tasks[i].Priority = config.Defaults.UnknownExitCode
 			}
 		}
 

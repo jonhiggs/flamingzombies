@@ -15,18 +15,17 @@ import (
 )
 
 type Task struct {
-	Name                  string   `toml:"name"`              // friendly name
-	Command               string   `toml:"command"`           // command
-	Args                  []string `toml:"args"`              // command arguments
-	FrequencySeconds      int      `toml:"frequency"`         // how often to run
-	RetryFrequencySeconds int      `toml:"retry_frequency"`   // how quickly to retry when state unknown
-	TimeoutSeconds        int      `toml:"timeout"`           // how long an execution may run
-	Retries               int      `toml:"retries"`           // number of retries before changing the state
-	NotifierNames         []string `toml:"notifiers"`         // notifiers to trigger upon state change
-	Priority              int      `toml:"priority"`          // the priority of the notifications
-	ErrorBody             string   `toml:"error_body"`        // the body of the notification when entering an error state
-	RecoverBody           string   `toml:"recover_body"`      // the body of the notification when recovering from an error state
-	UnknownExitCode       int      `toml:"unknown_exit_code"` // the exit code indicating that a measurement could not be taken
+	Name                  string   `toml:"name"`            // friendly name
+	Command               string   `toml:"command"`         // command
+	Args                  []string `toml:"args"`            // command arguments
+	FrequencySeconds      int      `toml:"frequency"`       // how often to run
+	RetryFrequencySeconds int      `toml:"retry_frequency"` // how quickly to retry when state unknown
+	TimeoutSeconds        int      `toml:"timeout"`         // how long an execution may run
+	Retries               int      `toml:"retries"`         // number of retries before changing the state
+	NotifierNames         []string `toml:"notifiers"`       // notifiers to trigger upon state change
+	Priority              int      `toml:"priority"`        // the priority of the notifications
+	ErrorBody             string   `toml:"error_body"`      // the body of the notification when entering an error state
+	RecoverBody           string   `toml:"recover_body"`    // the body of the notification when recovering from an error state
 
 	// public, but unconfigurable
 	LastRun        time.Time
@@ -151,7 +150,9 @@ func (t *Task) Run() bool {
 	}).Debug(fmt.Sprintf("command returned stderr: %s", errorMessage))
 
 	switch exitCode {
-	case t.UnknownExitCode:
+	case 3: // unknown status
+		return false
+	case 124: // unknown status due to timeout
 		return false
 	case 0:
 		t.LastOk = time.Now()
