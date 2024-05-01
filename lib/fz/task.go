@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"hash/fnv"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -96,9 +97,19 @@ func (t *Task) Run() bool {
 		fmt.Sprintf("TIMEOUT=%d", t.TimeoutSeconds),
 	}
 
-	err := cmd.Run()
+	stderr, _ := cmd.StderrPipe()
+
+	err := cmd.Start()
+	if err != nil {
+		panic(err)
+	}
+
 	t.LastRun = time.Now()
 	t.ExecutionCount++
+
+	errorMessage, _ := io.ReadAll(stderr)
+
+	err = cmd.Wait()
 
 	if ctx.Err() == context.DeadlineExceeded {
 		log.WithFields(log.Fields{
@@ -136,16 +147,11 @@ func (t *Task) Run() bool {
 		"file":      "lib/fz/task.go",
 		"task_name": t.Name,
 		"task_hash": t.Hash(),
-	}).Debug(fmt.Sprintf("command exited with %d", exitCode))
+		"exit_code": exitCode,
+	}).Debug(fmt.Sprintf("command returned stderr: %s", errorMessage))
 
 	switch exitCode {
 	case t.UnknownExitCode:
-		log.WithFields(log.Fields{
-			"file":      "lib/fz/task.go",
-			"task_name": t.Name,
-			"task_hash": t.Hash(),
-		}).Info(fmt.Sprintf("command exited with 'unknown_exit_code' (%d). The result will be disregarded.", exitCode))
-
 		return false
 	case 0:
 		t.LastOk = time.Now()
