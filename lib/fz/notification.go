@@ -68,7 +68,16 @@ func ProcessNotifications() {
 				io.WriteString(stdin, n.body())
 				stdin.Close()
 
-				err = cmd.Run()
+				stderr, _ := cmd.StderrPipe()
+
+				err = cmd.Start()
+				if err != nil {
+					panic(err)
+				}
+
+				errorMessage, _ := io.ReadAll(stderr)
+
+				err = cmd.Wait()
 
 				if ctx.Err() == context.DeadlineExceeded {
 					log.WithFields(log.Fields{
@@ -76,10 +85,14 @@ func ProcessNotifications() {
 						"notifier_name": n.Notifier.Name,
 					}).Error(fmt.Sprintf("time out exceeded while executing notifier"))
 				} else if err != nil {
+					exiterr, _ := err.(*exec.ExitError)
+					exitCode := exiterr.ExitCode()
+
 					log.WithFields(log.Fields{
 						"file":          "lib/fz/notification.go",
 						"notifier_name": n.Notifier.Name,
-					}).Error(err)
+						"exit_code":     exitCode,
+					}).Error(fmt.Sprintf("command returned stderr: %s", errorMessage))
 				}
 			}
 		}
