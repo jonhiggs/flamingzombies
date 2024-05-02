@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"time"
 )
 
 type Notification struct {
@@ -26,6 +27,8 @@ func ProcessNotifications() {
 				}
 
 				Logger.Info("sending notification", "notifier", n.Notifier.Name)
+				notifierIndex, _ := n.Task.NotifierIndex(n.Notifier.Name)
+				n.Task.LastNotifications[notifierIndex] = time.Now()
 
 				ctx, cancel := context.WithTimeout(context.Background(), n.Notifier.timeout())
 				defer cancel()
