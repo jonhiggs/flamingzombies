@@ -78,6 +78,8 @@ func main() {
 		list()
 	case "show":
 		show()
+	case "help":
+		usage()
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", cmd)
 		os.Exit(1)
@@ -190,11 +192,11 @@ func usage() {
 	fmt.Println("  fzctl [OPTIONS] <command> [subcommand]")
 	fmt.Println("")
 	fmt.Println("Options:")
-	fmt.Println("  -h, --help                  This help")
 	fmt.Println("  -H, --host <ip:port>        Host to connect to")
 	fmt.Println("  -V, --version               Version")
 	fmt.Println("")
 	fmt.Println("Commands:")
+	fmt.Println("  help                        This help")
 	fmt.Println("  list [ok] [fail] [unknown]  List the running tasks")
 	fmt.Println("  show <task>                 Show the details of a task")
 	os.Exit(0)
