@@ -31,5 +31,3 @@ plugins.tar.gz:
 .PHONY: clean
 clean:
 	rm -f $(BINS)
-
-.FORCE:
