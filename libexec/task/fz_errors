@@ -1,0 +1,26 @@
+#!/bin/sh
+if [ $# -eq 2 ]; then
+  export FZ_LISTEN="$1:$2"
+fi
+
+_fz_online() { fzctl || exit 3; }
+_fz_tasks() { fzctl list | awk '{ print $1 }'; }
+
+# the state is unknown if fzctl cannot be called.
+_fz_online
+
+# shellcheck disable=SC2046
+fzctl show $(_fz_tasks) | awk '
+    BEGIN { errors=0 }
+    /^name:/ { name=$2 }
+    /^errors:/ {
+      if ($2>0) {
+        print name, "has experienced errors"
+        errors++
+      }
+    }
+    END {
+      if (errors>0)
+        exit 1
+    }
+  ' >&2
