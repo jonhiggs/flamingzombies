@@ -27,8 +27,7 @@ func ProcessNotifications() {
 				}
 
 				Logger.Info("sending notification", "notifier", n.Notifier.Name)
-				notifierIndex, _ := n.Task.NotifierIndex(n.Notifier.Name)
-				n.Task.LastNotifications[notifierIndex] = time.Now()
+				n.Task.SetLastNotification(n.Notifier.Name, time.Now())
 
 				ctx, cancel := context.WithTimeout(context.Background(), n.Notifier.timeout())
 				defer cancel()
@@ -77,12 +76,16 @@ func ProcessNotifications() {
 
 // check the state of all configured gates.
 func (n Notification) gateState() bool {
-C:
-	for gsi, gs := range n.Notifier.gates() {
+X:
+	for gsi, gs := range n.Notifier.Gates() {
 		for _, g := range gs {
-			if !g.IsOpen(n.Task) {
+			if g == nil {
+				panic("cannot operate on a nil gate")
+			}
+
+			if g.IsOpen(n.Task) == false {
 				Logger.Debug("gate is closed", "gate", g.Name)
-				break C
+				break X
 			}
 		}
 		Logger.Debug("gateset is open", "gateset", gsi)

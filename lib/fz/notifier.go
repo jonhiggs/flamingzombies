@@ -13,26 +13,32 @@ type Notifier struct {
 	Args           []string
 	GateSets       [][]string `toml:"gates"`
 	TimeoutSeconds int        `toml:"timeout"`
+
+	gates [][]*Gate
 }
 
 func (n Notifier) timeout() time.Duration {
 	return time.Duration(n.TimeoutSeconds) * time.Second
 }
 
-func (n Notifier) gates() [][]*Gate {
-	gateSets := make([][]*Gate, len(n.GateSets))
-	for i := 0; i < len(n.GateSets); i++ {
-		gateSets[i] = make([]*Gate, 30)
+func (n Notifier) Gates() [][]*Gate {
+	if len(n.gates) < 0 {
+		return n.gates
+	}
+
+	n.gates = make([][]*Gate, len(n.GateSets))
+	for i, gs := range n.GateSets {
+		n.gates[i] = make([]*Gate, len(gs))
 	}
 
 	for gsi, gs := range n.GateSets {
 		for gi, gn := range gs {
 			g, _ := GateByName(gn)
-			gateSets[gsi][gi] = g
+			n.gates[gsi][gi] = g
 		}
 	}
 
-	return gateSets
+	return n.gates
 }
 
 func (n Notifier) validate() error {
@@ -62,12 +68,12 @@ func (n Notifier) validate() error {
 	return nil
 }
 
-func NotifierByName(name string) (*Notifier, error) {
+func NotifierByName(name string) *Notifier {
 	for i, n := range config.Notifiers {
 		if n.Name == name {
-			return &config.Notifiers[i], nil
+			return &config.Notifiers[i]
 		}
 	}
 
-	return nil, fmt.Errorf("notifier '%s' is not known", name)
+	return nil
 }

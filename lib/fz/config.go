@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"time"
 
 	"github.com/pelletier/go-toml"
 )
@@ -65,9 +64,6 @@ func ReadConfig() Config {
 	}
 
 	for i, t := range config.Tasks {
-		// make room for as many timestames as there are notifiers
-		config.Tasks[i].LastNotifications = make([]time.Time, len(t.NotifierNames))
-
 		if t.Retries == 0 {
 			if config.Defaults.Retries == 0 {
 				config.Tasks[i].Retries = DEFAULT_RETRIES
