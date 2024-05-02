@@ -202,6 +202,8 @@ Ensure that the md_device has the expected number of underlying block devices.
 Ping the host with a number of packets. The task succeeds if all the expected packets are received.
 .It Cm task/port_open Ar host Ar port
 Check if host has an open port.
+.It Cm task/fz_errors Ar host Ar port
+Check that none of fz's tasks have experienced an error.
 .It Cm notifier/email
 Send notification using the local MTA.
 .It Cm notifier/ntfy Ar topic
