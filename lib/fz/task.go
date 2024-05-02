@@ -28,6 +28,7 @@ type Task struct {
 	// public, but unconfigurable
 	LastRun        time.Time
 	LastOk         time.Time
+	LastFail       time.Time
 	History        uint32 // represented in binary. Successes are high
 	HistoryMask    uint32 // the bits in the history with a recorded value. Needed to understand a history of 0
 	ExecutionCount int    // task was executed
@@ -134,7 +135,6 @@ func (t *Task) Run() bool {
 	case 124: // unknown status due to timeout
 		return false
 	case 0:
-		t.LastOk = time.Now()
 		t.OKCount++
 		t.RecordStatus(true)
 	default:
@@ -166,6 +166,13 @@ func (t *Task) RecordStatus(b bool) {
 
 	t.HistoryMask = t.HistoryMask << 1
 	t.HistoryMask += 1
+
+	switch t.State() {
+	case STATE_OK:
+		t.LastOk = time.Now()
+	case STATE_FAIL:
+		t.LastFail = time.Now()
+	}
 }
 
 // extract the current state from the history
