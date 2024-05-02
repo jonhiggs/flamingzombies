@@ -30,4 +30,4 @@ plugins.tar.gz:
 
 .PHONY: clean
 clean:
-	rm -f $(BINS)
+	rm -f $(BINS) plugins.tar.gz
