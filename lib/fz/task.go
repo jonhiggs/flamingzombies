@@ -26,15 +26,16 @@ type Task struct {
 	RecoverBody           string   `toml:"recover_body"`    // the body of the notification when recovering from an error state
 
 	// public, but unconfigurable
-	LastRun        time.Time
-	LastOk         time.Time
-	LastFail       time.Time
-	History        uint32 // represented in binary. Successes are high
-	HistoryMask    uint32 // the bits in the history with a recorded value. Needed to understand a history of 0
-	ExecutionCount int    // task was executed
-	OKCount        int    // task passed
-	FailCount      int    // task failed
-	ErrorCount     int    // fask failed to executed
+	LastRun           time.Time
+	LastOk            time.Time
+	LastFail          time.Time
+	LastNotifications []time.Time
+	History           uint32 // represented in binary. Successes are high
+	HistoryMask       uint32 // the bits in the history with a recorded value. Needed to understand a history of 0
+	ExecutionCount    int    // task was executed
+	OKCount           int    // task passed
+	FailCount         int    // task failed
+	ErrorCount        int    // fask failed to executed
 
 	mutex sync.Mutex // lock to ensure one task runs at a time
 }
@@ -280,6 +281,15 @@ func (t Task) ExpandArgs() []string {
 	}
 
 	return newArgs
+}
+
+func (t Task) NotifierIndex(name string) (int, error) {
+	for i, n := range t.NotifierNames {
+		if n == name {
+			return i, nil
+		}
+	}
+	return -1, fmt.Errorf("unknown notifier name")
 }
 
 func (t Task) validate() error {
