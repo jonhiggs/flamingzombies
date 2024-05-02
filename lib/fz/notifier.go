@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type Notifier struct {
@@ -32,10 +30,7 @@ func (n Notifier) gates() []*Gate {
 		}
 
 		if !found {
-			log.WithFields(log.Fields{
-				"file":          "lib/fz/notifier.go",
-				"notifier_name": n.Name,
-			}).Fatal(fmt.Sprintf("unknown gate '%s'", gName))
+			panic(fmt.Sprintf("unknown gate '%s'", gName))
 		}
 	}
 

@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/pelletier/go-toml"
-	log "github.com/sirupsen/logrus"
 )
 
 const DEFAULT_RETRIES = 5
@@ -26,7 +25,6 @@ type Defaults struct {
 type Config struct {
 	Defaults      Defaults
 	LogLevel      string     `toml:"log_level"`
-	LogFile       string     `toml:"log_file"`
 	Notifiers     []Notifier `toml:"notifier"`
 	Tasks         []Task     `toml:"task"`
 	Gates         []Gate     `toml:"gate"`
@@ -57,10 +55,6 @@ func ReadConfig() Config {
 		fmt.Fprintf(os.Stderr, "Error parsing configuration file %s\n", os.Getenv("FZ_CONFIG_FILE"))
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
-	}
-
-	if config.LogFile == "" {
-		config.LogFile = os.Getenv("FZ_LOG_FILE")
 	}
 
 	if config.LogLevel == "" {
@@ -132,73 +126,43 @@ func ReadConfig() Config {
 
 		// validate the inputs
 		if config.Tasks[i].Retries > 32 {
-			log.WithFields(log.Fields{
-				"file":      "lib/fz/config.go",
-				"task_name": t.Name,
-				"task_hash": t.Hash(),
-			}).Fatal("cannot retry more than 32 times")
+			panic(fmt.Sprintf("task '%s' cannot retry more than 32 times", t.Name))
 		}
 
 		if config.Tasks[i].FrequencySeconds < 1 {
-			log.WithFields(log.Fields{
-				"file":      "lib/fz/config.go",
-				"task_name": t.Name,
-				"task_hash": t.Hash(),
-			}).Fatal("frequency_seconds must be greater than 1")
+			panic(fmt.Sprintf("task '%s' must have a frequency greater than 0", t.Name))
 		}
 
 		if config.Tasks[i].TimeoutSeconds > config.Tasks[i].FrequencySeconds {
-			log.WithFields(log.Fields{
-				"file":      "lib/fz/config.go",
-				"task_name": t.Name,
-				"task_hash": t.Hash(),
-			}).Fatal(fmt.Sprintf("frequency_seconds (%d) must be shorter than the timeout_seconds (%d)", config.Tasks[i].FrequencySeconds, config.Tasks[i].TimeoutSeconds))
+			panic(fmt.Sprintf("task '%s' must have its timeout shorter than its frequency", t.Name))
 		}
 
 		if config.Tasks[i].TimeoutSeconds > config.Tasks[i].RetryFrequencySeconds {
-			log.WithFields(log.Fields{
-				"file":      "lib/fz/config.go",
-				"task_name": t.Name,
-				"task_hash": t.Hash(),
-			}).Fatal(fmt.Sprintf("retry_frequency_seconds (%d) must be shorter than the timeout_seconds (%d)", config.Tasks[i].RetryFrequencySeconds, config.Tasks[i].TimeoutSeconds))
+			panic(fmt.Sprintf("task '%s' must have its timeout shorter than its retry_frequency", t.Name))
 		}
 
 		if config.Tasks[i].Priority < 0 || config.Tasks[i].Priority > 100 {
-			log.WithFields(log.Fields{
-				"file":      "lib/fz/config.go",
-				"task_name": t.Name,
-				"task_hash": t.Hash(),
-			}).Fatal("priority must be between 1 and 100")
+			panic(fmt.Sprintf("task '%s' must a priority between 1 and 100", t.Name))
 		}
 
 		// hit the notifiers() method to check that all specified notifiers exist
 		config.Tasks[i].notifiers()
 
 		if err = t.validate(); err != nil {
-			log.WithFields(log.Fields{
-				"file":      "lib/fz/config.go",
-				"task_name": t.Name,
-				"task_hash": t.Hash(),
-			}).Fatal(err)
+			panic(fmt.Sprintf("task '%s': %s", t.Name, err))
 		}
 	}
 
 	for _, n := range config.Notifiers {
 		if err = n.validate(); err != nil {
-			log.WithFields(log.Fields{
-				"file":          "lib/fz/config.go",
-				"notifier_name": n.Name,
-			}).Fatal(err)
+			panic(fmt.Sprintf("notifier '%s': %s", n.Name, err))
 		}
 
 	}
 
 	for _, g := range config.Gates {
 		if err = g.validate(); err != nil {
-			log.WithFields(log.Fields{
-				"file":      "lib/fz/config.go",
-				"gate_name": g.Name,
-			}).Fatal(err)
+			panic(fmt.Sprintf("gate '%s': %s", g.Name, err))
 		}
 	}
 

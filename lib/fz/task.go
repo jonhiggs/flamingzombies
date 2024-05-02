@@ -10,8 +10,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type Task struct {
@@ -81,11 +79,7 @@ func (t *Task) Run() bool {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
-	log.WithFields(log.Fields{
-		"file":      "lib/fz/task.go",
-		"task_name": t.Name,
-		"task_hash": t.Hash(),
-	}).Info("executing task")
+	Logger.Info("executing task", "task", t.Name)
 
 	ctx, cancel := context.WithTimeout(context.Background(), t.timeout())
 	defer cancel()
@@ -111,24 +105,14 @@ func (t *Task) Run() bool {
 	err = cmd.Wait()
 
 	if ctx.Err() == context.DeadlineExceeded {
-		log.WithFields(log.Fields{
-			"file":      "lib/fz/task.go",
-			"task_name": t.Name,
-			"task_hash": t.Hash(),
-		}).Error(fmt.Sprintf("time out exceeded while executing command"))
-
+		Logger.Error("time out exceeded while executing command", "task", t.Name)
 		t.ErrorCount++
 		return false
 	}
 
 	if err != nil {
 		if os.IsPermission(err) {
-			log.WithFields(log.Fields{
-				"file":      "lib/fz/task.go",
-				"task_name": t.Name,
-				"task_hash": t.Hash(),
-			}).Error(err)
-
+			Logger.Error(fmt.Sprint(err), "task", t.Name)
 			t.ErrorCount++
 			return false
 		}
@@ -142,12 +126,7 @@ func (t *Task) Run() bool {
 		exitCode = 0
 	}
 
-	log.WithFields(log.Fields{
-		"file":      "lib/fz/task.go",
-		"task_name": t.Name,
-		"task_hash": t.Hash(),
-		"exit_code": exitCode,
-	}).Debug(fmt.Sprintf("command returned stderr: %s", errorMessage))
+	Logger.Debug(fmt.Sprintf("command returned stderr: %s", errorMessage), "task", t.Name)
 
 	switch exitCode {
 	case 3: // unknown status
@@ -168,11 +147,7 @@ func (t *Task) Run() bool {
 		for _, name := range t.NotifierNames {
 			for i, n := range config.Notifiers {
 				if n.Name == name {
-					log.WithFields(log.Fields{
-						"file":      "lib/fz/task.go",
-						"task_name": t.Name,
-						"task_hash": t.Hash(),
-					}).Debug(fmt.Sprintf("raising notification. is %s, was %s", t.State(), t.LastState()))
+					Logger.Debug("raising notification", "task", t.Name, "last_state", t.LastState, "new_state", t.State())
 					NotifyCh <- Notification{&config.Notifiers[i], t}
 				}
 			}
@@ -182,11 +157,7 @@ func (t *Task) Run() bool {
 }
 
 func (t *Task) RecordStatus(b bool) {
-	log.WithFields(log.Fields{
-		"file":      "lib/fz/task.go",
-		"task_name": t.Name,
-		"task_hash": t.Hash(),
-	}).Trace(fmt.Sprintf("recording status %v", b))
+	Logger.Debug(fmt.Sprintf("recording measurement %v", b), "task", t.Name)
 
 	t.History = t.History << 1
 	if b {
@@ -195,13 +166,6 @@ func (t *Task) RecordStatus(b bool) {
 
 	t.HistoryMask = t.HistoryMask << 1
 	t.HistoryMask += 1
-
-	log.WithFields(log.Fields{
-		"file":      "lib/fz/task.go",
-		"task_name": t.Name,
-		"task_hash": t.Hash(),
-	}).Trace(fmt.Sprintf("history is %b", t.History))
-
 }
 
 // extract the current state from the history
@@ -298,11 +262,7 @@ func (t Task) notifiers() []*Notifier {
 		}
 
 		if !found {
-			log.WithFields(log.Fields{
-				"file":      "lib/fz/task.go",
-				"task_name": t.Name,
-				"task_hash": t.Hash(),
-			}).Fatal(fmt.Sprintf("unknown notifier '%s'", nName))
+			panic(fmt.Sprintf("unknown notifier '%s'", nName))
 		}
 	}
 

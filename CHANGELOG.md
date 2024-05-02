@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.0.20
+
+- Many improvements to the docs and the interface.
+- Removed dependency on logrus so that it can cross-compile for OpenBSD 7.5.
+
 ## v0.0.19
 
 - Add fzctl to check the daemon state
