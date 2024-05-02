@@ -20,11 +20,9 @@ func ProcessNotifications() {
 		C:
 			select {
 			case n := <-NotifyCh:
-				for _, g := range n.Notifier.gates() {
-					if g.IsOpen(n.Task) == false {
-						Logger.Debug("gate is closed", "gate", g.Name)
-						break C
-					}
+				if n.gateState() == false {
+					Logger.Debug("notification canceled due to closed gate", "notifier", n.Notifier.Name)
+					break C
 				}
 
 				Logger.Info("sending notification", "notifier", n.Notifier.Name)
@@ -72,6 +70,23 @@ func ProcessNotifications() {
 			}
 		}
 	}()
+}
+
+// check the state of all configured gates.
+func (n Notification) gateState() bool {
+C:
+	for gsi, gs := range n.Notifier.gates() {
+		for _, g := range gs {
+			if !g.IsOpen(n.Task) {
+				Logger.Debug("gate is closed", "gate", g.Name)
+				break C
+			}
+		}
+		Logger.Debug("gateset is open", "gateset", gsi)
+		return true
+	}
+
+	return false
 }
 
 func (n Notification) subject() string {

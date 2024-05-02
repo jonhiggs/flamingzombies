@@ -157,7 +157,6 @@ func ReadConfig() Config {
 		if err = n.validate(); err != nil {
 			panic(fmt.Sprintf("notifier '%s': %s", n.Name, err))
 		}
-
 	}
 
 	for _, g := range config.Gates {

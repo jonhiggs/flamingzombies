@@ -10,31 +10,28 @@ type Notifier struct {
 	Name           string
 	Command        string
 	Args           []string
-	GateNames      []string `toml:"gates"`
-	TimeoutSeconds int      `toml:"timeout"`
+	GateSets       [][]string `toml:"gates"`
+	TimeoutSeconds int        `toml:"timeout"`
 }
 
 func (n Notifier) timeout() time.Duration {
 	return time.Duration(n.TimeoutSeconds) * time.Second
 }
 
-func (n Notifier) gates() []*Gate {
-	var gs []*Gate
-	for _, gName := range n.GateNames {
-		found := false
-		for i, _ := range config.Gates {
-			if gName == config.Gates[i].Name {
-				gs = append(gs, &config.Gates[i])
-				found = true
-			}
-		}
+func (n Notifier) gates() [][]*Gate {
+	gateSets := make([][]*Gate, len(n.GateSets))
+	for i := 0; i < len(n.GateSets); i++ {
+		gateSets[i] = make([]*Gate, 30)
+	}
 
-		if !found {
-			panic(fmt.Sprintf("unknown gate '%s'", gName))
+	for gsi, gs := range n.GateSets {
+		for gi, gn := range gs {
+			g, _ := GateByName(gn)
+			gateSets[gsi][gi] = g
 		}
 	}
 
-	return gs
+	return gateSets
 }
 
 func (n Notifier) validate() error {
@@ -43,6 +40,8 @@ func (n Notifier) validate() error {
 			return fmt.Errorf("notifier command not found")
 		}
 	}
+
+	// TODO: make sure that no GateSet has more than 30 elements.
 
 	return nil
 }

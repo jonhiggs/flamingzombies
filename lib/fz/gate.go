@@ -2,6 +2,7 @@ package fz
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -46,6 +47,16 @@ func (g Gate) IsOpen(t *Task) bool {
 		return false
 	}
 	return true
+}
+
+func GateByName(n string) (*Gate, error) {
+	for i, g := range config.Gates {
+		if g.Name == n {
+			return &config.Gates[i], nil
+		}
+	}
+
+	return nil, errors.New("named gate was not be found")
 }
 
 func (g Gate) validate() error {
