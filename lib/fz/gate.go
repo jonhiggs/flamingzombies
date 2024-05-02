@@ -23,13 +23,15 @@ func (g Gate) IsOpen(t *Task) bool {
 	cmd.Dir = config.Directory
 	cmd.Env = []string{
 		fmt.Sprintf("FREQUENCY=%d", t.FrequencySeconds),
-		fmt.Sprintf("TASK_COMMAND=%s", t.Command),
+		fmt.Sprintf("HISTORY=%d", t.History),
+		fmt.Sprintf("HISTORY_MASK=%d", t.HistoryMask),
+		fmt.Sprintf("LAST_FAIL=%d", t.LastFail.Unix()),
+		fmt.Sprintf("LAST_OK=%d", t.LastOk.Unix()),
 		fmt.Sprintf("LAST_STATE=%s", t.LastState()),
 		fmt.Sprintf("PRIORITY=%d", t.Priority),
 		fmt.Sprintf("STATE=%s", t.State()),
 		fmt.Sprintf("STATE_CHANGED=%v", t.StateChanged()),
-		fmt.Sprintf("HISTORY=%d", t.History),
-		fmt.Sprintf("HISTORY_MASK=%d", t.HistoryMask),
+		fmt.Sprintf("TASK_COMMAND=%s", t.Command),
 	}
 
 	err := cmd.Run()
