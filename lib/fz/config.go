@@ -37,24 +37,18 @@ var config Config
 func ReadConfig() Config {
 	file, err := os.Open(os.Getenv("FZ_CONFIG_FILE"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error opening configuration file %s\n", os.Getenv("FZ_CONFIG_FILE"))
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		Fatal(fmt.Sprintf("Error opening the configuration file %s\n", os.Getenv("FZ_CONFIG_FILE")), fmt.Sprint(err))
 	}
 	defer file.Close()
 
 	b, err := io.ReadAll(file)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error reading configuration file %s\n", os.Getenv("FZ_CONFIG_FILE"))
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		Fatal(fmt.Sprintf("Error reading the configuration file %s\n", os.Getenv("FZ_CONFIG_FILE")), fmt.Sprint(err))
 	}
 
 	err = toml.Unmarshal(b, &config)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error parsing configuration file %s\n", os.Getenv("FZ_CONFIG_FILE"))
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		Fatal(fmt.Sprintf("Error parsing the configuration file %s\n", os.Getenv("FZ_CONFIG_FILE")), fmt.Sprint(err))
 	}
 
 	if config.LogLevel == "" {
@@ -124,44 +118,23 @@ func ReadConfig() Config {
 		// start the history in an unknown state
 		config.Tasks[i].History = 0b10
 
-		// validate the inputs
-		if config.Tasks[i].Retries > 32 {
-			panic(fmt.Sprintf("task '%s' cannot retry more than 32 times", t.Name))
-		}
-
-		if config.Tasks[i].FrequencySeconds < 1 {
-			panic(fmt.Sprintf("task '%s' must have a frequency greater than 0", t.Name))
-		}
-
-		if config.Tasks[i].TimeoutSeconds > config.Tasks[i].FrequencySeconds {
-			panic(fmt.Sprintf("task '%s' must have its timeout shorter than its frequency", t.Name))
-		}
-
-		if config.Tasks[i].TimeoutSeconds > config.Tasks[i].RetryFrequencySeconds {
-			panic(fmt.Sprintf("task '%s' must have its timeout shorter than its retry_frequency", t.Name))
-		}
-
-		if config.Tasks[i].Priority < 0 || config.Tasks[i].Priority > 100 {
-			panic(fmt.Sprintf("task '%s' must a priority between 1 and 100", t.Name))
-		}
-
 		// hit the notifiers() method to check that all specified notifiers exist
 		config.Tasks[i].notifiers()
 
-		if err = t.validate(); err != nil {
-			panic(fmt.Sprintf("task '%s': %s", t.Name, err))
+		if err = config.Tasks[i].validate(); err != nil {
+			Fatal(fmt.Sprintf("task '%s': %s", t.Name, err))
 		}
 	}
 
 	for _, n := range config.Notifiers {
 		if err = n.validate(); err != nil {
-			panic(fmt.Sprintf("notifier '%s': %s", n.Name, err))
+			Fatal(fmt.Sprintf("notifier '%s': %s", n.Name, err))
 		}
 	}
 
 	for _, g := range config.Gates {
 		if err = g.validate(); err != nil {
-			panic(fmt.Sprintf("gate '%s': %s", g.Name, err))
+			Fatal(fmt.Sprintf("gate '%s': %s", g.Name, err))
 		}
 	}
 
