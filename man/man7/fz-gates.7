@@ -3,9 +3,9 @@
 .Os
 .Sh NAME
 .Nm fz-gates
-.Nd A development guide to create your own fz gates.
+.Nd A development guide for making your own fz gates.
 .Sh DESCRIPTION
-Gates govern when a notifier is executed. They provide a high degree of control over exactly the conditions in which an alert may be raised. They base their decisions from the task's metadata received in the environment.
+Gates govern when notifiers execute. They provide a high degree of control over exactly the conditions in which an alert may be raised. They base their decisions from the task's metadata received in the environment.
 .Sh ENVIRONMENT
 Gates are executed with metadata of the triggering task available in its environment.
 .Bl -tag -width STATE_CHANGED
@@ -20,6 +20,12 @@ of the task.
 .It Cm LAST_STATE
 The last stable state. Not to be confused with STATE.
 .Op ok, fail
+.It Cm LAST_OK
+The epoch when the task was last in an ok state.
+.It Cm LAST_FAIL
+The epoch when the task was last in a fail state.
+.It Cm LAST_NOTIFICATION
+The epoch of the last notification sent through this notifier. Tasks hold the last notification time for each notifier, but only the last notification time for this notifier is available in a gate.
 .It Cm PRIORITY
 The
 .Ar priority
@@ -35,15 +41,15 @@ A uint32 representing the last 32 executions results of the task. Read using bit
 .It Cm HISTORY_MASK
 A uint32 representing how much of the history contains values. This needed to tell how many of the leading zeros in HISTORY are significant. Read using bitwise operators; high represents a measurement and low does not.
 .Sh EXIT CODES
-The following exit codes are supported:
+The following exit codes are recognised:
 .Pp
 .Bl -tag -width XX
 .It Cm 0
-The gate is open and the notifier may execute.
+The gate is open, permitting the notifier to execute.
 .El
 .Pp
-Any other exit code states that the gate is closed and the notifier may not execute.
+Any other exit code closes the gate preventing the notifier from executing.
 .Sh CONSIDERATIONS
-Gates should be stateless, rarely will they depend on more than the provided metadata. They have a fixed timeout of one second. If the timeout is exceeded, the gate is read as closed and the notifier will not be executed. Gate timeouts are logged as errors and must be prevented otherwise alerts will be dropped.
+Gates should be stateless. Rarely, will they depend on more than the provided metadata. They have a fixed timeout of one second which if exceeded, results in the gate being closed. Gate timeouts are logged as errors and must be prevented otherwise alerts will be dropped.
 .Pp
 Gates are not retried, and cannot return an unknown state.
