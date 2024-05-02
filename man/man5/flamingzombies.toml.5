@@ -143,14 +143,16 @@ The path of the notifier command to execute. This can be a fully qualified path,
 The command arguments to send to the
 .Ar command
 .It Ic gates = Op [gates...]...
-A list, of a lists of gates. The results of the innermost gates are ANDed together, and those results are ORed.
+A list of gatesets, where each gateset contains a list of gates. Each gateset is evaluated by ANDing the results of its gates together. If any gate in the set is closed, then the gateset is closed. Then the gatesets are ORed together. The notifier will execute if any gateset is open.
+.Pp
+You may have unlimited gatesets, but each must contain no more than 30 gates.
 .Pp
 So for the values:
 .Bd -literal -offset indent
 [open_gate, closed_gate], [closed_gate, closed_gate]
 .Ed
 .Pp
-The result would evaluate to false, because neither list has a complete set of true values. The notifier command will not get executed.
+The result would evaluate to false, because neither gateset has a complete set of true values. The notifier command won't be executed.
 .It Ic timeout = Ar seconds
 The number of seconds that a notifier can run before it times out. There is no retry logic for failed or timed out notifiers. These programs should be highly reliable, and manage their own retries. A notifier returning a non-zero exit code is a serious error that will be logged.
 .Sh GATES
