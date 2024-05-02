@@ -4,6 +4,7 @@
 
 - Many improvements to the docs and the interface.
 - Removed dependency on logrus so that it can cross-compile for OpenBSD 7.5.
+- Support gatesets to combine ANDing or ORing the results of gates.
 
 ## v0.0.19
 
