@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/pelletier/go-toml"
 )
@@ -12,6 +13,8 @@ const DEFAULT_RETRIES = 5
 const DEFAULT_TIMEOUT_SECONDS = 5
 const DEFAULT_FREQUENCY_SECONDS = 300
 const DEFAULT_PRIORITY = 5
+
+var DAEMON_START_TIME = time.Now()
 
 type Defaults struct {
 	FrequencySeconds      int      `toml:"frequency"`
