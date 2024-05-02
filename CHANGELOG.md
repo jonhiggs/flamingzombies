@@ -7,6 +7,7 @@
 - Support gatesets to combine ANDing or ORing the results of gates.
 - Improvements to the configtest
 - Add `task/fz_errors` plugin
+- Add `LAST_OK`, `LAST_FAIL` and `LAST_NOTIFICATION` to the environment of the gates.
 
 ## v0.0.19
 
