@@ -6,6 +6,7 @@
 - Removed dependency on logrus so that it can cross-compile for OpenBSD 7.5.
 - Support gatesets to combine ANDing or ORing the results of gates.
 - Improvements to the configtest
+- Add `task/fz_errors` plugin
 
 ## v0.0.19
 
