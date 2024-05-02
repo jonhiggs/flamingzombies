@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -53,6 +54,10 @@ func (g Gate) validate() error {
 		if _, err := os.Stat(fmt.Sprintf("%s/%s", config.Directory, g.Command)); os.IsNotExist(err) {
 			return fmt.Errorf("gate command not found")
 		}
+	}
+
+	if strings.ContainsRune(g.Name, ' ') {
+		return fmt.Errorf("name cannot contain spaces")
 	}
 
 	return nil

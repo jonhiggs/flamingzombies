@@ -3,6 +3,7 @@ package fz
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -41,9 +42,20 @@ func (n Notifier) validate() error {
 		}
 	}
 
+	if strings.ContainsRune(n.Name, ' ') {
+		return fmt.Errorf("name cannot contain spaces")
+	}
+
 	for i, gates := range n.GateSets {
 		if len(gates) > 3 {
-			return fmt.Errorf("gateset '%d' cannot have more than 30 elements", i)
+			return fmt.Errorf("gateset %d: cannot have more than 30 elements", i)
+		}
+
+		for _, g := range gates {
+			_, err := GateByName(g)
+			if err != nil {
+				return fmt.Errorf("gateset %d: %s", i, err)
+			}
 		}
 	}
 

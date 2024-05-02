@@ -282,7 +282,10 @@ func (t Task) validate() error {
 		}
 	}
 
-	// validate the inputs
+	if strings.ContainsRune(t.Name, ' ') {
+		return fmt.Errorf("name cannot contain spaces")
+	}
+
 	if t.Retries > 32 {
 		return fmt.Errorf("cannot retry more than 32 times")
 	}
