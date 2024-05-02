@@ -15,7 +15,7 @@ type Gate struct {
 	Args    []string `toml:"args"`    // command arguments
 }
 
-func (g Gate) IsOpen(t *Task) bool {
+func (g Gate) IsOpen(t *Task, n *Notifier) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, g.Command, g.Args...)
@@ -26,6 +26,7 @@ func (g Gate) IsOpen(t *Task) bool {
 		fmt.Sprintf("HISTORY=%d", t.History),
 		fmt.Sprintf("HISTORY_MASK=%d", t.HistoryMask),
 		fmt.Sprintf("LAST_FAIL=%d", t.LastFail.Unix()),
+		fmt.Sprintf("LAST_NOTIFICATION=%d", t.GetLastNotification(n.Name).Unix()),
 		fmt.Sprintf("LAST_OK=%d", t.LastOk.Unix()),
 		fmt.Sprintf("LAST_STATE=%s", t.LastState()),
 		fmt.Sprintf("PRIORITY=%d", t.Priority),

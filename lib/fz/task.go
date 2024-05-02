@@ -298,10 +298,14 @@ func (t Task) GetLastNotification(name string) time.Time {
 		panic(err)
 	}
 
+	if len(t.lastNotifications) != len(t.NotifierNames) {
+		return DAEMON_START_TIME
+	}
+
 	return t.lastNotifications[i]
 }
 
-func (t Task) SetLastNotification(name string, ts time.Time) error {
+func (t *Task) SetLastNotification(name string, ts time.Time) error {
 	if len(t.lastNotifications) != len(t.NotifierNames) {
 		t.lastNotifications = make([]time.Time, len(t.NotifierNames))
 	}

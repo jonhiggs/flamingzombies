@@ -241,3 +241,40 @@ func TestExpandArgs(t *testing.T) {
 		}
 	}
 }
+
+func TestLastNotification(t *testing.T) {
+	task := Task{
+		Name:          "blah",
+		NotifierNames: []string{"one", "two"},
+	}
+
+	// before it has been set
+	got := task.GetLastNotification("one")
+	want := DAEMON_START_TIME
+
+	if got != want {
+		t.Errorf("got %s, want %s", got, want)
+	}
+
+	if len(task.lastNotifications) != 0 {
+		t.Errorf("initial length: got %d, want 0", len(task.lastNotifications))
+	}
+
+	// setting
+	newTime := time.Now()
+	err := task.SetLastNotification("one", newTime)
+	if err != nil {
+		t.Errorf("received error: %s", err)
+	}
+
+	// after it has been set
+	got = task.GetLastNotification("one")
+	want = newTime
+
+	if got != want {
+		t.Errorf("got %s, want %s", got, want)
+	}
+	if len(task.lastNotifications) != 2 {
+		t.Errorf("after setting length: got %d, want 2", len(task.lastNotifications))
+	}
+}

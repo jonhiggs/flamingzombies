@@ -83,7 +83,7 @@ X:
 				panic("cannot operate on a nil gate")
 			}
 
-			if g.IsOpen(n.Task) == false {
+			if g.IsOpen(n.Task, n.Notifier) == false {
 				Logger.Debug("gate is closed", "gate", g.Name)
 				break X
 			}
