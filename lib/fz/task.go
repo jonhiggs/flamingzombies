@@ -25,19 +25,19 @@ type Task struct {
 	ErrorBody             string   `toml:"error_body"`      // the body of the notification when entering an error state
 	RecoverBody           string   `toml:"recover_body"`    // the body of the notification when recovering from an error state
 
-	// public, but unconfigurable
-	LastRun           time.Time
-	LastOk            time.Time
-	LastFail          time.Time
-	LastNotifications []time.Time
-	History           uint32 // represented in binary. Successes are high
-	HistoryMask       uint32 // the bits in the history with a recorded value. Needed to understand a history of 0
-	ExecutionCount    int    // task was executed
-	OKCount           int    // task passed
-	FailCount         int    // task failed
-	ErrorCount        int    // fask failed to executed
+	// public, but not configurable
+	LastRun        time.Time
+	LastOk         time.Time
+	LastFail       time.Time
+	History        uint32 // represented in binary. Successes are high
+	HistoryMask    uint32 // the bits in the history with a recorded value. Needed to understand a history of 0
+	ExecutionCount int    // task was executed
+	OKCount        int    // task passed
+	FailCount      int    // task failed
+	ErrorCount     int    // task failed to executed
 
-	mutex sync.Mutex // lock to ensure one task runs at a time
+	mutex             sync.Mutex  // lock to ensure one task runs at a time
+	lastNotifications []time.Time // times that each notifier was last executed
 }
 
 func (t Task) Hash() uint32 {
@@ -292,6 +292,30 @@ func (t Task) NotifierIndex(name string) (int, error) {
 	return -1, fmt.Errorf("unknown notifier name")
 }
 
+func (t Task) GetLastNotification(name string) time.Time {
+	i, err := t.NotifierIndex(name)
+	if err != nil {
+		panic(err)
+	}
+
+	return t.lastNotifications[i]
+}
+
+func (t Task) SetLastNotification(name string, ts time.Time) error {
+	if len(t.lastNotifications) != len(t.NotifierNames) {
+		t.lastNotifications = make([]time.Time, len(t.NotifierNames))
+	}
+
+	i, err := t.NotifierIndex(name)
+	if err != nil {
+		return err
+	}
+
+	t.lastNotifications[i] = ts
+
+	return nil
+}
+
 func (t Task) validate() error {
 	if _, err := os.Stat(t.Command); os.IsNotExist(err) {
 		if _, err := os.Stat(fmt.Sprintf("%s/%s", config.Directory, t.Command)); os.IsNotExist(err) {
@@ -324,9 +348,8 @@ func (t Task) validate() error {
 	}
 
 	for _, n := range t.NotifierNames {
-		_, err := NotifierByName(n)
-		if err != nil {
-			return err
+		if NotifierByName(n) == nil {
+			return fmt.Errorf("unknown notifier")
 		}
 	}
 
