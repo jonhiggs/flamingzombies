@@ -59,7 +59,7 @@ flappy has recovered
 name = "logger"
 command = "notifier/null"
 timeout = 5
-gates = ["state_change"]
+gates = [["state_change"]]
 
 [[gate]]
 name = "state_change"
