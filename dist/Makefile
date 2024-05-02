@@ -1,5 +1,6 @@
 SHELL = /bin/bash
 UID = $(shell id -u)
+GID = $(shell id -g)
 
 BINS = fz_linux_amd64 fzctl_linux_amd64 fz_openbsd_amd64 fzctl_openbsd_amd64
 
@@ -17,7 +18,7 @@ $(BINS):
 		golang:1.22-bookworm                              \
 		bash -c '                                         \
 			go build -o ./dist/$@ ./cmd/$(BIN)/$(BIN)*.go \
-				&& chown 1000:1000 ./dist/$@              \
+				&& chown $(UID):$(GID) ./dist/$@          \
 		'
 
 plugins.tar.gz:
