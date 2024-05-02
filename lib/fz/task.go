@@ -253,16 +253,10 @@ func (t Task) retryFrequency() time.Duration {
 func (t Task) notifiers() []*Notifier {
 	var not []*Notifier
 	for _, nName := range t.NotifierNames {
-		found := false
 		for i, _ := range config.Notifiers {
 			if nName == config.Notifiers[i].Name {
 				not = append(not, &config.Notifiers[i])
-				found = true
 			}
-		}
-
-		if !found {
-			panic(fmt.Sprintf("unknown notifier '%s'", nName))
 		}
 	}
 
@@ -285,6 +279,34 @@ func (t Task) validate() error {
 	if _, err := os.Stat(t.Command); os.IsNotExist(err) {
 		if _, err := os.Stat(fmt.Sprintf("%s/%s", config.Directory, t.Command)); os.IsNotExist(err) {
 			return fmt.Errorf("task command not found")
+		}
+	}
+
+	// validate the inputs
+	if t.Retries > 32 {
+		return fmt.Errorf("cannot retry more than 32 times")
+	}
+
+	if t.FrequencySeconds < 1 {
+		return fmt.Errorf("must have a frequency greater than 0")
+	}
+
+	if t.TimeoutSeconds > t.FrequencySeconds {
+		return fmt.Errorf("must have its timeout shorter than its frequency")
+	}
+
+	if t.TimeoutSeconds > t.RetryFrequencySeconds {
+		return fmt.Errorf("must have its timeout shorter than its retry_frequency")
+	}
+
+	if t.Priority <= 0 || t.Priority > 100 {
+		return fmt.Errorf("must have a priority between 1 and 100")
+	}
+
+	for _, n := range t.NotifierNames {
+		_, err := NotifierByName(n)
+		if err != nil {
+			return err
 		}
 	}
 

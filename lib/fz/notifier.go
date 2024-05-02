@@ -41,7 +41,21 @@ func (n Notifier) validate() error {
 		}
 	}
 
-	// TODO: make sure that no GateSet has more than 30 elements.
+	for i, gates := range n.GateSets {
+		if len(gates) > 3 {
+			return fmt.Errorf("gateset '%d' cannot have more than 30 elements", i)
+		}
+	}
 
 	return nil
+}
+
+func NotifierByName(name string) (*Notifier, error) {
+	for i, n := range config.Notifiers {
+		if n.Name == name {
+			return &config.Notifiers[i], nil
+		}
+	}
+
+	return nil, fmt.Errorf("notifier '%s' is not known", name)
 }

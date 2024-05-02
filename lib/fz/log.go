@@ -26,3 +26,10 @@ func StartLogger(l string) {
 		panic(fmt.Sprintf("Invalid log level: %s", l))
 	}
 }
+
+func Fatal(ss ...string) {
+	for _, s := range ss {
+		fmt.Fprintln(os.Stderr, s)
+	}
+	os.Exit(1)
+}
