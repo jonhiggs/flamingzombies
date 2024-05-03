@@ -1,7 +1,9 @@
 #!/bin/sh
-if [ $# -eq 1 ]; then
+if [ $# -ne 1 ]; then
   echo "you must provide at least one email recepient" >&2
   exit 1
 fi
+
+SUBJECT="${NAME}: state ${STATE}"
 
 timeout 0.2 cat | mail -s "${SUBJECT}" "$@"
