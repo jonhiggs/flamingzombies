@@ -145,13 +145,9 @@ func (t *Task) Run() bool {
 
 	// raising notifications
 	if t.State() != STATE_UNKNOWN {
-		for _, name := range t.NotifierNames {
-			for i, n := range config.Notifiers {
-				if n.Name == name {
-					Logger.Debug("raising notification", "task", t.Name, "last_state", t.LastState(), "new_state", t.State())
-					NotifyCh <- Notification{&config.Notifiers[i], t}
-				}
-			}
+		for _, n := range t.notifiers() {
+			Logger.Debug("raising notification", "task", t.Name, "last_state", t.LastState(), "new_state", t.State())
+			NotifyCh <- Notification{n, t}
 		}
 	}
 	return true
