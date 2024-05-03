@@ -222,6 +222,9 @@ The gate opens after the state flips from fail to ok until a notification is sen
 .It Cm fail
 The gate opens after the state flips from ok to fail until a notification is sent.
 .El
+.It Cm gate/defer Ar seconds
+Prevent a gate from opening until it been it its state for the specified time.
+.El
 .Sh EXAMPLES
 .Pp
 A minimal configuration:
