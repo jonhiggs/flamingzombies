@@ -87,6 +87,7 @@ X:
 				Logger.Debug("gate is closed", "gate", g.Name)
 				break X
 			}
+			Logger.Debug("gate is open", "gate", g.Name)
 		}
 		Logger.Debug("gateset is open", "gateset", gsi)
 		return true
