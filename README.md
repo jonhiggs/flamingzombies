@@ -34,7 +34,7 @@ And that is the basis of Flaming Zombies.
 The complete documentation is available in the [man pages](./man). You can read them in your shell before they're installed using using the command:
 
 ```
-curl https://raw.githubusercontent.com/jonhiggs/flamingzombies/master/man/man1/fz.1 | man /dev/stdin
+curl https://raw.githubusercontent.com/jonhiggs/flamingzombies/main/man/man1/fz.1 | man /dev/stdin
 ```
 
 ## Features
@@ -84,7 +84,7 @@ chown root:wheel /usr/local/bin/fzctl
 chmod 755 /usr/local/bin/fzctl
 
 ## rc script
-wget https://raw.githubusercontent.com/jonhiggs/flamingzombies/master/scripts/openbsd_rc \
+wget https://raw.githubusercontent.com/jonhiggs/flamingzombies/main/scripts/openbsd_rc \
     -O /etc/rc.d/flamingzombies
 
 chown root:wheel /etc/rc.d/flamingzombies
@@ -99,7 +99,7 @@ rm /tmp/plugins.tar.gz
 
 ## man pages
 for m in man1/fz.1 man1/fzctl.1 man5/flamingzombies.toml.5 man7/fz-gates.7 man7/fz-notifiers.7 man7/fz-tasks.7; do
-    wget https://raw.githubusercontent.com/jonhiggs/flamingzombies/master/man/$f \
+    wget https://raw.githubusercontent.com/jonhiggs/flamingzombies/main/man/$f \
         -O /usr/local/man/$f
 done
 
