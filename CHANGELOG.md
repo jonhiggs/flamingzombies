@@ -10,6 +10,7 @@
 - Add `LAST_OK`, `LAST_FAIL` and `LAST_NOTIFICATION` to the environment of the gates.
 - Support delayed notifications.
 - Support re-raising notifications.
+- Support detecting when a task is flapping.
 
 ## v0.0.19
 
