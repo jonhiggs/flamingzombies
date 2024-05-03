@@ -79,13 +79,9 @@ func (n Notification) gateState() bool {
 X:
 	for gsi, gs := range n.Notifier.Gates() {
 		for _, g := range gs {
-			if g == nil {
-				panic("cannot operate on a nil gate")
-			}
-
 			if g.IsOpen(n.Task, n.Notifier) == false {
 				Logger.Debug("gate is closed", "gate", g.Name)
-				break X
+				continue X
 			}
 			Logger.Debug("gate is open", "gate", g.Name)
 		}
