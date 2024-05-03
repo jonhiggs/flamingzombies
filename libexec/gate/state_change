@@ -1,2 +1,16 @@
 #!/bin/sh
-[ "${STATE_CHANGED}" = "true" ]
+
+case $1 in
+  "ok")
+    [ "${STATE}" = "ok" ]                           \
+      && [ "${LAST_NOTIFICATION}" -le "${LAST_FAIL}" ] \
+      && exit 0
+    ;;
+  "fail")
+    [ "${STATE}" = "fail" ]                           \
+      && [ "${LAST_NOTIFICATION}" -le "${LAST_OK}" ] \
+      && exit 0
+    ;;
+esac
+
+exit 1

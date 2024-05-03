@@ -212,8 +212,15 @@ Send notification using the ntfy web service.
 A phony notifier for testing purposes.
 .It Cm gate/min_priority Ar priority
 Open the gate if it's less than the minimum priority.
-.It Cm gate/state_change
-Open the gate if state has changed from ok to fail or fail to ok.
+.It Cm gate/state_change Ar state
+Open when state has changed, but a notification is yet to be executed.
+.Pp
+Valid options for state are:
+.Bl -tag -width "fail"
+.It Cm ok
+The gate opens after the state flips from fail to ok until a notification is sent.
+.It Cm fail
+The gate opens after the state flips from ok to fail until a notification is sent.
 .El
 .Sh EXAMPLES
 .Pp
@@ -234,20 +241,23 @@ name = "example_notifier"
 command = "notifier/null"
 args = []
 timeout = 5
-gates = [ "state_change" ]
+gates = [
+    ["state_failed"]
+]
 
 [[gate]]
-name = "state_change"
+name = "state_failed"
 command = "gate/state_change"
+args = "fail"
 .Ed
 .Pp
 This will ping 127.0.0.1 every 60 seconds. When the state changes, retries are performed at a rate of once every 5 seconds until 5 consecutive executions agree on the new state.
 .Pp
 At the end of each task execution, the
-.Ar state_change
+.Ar state_failed
 gate of
 .Ar example_notifier
-is executed. The behaviour of this gate is to be open when state either changes from ok to fail, or from fail to ok. When the gate is open, the
+is executed. The behaviour of this gate is to be open when state either changes from ok to fail. When the gate is open, the
 .Ar notifier/null
 notifier is executed.
 .Sh SEE ALSO
