@@ -20,7 +20,7 @@ case "${PRIORITY}" in
   *) NTFY_PRIORITY="default" ;;
 esac
 
-cat | curl -v -f -d @-            \
-  -H "Title: ${SUBJECT}"          \
-  -H "Priority: ${NTFY_PRIORITY}" \
+timeout 0.2 cat | curl -v -f -d @-  \
+  -H "Title: ${SUBJECT}"            \
+  -H "Priority: ${NTFY_PRIORITY}"   \
   "ntfy.sh/${TOPIC}"
