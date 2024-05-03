@@ -54,7 +54,11 @@ func ProcessNotifications() {
 
 				err = cmd.Start()
 				if err != nil {
-					panic(err)
+					if ctx.Err() == context.DeadlineExceeded {
+						Logger.Error(fmt.Sprintf("time out exceeded while executing notifier"), "notifier", n.Notifier.Name)
+					} else {
+						panic(err)
+					}
 				}
 
 				errorMessage, _ := io.ReadAll(stderr)
