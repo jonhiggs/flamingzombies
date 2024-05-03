@@ -226,7 +226,6 @@ The gate opens after the state flips from ok to fail until a notification is sen
 Prevent a gate from opening until it been it its state for the specified time.
 .El
 .Sh EXAMPLES
-.Pp
 A minimal configuration:
 .Bd -literal -offset indent
 [[task]]
@@ -251,7 +250,7 @@ gates = [
 [[gate]]
 name = "state_failed"
 command = "gate/state_change"
-args = "fail"
+args = ["fail"]
 .Ed
 .Pp
 This will ping 127.0.0.1 every 60 seconds. When the state changes, retries are performed at a rate of once every 5 seconds until 5 consecutive executions agree on the new state.
@@ -263,6 +262,34 @@ gate of
 is executed. The behaviour of this gate is to be open when state either changes from ok to fail. When the gate is open, the
 .Ar notifier/null
 notifier is executed.
+.Pp
+Deferring notifications:
+.Bd -literal -offset indent
+[[notifier]]
+name = "deferred_notifier"
+command = "notifier/null"
+args = []
+timeout = 5
+gates = [
+    ["state_failed", "defer_5m"]
+]
+
+[[gate]]
+name = "state_failed"
+command = "gate/state_change"
+args = ["fail"]
+
+[[gate]]
+name = "defer_5m"
+command = "gate/defer"
+args = ["300"]
+.Ed
+.Pp
+Tasks should be fast to detect issues, but it can sometimes be preferable to allow time for the task to recover before raising notifications. The 
+.Ar deferred_notifier
+in this example uses the
+.Ar task/defer
+plugin to allow five minutes grace time before raising a notification.
 .Sh SEE ALSO
 .Xr fz 1 ,
 .Xr fzctl 1
