@@ -224,6 +224,10 @@ The gate opens after the state flips from ok to fail until a notification is sen
 .El
 .It Cm gate/defer Ar seconds
 Prevent a gate from opening until it been it its state for the specified time.
+.It Cm gate/renotify Ar seconds
+Open the gate if it as been longer than
+.Ar seconds
+since a notification was raised.
 .El
 .Sh EXAMPLES
 A minimal configuration:

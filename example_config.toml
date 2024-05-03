@@ -59,15 +59,27 @@ flappy has recovered
 name = "logger"
 command = "notifier/null"
 timeout = 5
-gates = [["state_change", "defer"]]
+gates = [
+    ["to_failed", "defer"],
+    ["is_failed", "renotify"],
+]
 
 [[gate]]
-name = "state_change"
-command = "gate/state_change"
-timeout = 1
+name = "to_failed"
+command = "gate/to_state"
+args = ["fail"]
+
+[[gate]]
+name = "is_failed"
+command = "gate/is_state"
 args = ["fail"]
 
 [[gate]]
 name = "defer"
 command = "gate/defer"
 args = ["6"]
+
+[[gate]]
+name = "renotify"
+command = "gate/renotify"
+args = ["5"]

@@ -1,0 +1,12 @@
+#!/bin/sh
+
+NOW="$(date +%s)"
+DELAY_SECONDS=${1:-0}
+
+# exit 1 until the regular notification has been made
+case "${LAST_STATE}" in
+  "fail") [ "${LAST_OK}" -lt "${LAST_NOTIFICATION}" ]   && exit 1 ;;
+  "ok")   [ "${LAST_FAIL}" -lt "${LAST_NOTIFICATION}" ] && exit 1 ;;
+esac
+
+[ $((LAST_NOTIFICATION+DELAY_SECONDS)) -gt "${NOW}" ]
