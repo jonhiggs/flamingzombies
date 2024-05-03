@@ -11,6 +11,9 @@ case $1 in
       && [ "${LAST_NOTIFICATION}" -le "${LAST_OK}" ] \
       && exit 0
     ;;
+  *)
+    echo "$0 was not provided a valid argument" >&2
+    ;;
 esac
 
 exit 1
