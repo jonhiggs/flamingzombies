@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.0.21
+
+- Add `OPEN_GATES` to the environment of notifiers.
+
 ## v0.0.20
 
 - Many improvements to the docs and the interface.
