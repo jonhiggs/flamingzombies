@@ -230,6 +230,22 @@ Open the gate if it as been longer than
 Open while the current state matches the
 .Ar state
 argument.
+.It Cm gate/is_flapping Ar threshold Ar window
+Detect if a task is flapping between states.
+.Pp
+The plugin expects two arguments:
+.Bl -tag -width "threshold"
+.It Cm threshold
+How many state changes are allowed within the window. A state change is a flip from ok to fail, or fail to ok.
+.It Cm window
+How many measurements to consider when searching for state changes. A maximum window 32 will be used.
+.El
+.Pp
+When tuning, consider the timespan covered by the measurements can vary wildly based on the
+.Ar retry
+count, and
+.Ar frequency
+rate. A full set of measurements for an infrequent check with a low retry count might cover weeks, while the opposite might cover just minutes.
 .El
 .Sh EXAMPLES
 A minimal configuration:
@@ -326,6 +342,16 @@ args = ["3600"]
 .Ed
 .Pp
 As soon as the task fails, a notification is sent and notifications are redelivered hourly for as long as it remains failed.
+.Pp
+Detecting flapping tasks:
+.Bd -literal -offset indent
+[[gate]]
+name = "is_flapping"
+command = "gate/is_flapping"
+args = ["4", "32"]
+.Ed
+.Pp
+This gate will open if there have been four state-changes in the last 32 measurements.
 .Sh SEE ALSO
 .Xr fz 1 ,
 .Xr fzctl 1
