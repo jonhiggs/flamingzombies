@@ -68,7 +68,7 @@ func (t Task) Frequency() time.Duration {
 
 func (t Task) Ready(ts time.Time) bool {
 	// the hash is used to spread the checks across time.
-	// if the state is unknown, retry at the rate of RetryFrequencySeconds
+	// while the state is unknown, retry at the rate of RetryFrequencySeconds
 
 	if t.State() == STATE_UNKNOWN {
 		return (uint32(ts.Unix())+t.Hash())%uint32(t.RetryFrequencySeconds) == 0

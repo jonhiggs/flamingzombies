@@ -10,6 +10,7 @@ if [ $# -eq 0 ]; then
 fi
 
 TOPIC="$1"
+SUBJECT="${NAME}: state ${STATE}"
 
 case "${PRIORITY}" in
   1) NTFY_PRIORITY="max"     ;;

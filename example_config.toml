@@ -12,12 +12,6 @@ notifiers = [
 ]
 priority = 3
 
-#[[task]]
-#name = "localhost:ssh"
-#command = "/usr/lib/nagios/libexec/check_ssh"
-#args = [ "-t", "5", "-r", "9.7", "1.2.3.4"]
-#timeout = 6
-
 [[task]]
 name = "flappy"
 command = "task/flappy"
@@ -29,39 +23,22 @@ recover_body = """
 flappy has recovered
 """
 
-#[[task]]
-#name = "whoami"
-#command = "/usr/bin/whoami"
-#args = ["--help"]
-#frequency = 1
-#retry_frequency = 1
-
-#[[task]]
-#name = "ping.localhost"
-#command = "ping"
-#args = [ "-A", "-c3", "127.0.0.1" ]
-#frequency = 3
-#
-#[[task]]
-#name = "sleep"
-#command = "sleep"
-#args = [ "4" ]
-#frequency = 1
-#timeout = 1
-#
-#[[task]]
-#name = "false"
-#command = "false"
-#args = []
-#frequency = 1
+#[[notifier]]
+#name = "logger"
+#command = "notifier/null"
+#timeout = 5
+#gates = [
+#    ["to_failed", "defer"],
+#    ["is_failed", "renotify"],
+#]
 
 [[notifier]]
 name = "logger"
 command = "notifier/null"
-timeout = 5
+timeout = 1
 gates = [
-    ["to_failed", "defer"],
-    ["is_failed", "renotify"],
+    ["is_failed"],
+    ["is_ok"],
 ]
 
 [[gate]]
@@ -73,6 +50,11 @@ args = ["fail"]
 name = "is_failed"
 command = "gate/is_state"
 args = ["fail"]
+
+[[gate]]
+name = "is_ok"
+command = "gate/is_state"
+args = ["ok"]
 
 [[gate]]
 name = "defer"
