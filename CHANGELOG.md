@@ -8,6 +8,8 @@
 - Improvements to the configtest
 - Add `task/fz_errors` plugin
 - Add `LAST_OK`, `LAST_FAIL` and `LAST_NOTIFICATION` to the environment of the gates.
+- Support delayed notifications.
+- Support re-raising notifications.
 
 ## v0.0.19
 
