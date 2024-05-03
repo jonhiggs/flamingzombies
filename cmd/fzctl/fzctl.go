@@ -14,7 +14,7 @@ import (
 	"nullprogram.com/x/optparse"
 )
 
-const VERSION = "v0.0.19"
+const VERSION = "v0.0.20"
 
 type taskData struct {
 	Name           string    `json:"name"`
