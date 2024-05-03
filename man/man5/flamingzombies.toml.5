@@ -212,7 +212,7 @@ Send notification using the ntfy web service.
 A phony notifier for testing purposes.
 .It Cm gate/min_priority Ar priority
 Open the gate if it's less than the minimum priority.
-.It Cm gate/state_change Ar state
+.It Cm gate/to_state Ar state
 Open when state has changed, but a notification is yet to be executed.
 .Pp
 Valid options for state are:
@@ -226,8 +226,10 @@ The gate opens after the state flips from ok to fail until a notification is sen
 Prevent a gate from opening until it been it its state for the specified time.
 .It Cm gate/renotify Ar seconds
 Open the gate if it as been longer than
-.Ar seconds
-since a notification was raised.
+.It Cm gate/is_state Ar state
+Open while the current state matches the
+.Ar state
+argument.
 .El
 .Sh EXAMPLES
 A minimal configuration:
@@ -253,7 +255,7 @@ gates = [
 
 [[gate]]
 name = "state_failed"
-command = "gate/state_change"
+command = "gate/to_state"
 args = ["fail"]
 .Ed
 .Pp
@@ -280,7 +282,7 @@ gates = [
 
 [[gate]]
 name = "state_failed"
-command = "gate/state_change"
+command = "gate/to_state"
 args = ["fail"]
 
 [[gate]]
@@ -294,6 +296,36 @@ Tasks should be fast to detect issues, but it can sometimes be preferable to all
 in this example uses the
 .Ar task/defer
 plugin to allow five minutes grace time before raising a notification.
+.Pp
+Re-raising notifications:
+.Bd -literal -offset indent
+[[notifier]]
+name = "renotify"
+command = "notifier/null"
+args = []
+timeout = 5
+gates = [
+    ["to_failed"],
+    ["is_failed", "renotify_hourly"],
+]
+
+[[gate]]
+name = "to_failed"
+command = "gate/to_state"
+args = ["fail"]
+
+[[gate]]
+name = "is_failed"
+command = "gate/is_state"
+args = ["fail"]
+
+[[gate]]
+name = "renotify_hourly"
+command = "gate/renotify"
+args = ["3600"]
+.Ed
+.Pp
+As soon as the task fails, a notification is sent and notifications are redelivered hourly for as long as it remains failed.
 .Sh SEE ALSO
 .Xr fz 1 ,
 .Xr fzctl 1
