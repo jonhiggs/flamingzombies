@@ -52,6 +52,10 @@ func (n Notifier) validate() error {
 		return fmt.Errorf("name cannot contain spaces")
 	}
 
+	if strings.ContainsRune(n.Name, ',') {
+		return fmt.Errorf("name cannot contain commas")
+	}
+
 	for i, gates := range n.GateSets {
 		if len(gates) > 3 {
 			return fmt.Errorf("gateset %d: cannot have more than 30 elements", i)

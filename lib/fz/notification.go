@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -21,9 +22,15 @@ func ProcessNotifications() {
 		C:
 			select {
 			case n := <-NotifyCh:
-				if n.gateState() == false {
-					Logger.Debug("notification canceled due to closed gate", "notifier", n.Notifier.Name)
+				openGates, ok := n.gateState()
+				if !ok {
+					Logger.Debug("notification canceled due to a closed gate", "notifier", n.Notifier.Name)
 					break C
+				}
+
+				var openGatesNames []string
+				for _, g := range openGates {
+					openGatesNames = append(openGatesNames, g.Name)
 				}
 
 				Logger.Info("sending notification", "notifier", n.Notifier.Name)
@@ -43,6 +50,7 @@ func ProcessNotifications() {
 				cmd.Env = []string{
 					fmt.Sprintf("LAST_STATE=%s", n.Task.LastState()),
 					fmt.Sprintf("NAME=%s", n.Task.Name),
+					fmt.Sprintf("OPEN_GATES=%s", strings.Join(openGatesNames, ",")),
 					fmt.Sprintf("PRIORITY=%d", n.Task.Priority),
 					fmt.Sprintf("STATE=%s", n.Task.State()),
 				}
@@ -79,21 +87,26 @@ func ProcessNotifications() {
 }
 
 // check the state of all configured gates.
-func (n Notification) gateState() bool {
+func (n Notification) gateState() ([]*Gate, bool) {
+	openGates := []*Gate{}
 X:
 	for gsi, gs := range n.Notifier.Gates() {
+		openGates = []*Gate{} // ignore the gates from prior gateset
+
 		for _, g := range gs {
 			if g.IsOpen(n.Task, n.Notifier) == false {
 				Logger.Debug("gate is closed", "gate", g.Name)
 				continue X
 			}
+
+			openGates = append(openGates, g)
 			Logger.Debug("gate is open", "gate", g.Name)
 		}
 		Logger.Debug("gateset is open", "gateset", gsi)
-		return true
+		return openGates, true
 	}
 
-	return false
+	return openGates, false
 }
 
 func (n Notification) subject() string {
