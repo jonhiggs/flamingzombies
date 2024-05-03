@@ -6,7 +6,7 @@ for f in $(find . -type f -iname \*\.[0-9]); do
   mtime=$(date --date="@$(stat -c %Y $f)" +%Y-%m-%d)
   Dd=$(awk '($1=/^\.Dd /) { print $2 }' $f)
   if [[ "${mtime}" != "${Dd}" ]]; then
-    echo "$f. invalid mtime"
+    echo "$f: invalid mtime"
     code=1
   fi
 done

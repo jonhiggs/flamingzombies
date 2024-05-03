@@ -7,3 +7,6 @@ man1/%.pdf man5/%.pdf man7/%.pdf:
 
 clean:
 	find . -iname \*.pdf -delete
+
+test:
+	./test.sh

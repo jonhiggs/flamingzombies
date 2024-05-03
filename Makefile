@@ -31,7 +31,7 @@ prerelease_tests: test
 	git status | grep -q "On branch main"
 	git status | grep -q "working tree clean"
 	grep -q "^## $(VERSION)$$" CHANGELOG.md
-	./man/test.sh
+	$(MAKE) -C ./man test
 
 test: gotest shellcheck
 
