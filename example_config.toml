@@ -23,22 +23,13 @@ recover_body = """
 flappy has recovered
 """
 
-#[[notifier]]
-#name = "logger"
-#command = "notifier/null"
-#timeout = 5
-#gates = [
-#    ["to_failed", "defer"],
-#    ["is_failed", "renotify"],
-#]
-
 [[notifier]]
 name = "logger"
 command = "notifier/null"
-timeout = 1
+timeout = 5
 gates = [
-    ["is_failed"],
-    ["is_ok"],
+    ["to_failed", "defer"],
+    ["is_failed", "renotify"],
 ]
 
 [[gate]]
