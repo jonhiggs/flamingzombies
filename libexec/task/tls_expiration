@@ -1,0 +1,65 @@
+#!/bin/sh
+
+# Detect when a ttl certificate is:
+#
+# - in use before its notBefore timestamp
+# - in use after its notAfter timestamp
+# - within threshold of notAfter timestamp
+
+if [ $# -ne 4 ]; then
+  echo "you must provide four arguments" >&2
+  exit 3
+fi
+
+address=$1
+port=$2
+host=$3
+threshold=$4
+
+parseDate() {
+  # parse dates that look like:
+  #   "Mar 13 20:03:32 2025 GMT"
+  #
+  # into epochs like 1741896212
+
+  if [ "$(uname)" = "OpenBSD" ]; then
+    date -j -u -f "%b %d %H:%M:%S %Y %Z" "$1" +%s
+  else
+    date --date="$1" +%s
+  fi
+}
+
+getValidityRange() {
+  # take an address, port and host
+  printf Q \
+    | openssl s_client -servername "${host}" -connect "${address}":"${port}" 2>/dev/null \
+    | openssl x509 -noout -dates \
+    | awk -F= '/^not(Before|After)/ { print $2 }'
+}
+
+# sorry that's so ugly...
+range=$(
+  getValidityRange "$1" "$2" "$3" | while IFS= read -r d; do
+    parseDate "$d"
+  done | sort -n | tr '\n' ':' | sed 's/:$//'
+)
+
+start=$(echo "${range}" | cut -d: -f1)
+end=$(echo "${range}" | cut -d: -f2)
+
+if [ "$(date +%s)" -lt "${start}" ]; then
+  echo "certificate is not yet valid" >&2
+  exit 1
+fi
+
+if [ "$(date +%s)" -gt "${end}" ]; then
+  echo "certificate has expired" >&2
+  exit 1
+fi
+
+if [ "$(date +%s)" -gt "$((end-threshold))" ]; then
+  echo "certificate is close to expiring" >&2
+  exit 1
+fi
+
+exit 0
