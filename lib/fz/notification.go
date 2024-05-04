@@ -53,7 +53,7 @@ func ProcessNotifications() {
 					fmt.Sprintf("OPEN_GATES=%s", strings.Join(openGatesNames, ",")),
 					fmt.Sprintf("PRIORITY=%d", n.Task.Priority),
 					fmt.Sprintf("STATE=%s", n.Task.State()),
-					fmt.Sprintf("RESULT_OUTPUT=%s", n.Task.LastResultOutput()),
+					fmt.Sprintf("RESULT_OUTPUT=%s", n.Task.LastResultOutput),
 				}
 
 				io.WriteString(stdin, n.body())

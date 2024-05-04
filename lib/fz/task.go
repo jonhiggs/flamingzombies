@@ -94,6 +94,7 @@ func (t *Task) Run() bool {
 	}
 
 	stderr, _ := cmd.StderrPipe()
+	stdout, _ := cmd.StdoutPipe()
 
 	err := cmd.Start()
 	if err != nil {
@@ -104,6 +105,8 @@ func (t *Task) Run() bool {
 	t.ExecutionCount++
 
 	errorMessage, _ := io.ReadAll(stderr)
+	stdoutBytes, _ := io.ReadAll(stdout)
+	t.LastResultOutput = string(stdoutBytes)
 
 	err = cmd.Wait()
 
