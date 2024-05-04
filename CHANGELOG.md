@@ -5,6 +5,7 @@
 - Add `OPEN_GATES` to the environment of notifiers.
 - Add `task/tls_expiration` plugin.
 - Add `task/loadavg` plugin.
+- Tag the messages from `ntfy`.
 
 ## v0.0.20
 
