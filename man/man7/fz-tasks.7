@@ -13,10 +13,25 @@ Tasks are executed with metadata inserted into the environment. These values are
 The number of seconds the task may run before
 .Xr fz
 times out the script.
+.Sh OUTPUT
+Tasks use both stdout and stderr output streams.
+.Bl -tag -width Ds
+.It Cm stdout
+Everything sent to stdout is provided to the notifier in the
+.Cm RESULT_OUTPUT
+environment variable.
+One line should be sufficient. If you need more detail than this, it's usually better to configure an
+.Ar error_body
+or
+.Ar recover_body
+on the task's definition.
+.It Cm stderr
+All data sent to stderr is written to DEBUG logs.
+.El
 .Sh EXIT CODES
 The following exit codes are supported:
 .Pp
-.Bl -tag -width XX
+.Bl -tag -width XXX
 .It Cm 0
 The task measured ok
 .It Cm 3
