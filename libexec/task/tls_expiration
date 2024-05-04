@@ -13,7 +13,7 @@ fi
 
 address=$1
 port=$2
-host=$3
+servername=$3
 threshold=$4
 
 parseDate() {
@@ -32,7 +32,7 @@ parseDate() {
 getValidityRange() {
   # take an address, port and host
   printf Q \
-    | openssl s_client -servername "${host}" -connect "${address}":"${port}" 2>/dev/null \
+    | openssl s_client -servername "${servername}" -connect "${address}":"${port}" 2>/dev/null \
     | openssl x509 -noout -dates \
     | awk -F= '/^not(Before|After)/ { print $2 }'
 }
