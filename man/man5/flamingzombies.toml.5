@@ -204,11 +204,27 @@ Ping the host with a number of packets. The task succeeds if all the expected pa
 Check if host has an open port.
 .It Cm task/fz_errors Ar host Ar port
 Check that none of fz's tasks have experienced an error.
+.It Cm task/tls_expiration Ar address Ar port Ar servername Ar threshold
+Check that the TLS certificate on a port is valid.
+.Pp
+It fails if the time is before the 'notBefore' value or after the 'notAfter' value, minus the
+.Ar threshold
+seconds.
+.Bl -tag -width "servername"
+.It Ar address
+The address to connect to
+.It Ar port
+The port on the address
+.It Ar servername
+The TLS Server Name Syndication (SNI) to check.
+.It Ar threshold
+Number of seconds before the certificate expires that the task fails.
+.El
 .It Cm notifier/email
 Send notification using the local MTA.
 .It Cm notifier/ntfy Ar topic
 Send notification using the ntfy web service.
-.It Cm task/null
+.It Cm notifier/null
 A phony notifier for testing purposes.
 .It Cm gate/min_priority Ar priority
 Open the gate if it's less than the minimum priority.
