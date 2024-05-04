@@ -11,7 +11,7 @@ uptime \
         sub(",","",$(NF-1))
         v=$(NF-1)
         if (v>threshold) {
-          print "threshold exceeded" > "/dev/stderr"
+          print "loadavg (" v ") exceeded threshold (" threshold ")"
           exit 1
         }
       }
