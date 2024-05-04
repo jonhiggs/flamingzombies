@@ -21,7 +21,12 @@ case "${PRIORITY}" in
   *) NTFY_PRIORITY="default" ;;
 esac
 
-timeout 0.2 cat | curl -v -f -d @-  \
-  -H "Title: ${SUBJECT}"            \
-  -H "Priority: ${NTFY_PRIORITY}"   \
+status_tag="gray_question"
+[ "${STATE}" = "ok" ] && status_tag="green_circle"
+[ "${STATE}" = "fail" ] && status_tag="red_circle"
+
+timeout 0.2 cat | curl -v -f -d @-                             \
+  -H "Title: ${SUBJECT}"                                       \
+  -H "Priority: ${NTFY_PRIORITY}"                              \
+  -H "X-Tags: ${status_tag},host:$(hostname -s),${OPEN_GATES}" \
   "ntfy.sh/${TOPIC}"
