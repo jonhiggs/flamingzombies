@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# checks that the 1m load average is below the threshold.
+#
+
+threshold=${1:-1}
+
+uptime \
+  | awk -v threshold="${threshold}" '
+      {
+        sub(",","",$(NF-1))
+        v=$(NF-1)
+        if (v>threshold) {
+          print "threshold exceeded" > "/dev/stderr"
+          exit 1
+        }
+      }
+    '
