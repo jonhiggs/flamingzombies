@@ -220,6 +220,8 @@ The TLS Server Name Syndication (SNI) to check.
 .It Ar threshold
 Number of seconds before the certificate expires that the task fails.
 .El
+.It Cm task/loadavg Op threshold
+Check that the 1m load average is below the threshold. The default threshold value is 1.0.
 .It Cm notifier/email
 Send notification using the local MTA.
 .It Cm notifier/ntfy Ar topic
