@@ -24,7 +24,6 @@ _send() {
     -H "Title: ${subject}"                                       \
     -H "Priority: ${ntfy_priority}"                              \
     -H "X-Tags: ${status_tag},host:$(hostname -s),${OPEN_GATES}" \
-    -H "Markdown: yes"                                           \
     "ntfy.sh/${NTFY_TOPIC}"
 }
 
@@ -37,7 +36,7 @@ NTFY_TOPIC="$1"
 DATAFILE=$(mktemp)
 
 cat <<EOF > "${DATAFILE}"
-> ${RESULT_OUTPUT}
+${RESULT_OUTPUT}
 ---
 $(timeout 0.2 cat)
 EOF
