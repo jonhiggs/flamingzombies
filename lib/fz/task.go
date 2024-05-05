@@ -106,7 +106,7 @@ func (t *Task) Run() bool {
 
 	errorMessage, _ := io.ReadAll(stderr)
 	stdoutBytes, _ := io.ReadAll(stdout)
-	t.LastResultOutput = string(stdoutBytes)
+	t.LastResultOutput = strings.TrimSuffix(string(stdoutBytes), "\n")
 
 	err = cmd.Wait()
 
