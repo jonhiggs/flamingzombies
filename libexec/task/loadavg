@@ -10,9 +10,13 @@ uptime \
       {
         sub(",","",$(NF-1))
         v=$(NF-1)
+      }
+      END {
         if (v>threshold) {
           print "loadavg (" v ") exceeded threshold (" threshold ")"
           exit 1
+        } else {
+          print "loadavg (" v ") is ok"
         }
       }
     '
