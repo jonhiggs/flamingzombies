@@ -4,4 +4,4 @@ if [ $# -ne 2 ]; then
   exit 1
 fi
 
-/usr/bin/nc -zv "$1" "$2"
+/usr/bin/nc -zv "$1" "$2" 2>&1
