@@ -17,15 +17,16 @@ import (
 const VERSION = "v0.0.20"
 
 type taskData struct {
-	Name           string    `json:"name"`
-	State          string    `json:"state"`
-	LastRun        time.Time `json:"last_run"`
-	LastOk         time.Time `json:"last_ok"`
-	Measurements   []bool    `json:"measurements"`
-	ExecutionCount int       `json:"execution_count"`
-	OKCount        int       `json:"ok_count"`
-	FailCount      int       `json:"fail_count"`
-	ErrorCount     int       `json:"error_count"`
+	ErrorCount       int       `json:"error_count"`
+	ExecutionCount   int       `json:"execution_count"`
+	FailCount        int       `json:"fail_count"`
+	LastNotification time.Time `json:"last_notification"`
+	LastOk           time.Time `json:"last_ok"`
+	LastRun          time.Time `json:"last_run"`
+	Measurements     []bool    `json:"measurements"`
+	Name             string    `json:"name"`
+	OKCount          int       `json:"ok_count"`
+	State            string    `json:"state"`
 }
 
 var tasks []taskData
@@ -127,6 +128,7 @@ func show() {
 				fmt.Printf("%-20s%s\n", "name:", t.Name)
 				fmt.Printf("%-20s%s\n", "state:", t.State)
 				fmt.Printf("%-20s%s ago\n", "last execution:", time.Now().Sub(t.LastRun))
+				fmt.Printf("%-20s%s ago\n", "last notification:", time.Now().Sub(t.LastNotification))
 				fmt.Printf("%-20s%s ago\n", "last success:", time.Now().Sub(t.LastOk))
 				fmt.Printf("%-20s%d\n", "executions:", t.ExecutionCount)
 				fmt.Printf("%-20s%d\n", "failures:", t.FailCount)

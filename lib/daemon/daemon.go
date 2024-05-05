@@ -32,28 +32,30 @@ func processClient(conn net.Conn, c *fz.Config) {
 	defer conn.Close()
 
 	type taskJsonline struct {
-		Name           string    `json:"name"`
-		State          string    `json:"state"`
-		LastRun        time.Time `json:"last_run"`
-		LastOk         time.Time `json:"last_ok"`
-		Measurements   []bool    `json:"measurements"`
-		ExecutionCount int       `json:"execution_count"`
-		OKCount        int       `json:"ok_count"`
-		FailCount      int       `json:"fail_count"`
-		ErrorCount     int       `json:"error_count"`
+		ErrorCount       int       `json:"error_count"`
+		ExecutionCount   int       `json:"execution_count"`
+		FailCount        int       `json:"fail_count"`
+		LastNotification time.Time `json:"last_notification"`
+		LastOk           time.Time `json:"last_ok"`
+		LastRun          time.Time `json:"last_run"`
+		Measurements     []bool    `json:"measurements"`
+		Name             string    `json:"name"`
+		OKCount          int       `json:"ok_count"`
+		State            string    `json:"state"`
 	}
 
 	for _, t := range c.Tasks {
 		d := taskJsonline{
-			Name:           t.Name,
-			State:          fmt.Sprintf("%s", t.State()),
-			LastRun:        t.LastRun,
-			LastOk:         t.LastOk,
-			Measurements:   []bool{},
-			ExecutionCount: t.ExecutionCount,
-			OKCount:        t.OKCount,
-			FailCount:      t.FailCount,
-			ErrorCount:     t.ErrorCount,
+			ErrorCount:       t.ErrorCount,
+			ExecutionCount:   t.ExecutionCount,
+			FailCount:        t.FailCount,
+			LastNotification: t.LastNotification(),
+			LastOk:           t.LastOk,
+			LastRun:          t.LastRun,
+			Measurements:     []bool{},
+			Name:             t.Name,
+			OKCount:          t.OKCount,
+			State:            fmt.Sprintf("%s", t.State()),
 		}
 
 		h := t.History
