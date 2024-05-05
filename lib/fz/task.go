@@ -292,6 +292,23 @@ func (t Task) NotifierIndex(name string) (int, error) {
 	return -1, fmt.Errorf("unknown notifier name")
 }
 
+// get the last notification of all notifiers.
+func (t Task) LastNotification() time.Time {
+	var ts time.Time
+
+	for i, n := range t.lastNotifications {
+		if i == 0 {
+			ts = n
+		} else {
+			if n.Unix() > ts.Unix() {
+				ts = n
+			}
+		}
+	}
+
+	return ts
+}
+
 func (t Task) GetLastNotification(name string) time.Time {
 	i, err := t.NotifierIndex(name)
 	if err != nil {
