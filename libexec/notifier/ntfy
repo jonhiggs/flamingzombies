@@ -4,29 +4,44 @@
 # https://github.com/binwiederhier/ntfy
 #
 
+_send() {
+  subject="${NAME}: state ${STATE}"
+
+  case "${PRIORITY}" in
+    1) ntfy_priority="max"     ;;
+    2) ntfy_priority="high"    ;;
+    3) ntfy_priority="default" ;;
+    4) ntfy_priority="low"     ;;
+    5) ntfy_priority="min"     ;;
+    *) ntfy_priority="default" ;;
+  esac
+
+  status_tag="gray_question"
+  [ "${STATE}" = "ok" ] && status_tag="green_circle"
+  [ "${STATE}" = "fail" ] && status_tag="red_circle"
+
+  curl -v -f --data-binary @"${DATAFILE}"                        \
+    -H "Title: ${subject}"                                       \
+    -H "Priority: ${ntfy_priority}"                              \
+    -H "X-Tags: ${status_tag},host:$(hostname -s),${OPEN_GATES}" \
+    -H "Markdown: yes"                                           \
+    "ntfy.sh/${NTFY_TOPIC}"
+}
+
 if [ $# -eq 0 ]; then
   echo "you must supply the topic as first argument" >&2
   exit 1
 fi
 
-TOPIC="$1"
-SUBJECT="${NAME}: state ${STATE}"
+NTFY_TOPIC="$1"
+DATAFILE=$(mktemp)
 
-case "${PRIORITY}" in
-  1) NTFY_PRIORITY="max"     ;;
-  2) NTFY_PRIORITY="high"    ;;
-  3) NTFY_PRIORITY="default" ;;
-  4) NTFY_PRIORITY="low"     ;;
-  5) NTFY_PRIORITY="min"     ;;
-  *) NTFY_PRIORITY="default" ;;
-esac
+cat <<EOF > "${DATAFILE}"
+> ${RESULT_OUTPUT}
+---
+$(timeout 0.2 cat)
+EOF
 
-status_tag="gray_question"
-[ "${STATE}" = "ok" ] && status_tag="green_circle"
-[ "${STATE}" = "fail" ] && status_tag="red_circle"
+_send
 
-timeout 0.2 cat | curl -v -f -d @-                             \
-  -H "Title: ${SUBJECT}"                                       \
-  -H "Priority: ${NTFY_PRIORITY}"                              \
-  -H "X-Tags: ${status_tag},host:$(hostname -s),${OPEN_GATES}" \
-  "ntfy.sh/${TOPIC}"
+rm -f "${DATAFILE}"
