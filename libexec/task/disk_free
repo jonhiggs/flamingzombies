@@ -1,13 +1,12 @@
 #!/bin/sh
-#
-# In the example:
-#
-#   disk_free / 90
-#
-# the script will return 1 if more than 90% of the disk space is used on the
-# file system mounted at /.
 
-df -P \
-  | awk -v mount="$1" -v threshold_percent="$2" '
-    ($6==mount) { if (int($5) > threshold_percent) { exit 1 }}
+df -BK \
+  | awk -v mount="$1" -v threshold="$2" '
+    ($6==mount) {
+      free = int($4)
+      if (free > threshold) {
+        print "free disk space on", mount, "(" free, "KB) is less than threshold (" threshold, "KB)."
+        exit 1
+      }
+    }
   '
