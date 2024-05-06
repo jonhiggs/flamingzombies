@@ -1,10 +1,17 @@
 # Flaming Zombies
 
-A simple, lightweight monitoring daemon for performing checks, detecting failure and raising alerts.
+A simple yet extendable, lightweight monitoring daemon.
+
+* Made for the command line.
+* Configured with flat files.
+* Complete documentation in man pages.
+* Few dependencies.
+* Easily extended, and customised.
+* Liberal 2-clause BSD license.
 
 ---
 
-THIS IS STILL A WORK IN PROGRESS... but it's ready to start testing.
+THIS IS STILL A WORK IN PROGRESS... but it's ready to test.
 
 ---
 
@@ -36,15 +43,6 @@ The complete documentation is available in the [man pages](./man). You can read 
 ```
 curl https://raw.githubusercontent.com/jonhiggs/flamingzombies/main/man/man1/fz.1 | man /dev/stdin
 ```
-
-## Features
-
-* Made to be used at the command line.
-* Configured with flat files.
-* Completely documented in man pages.
-* Few dependencies.
-* Very easy to extend, and customise.
-* Liberal 2-clause BSD license.
 
 ## Building
 
