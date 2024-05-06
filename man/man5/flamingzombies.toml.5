@@ -226,6 +226,12 @@ Check that the 1m load average is below the threshold. The default threshold val
 Check that
 .Ar file
 exists and is a file.
+.It Cm task/file_max_age Ar file Ar seconds
+Check that the mtime of
+.Ar file
+is no more than
+.Ar seconds
+ago.
 .It Cm notifier/email
 Send notification using the local MTA.
 .It Cm notifier/ntfy Ar topic
