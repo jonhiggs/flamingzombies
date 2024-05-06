@@ -1,0 +1,21 @@
+#!/bin/sh
+
+if [ $# -ne 1 ]; then
+    echo "not enough arguments were provided" >&2
+    exit 3
+fi
+
+threshold=$1
+
+if [ "$(uname)" = "OpenBSD" ]; then
+  free=$(swapctl -s -k | awk -F, '/^total/ { print int($NF) }')
+else
+  free=$(free -k | awk '/^Swap:/ { print $4 }')
+fi
+
+if [ "${free}" -lt "${threshold}" ]; then
+  echo "free swap space (${free}) is less than the threshold(${threshold})."
+  exit 1
+fi
+
+exit 0
