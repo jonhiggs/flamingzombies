@@ -20,7 +20,7 @@ NOW=$(date +%s)
 
 if ! [ -f "$1" ]; then
     echo "file '$1' does not exist"
-    exit 3
+    exit 1
 fi
 
 if [ "$(_file_epoch "${FILE}")" -lt "$((NOW-MAX_AGE))" ]; then

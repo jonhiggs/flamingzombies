@@ -33,13 +33,18 @@ The following exit codes are supported:
 .Pp
 .Bl -tag -width XXX
 .It Cm 0
-The task measured ok
+The task measured ok.
 .It Cm 3
-A measurement could not be taken.
+A measurement could not be taken. Nothing is recorded and the task will continue executing at the rate of
+.Ar frequency
+or
+.Ar retry_frequency
+if the state was previously unknown. Since nothing is recorded, the state cannot change.
 .It Cm 124
 A measurement could not be taken because of a timeout. This is mostly a convenience that aligns with the default exit code of the
 .Xr timeout 1
-command.
+command. It has the same traits as exit code
+.Cm 3.
 .El
 .Pp
 Any other exit code is a failure.
