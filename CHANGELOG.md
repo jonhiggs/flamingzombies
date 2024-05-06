@@ -9,6 +9,7 @@
 - Add `task/loadavg` plugin.
 - Add `task/swap_free` plugin.
 - Add `task/tls_expiration` plugin.
+- Modify the `task/disk_free` plugin to use kb, rather than percentage.
 - Add tags to messages from `ntfy`.
 
 ## v0.0.20
