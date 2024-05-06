@@ -204,6 +204,8 @@ Ping the host with a number of packets. The task succeeds if all the expected pa
 Check if host has an open port.
 .It Cm task/fz_errors Ar host Ar port
 Check that none of fz's tasks have experienced an error.
+.Pp
+It is unwise to point this to a local fz daemon.
 .It Cm task/tls_expiration Ar address Ar port Ar servername Ar threshold
 Check that the TLS certificate on a port is valid.
 .Pp
