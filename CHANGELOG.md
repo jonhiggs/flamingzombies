@@ -7,6 +7,7 @@
 - Add `task/file_exists` plugin.
 - Add `task/file_max_age` plugin.
 - Add `task/loadavg` plugin.
+- Add `task/swap_free` plugin.
 - Add `task/tls_expiration` plugin.
 - Add tags to messages from `ntfy`.
 
