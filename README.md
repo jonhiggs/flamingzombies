@@ -4,7 +4,7 @@ A simple, lightweight monitoring daemon for performing checks, detecting failure
 
 ---
 
-THIS IS STILL A WORK IN PROGRESS
+THIS IS STILL A WORK IN PROGRESS... but it's ready to start testing.
 
 ---
 
