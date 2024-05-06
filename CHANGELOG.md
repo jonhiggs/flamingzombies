@@ -2,10 +2,12 @@
 
 ## v0.0.21
 
+- Support emitting output from tasks into notifications.
 - Add `OPEN_GATES` to the environment of notifiers.
-- Add `task/tls_expiration` plugin.
+- Add `task/file_exists` plugin.
 - Add `task/loadavg` plugin.
-- Tag the messages from `ntfy`.
+- Add `task/tls_expiration` plugin.
+- Add tags to messages from `ntfy`.
 
 ## v0.0.20
 
