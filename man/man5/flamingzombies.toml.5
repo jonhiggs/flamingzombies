@@ -188,8 +188,12 @@ Default values can be supplied for any task parameter.
 .Xr fz
 comes with many plugins that are ready to use.
 .Bl -tag -width Ds
-.It Cm task/disk_free Ar mount_point Ar threshold_percent
-Ensure that the mount point is not using more disk space than the threshold.
+.It Cm task/disk_free Ar mount_point Ar threshold
+Ensure that the
+.Ar mount_point
+has no less than the
+.Ar threshold
+kilobytes of free disk space.
 .It Cm task/flappy
 This is a test task. It passes for 20 seconds, then fails for 20 seconds.
 .It Cm task/http_headers Ar url Op pattern...
