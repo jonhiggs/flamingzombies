@@ -3,7 +3,7 @@ if [ $# -eq 2 ]; then
   export FZ_LISTEN="$1:$2"
 fi
 
-_fz_online() { fzctl &>/dev/null || exit 3; }
+_fz_online() { fzctl >/dev/null 2>&1 || exit 3; }
 _fz_tasks() { fzctl list | awk '{ print $1 }'; }
 
 # the state is unknown if fzctl cannot be called.
