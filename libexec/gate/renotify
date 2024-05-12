@@ -9,7 +9,7 @@ case "${LAST_STATE}" in
   "ok")   [ "${LAST_NOTIFICATION}" -lt "${LAST_FAIL}" ] && exit 1 ;;
 esac
 
-if [ "${LAST_NOTIFICATION}" -lt "$((NOW-DELAY_SECONDS))" ]; then
+if [ "${LAST_NOTIFICATION}" -le "$((NOW-DELAY_SECONDS))" ]; then
   exit 0
 else
   exit 1
