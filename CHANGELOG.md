@@ -11,6 +11,7 @@
 - Add `task/tls_expiration` plugin.
 - Modify the `task/disk_free` plugin to use kb, rather than percentage.
 - Add tags to messages from `ntfy`.
+- Improve timeout handling of task plugins.
 
 ## v0.0.20
 
