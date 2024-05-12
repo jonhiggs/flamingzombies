@@ -15,4 +15,4 @@ else
 fi
 
 # shellcheck disable=SC2086
-ping ${ARGS} ${ADDRESS}
+timeout ${DEADLINE}.5 ping ${ARGS} ${ADDRESS}
