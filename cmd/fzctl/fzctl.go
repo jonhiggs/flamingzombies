@@ -14,7 +14,7 @@ import (
 	"nullprogram.com/x/optparse"
 )
 
-const VERSION = "v0.0.20"
+const VERSION = "v0.0.21"
 
 type taskData struct {
 	ErrorCount       int       `json:"error_count"`
