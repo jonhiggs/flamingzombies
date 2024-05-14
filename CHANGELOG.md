@@ -7,6 +7,7 @@
 - Add `task/file_exists` plugin.
 - Add `task/file_max_age` plugin.
 - Add `task/loadavg` plugin.
+- Add `task/mount` plugin.
 - Add `task/swap_free` plugin.
 - Add `task/tls_expiration` plugin.
 - Modify the `task/disk_free` plugin to use kb, rather than percentage.
