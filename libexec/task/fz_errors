@@ -17,7 +17,7 @@ if [ "$(echo "${tasks}" | wc -w)" -eq 0 ]; then
 fi
 
 # shellcheck disable=SC2086
-timeout 1 fzctl show ${tasks} | awk '
+timeout $((TIMEOUT-1)) fzctl show ${tasks} | awk '
     BEGIN { errors=0 }
     /^name:/ { name=$2 }
     /^errors:/ {
