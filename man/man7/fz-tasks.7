@@ -12,7 +12,9 @@ Tasks are executed with metadata inserted into the environment. These values are
 .It Cm TIMEOUT
 The number of seconds the task may run before
 .Xr fz
-times out the script.
+times out the script. A little grace time is added to the
+.Cm TIMEOUT
+to prevent scripts from ever being prematurely terminated.
 .Sh OUTPUT
 Tasks use both stdout and stderr output streams.
 .Bl -tag -width Ds
