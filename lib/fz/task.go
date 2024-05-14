@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+const GRACE_TIME = time.Duration(500) * time.Millisecond
+
 type Task struct {
 	Name                  string   `toml:"name"`            // friendly name
 	Command               string   `toml:"command"`         // command
@@ -251,7 +253,7 @@ func (t Task) retryMask() uint32 {
 }
 
 func (t Task) timeout() time.Duration {
-	return time.Duration(t.TimeoutSeconds) * time.Second
+	return GRACE_TIME + time.Duration(t.TimeoutSeconds)*time.Second
 }
 
 func (t Task) retryFrequency() time.Duration {
