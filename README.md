@@ -109,3 +109,56 @@ done
 rcctl enable flamingzombies
 rcctl set flamingzombies logger daemon.info
 ```
+
+### Alpine Linux
+
+The below sequence of commands will install the daemon on Alpine Linux:
+
+```sh
+## fz
+wget https://github.com/jonhiggs/flamingzombies/releases/download/${VERSION}/fz_linux_${ARCH} \
+    -O /usr/local/bin/fz
+
+chown root:root /usr/local/bin/fz
+chmod 755 /usr/local/bin/fz
+
+## fzctl
+wget https://github.com/jonhiggs/flamingzombies/releases/download/${VERSION}/fzctl_linux_${ARCH} \
+    -O /usr/local/bin/fzctl
+
+chown root:root /usr/local/bin/fzctl
+chmod 755 /usr/local/bin/fzctl
+
+## rc script
+wget https://raw.githubusercontent.com/jonhiggs/flamingzombies/main/scripts/openrc \
+    -O /etc/init.d/flamingzombies
+
+chown root:root /etc/init.d/flamingzombies
+chmod 755 /etc/init.d/flamingzombies
+
+## plugins
+wget https://github.com/jonhiggs/flamingzombies/releases/download/${VERSION}/plugins.tar.gz \
+    -O /tmp/plugins.tar.gz
+
+mkdir -p /usr/local/libexec
+tar -C /usr/local/libexec -zxvf /tmp/plugins.tar.gz
+rm /tmp/plugins.tar.gz
+
+## man pages
+for i in $(seq 1 7); do
+    mkdir -p "/usr/local/man/man$i"
+done
+
+for m in man1/fz.1 man1/fzctl.1 man5/flamingzombies.toml.5 man7/fz-gates.7 man7/fz-notifiers.7 man7/fz-tasks.7; do
+    wget https://raw.githubusercontent.com/jonhiggs/flamingzombies/main/man/$f \
+        -O /usr/local/man/$f
+done
+
+## config
+# create a configuration at /etc/flamingzombies.toml
+# see the flamingzombies.toml(5) man page.
+
+## enable the daemon
+rc-update add flamingzombies
+service flamingzombies start
+```
