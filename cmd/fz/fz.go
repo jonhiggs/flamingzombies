@@ -36,6 +36,7 @@ func init() {
 		{"help", 'h', optparse.KindNone},
 		{"loglevel", 'l', optparse.KindRequired},
 		{"version", 'V', optparse.KindNone},
+		{"pidfile", 'p', optparse.KindRequired},
 	}
 
 	results, _, err := optparse.Parse(options, os.Args)
@@ -53,6 +54,12 @@ func init() {
 			os.Setenv("FZ_LOG_LEVEL", result.Optarg)
 		case "directory":
 			os.Setenv("FZ_DIRECTORY", result.Optarg)
+		case "pidfile":
+			err := os.WriteFile(result.Optarg, []byte(fmt.Sprintf("%d\n", os.Getpid())), 0644)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		case "help":
 			usage()
 			return
@@ -109,5 +116,6 @@ func usage() {
 	fmt.Println("  -l, --loglevel <level>  Override the log level")
 	fmt.Println("  -n, --configtest        Test validity of the configuration")
 	fmt.Println("  -V, --version           Version")
+	fmt.Println("  -p, --pidfile           The pidfile to write")
 	os.Exit(0)
 }

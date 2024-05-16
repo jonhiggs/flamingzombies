@@ -5,7 +5,7 @@ command_args=""
 pidfile="/run/${RC_SVCNAME}/${RC_SVCNAME}.pid"
 command_user="root"
 logdir="/var/log/${RC_SVCNAME}"
-command_background="yes"
+command_background=true
 
 depend() {
   need net
