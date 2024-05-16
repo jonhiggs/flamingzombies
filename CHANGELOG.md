@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## v0.0.22
+
+- Add installation instructions for Alpine Linux
+- Fix logic of the `task/disk_free` plugin.
+- Introduce `--pidfile` flag to `fz`.
+
 ## v0.0.21
 
 - Support emitting output from tasks into notifications.

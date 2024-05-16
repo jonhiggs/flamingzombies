@@ -15,6 +15,7 @@ devrelease: clean test $(BINS) dist/plugins.tar.gz
 	scp -r man/ janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
 	scp $(BINS) dist/plugins.tar.gz janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
 	scp scripts/openbsd_rc janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
+	scp scripts/openrc janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
 
 $(BINS) dist/plugins.tar.gz:
 	make -C dist $(notdir $@)

@@ -4,7 +4,7 @@ df -BK \
   | awk -v mount="$1" -v threshold="$2" '
     ($6==mount) {
       free = int($4)
-      if (free > threshold) {
+      if (free < threshold) {
         print "free disk space on", mount, "(" free, "KB) is less than threshold (" threshold, "KB)."
         exit 1
       }
