@@ -115,7 +115,7 @@ func usage() {
 	fmt.Println("  -h, --help              This help")
 	fmt.Println("  -l, --loglevel <level>  Override the log level")
 	fmt.Println("  -n, --configtest        Test validity of the configuration")
-	fmt.Println("  -V, --version           Version")
 	fmt.Println("  -p, --pidfile           The pidfile to write")
+	fmt.Println("  -V, --version           Version")
 	os.Exit(0)
 }
