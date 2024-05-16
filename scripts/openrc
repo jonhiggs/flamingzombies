@@ -1,8 +1,8 @@
 #!/sbin/openrc-run
 name=${RC_SVCNAME}
 command="fz"
-command_args=""
 pidfile="/run/${RC_SVCNAME}/${RC_SVCNAME}.pid"
+command_args="-p ${pidfile}"
 command_user="root"
 logdir="/var/log/${RC_SVCNAME}"
 command_background=true
@@ -17,6 +17,7 @@ configtest() {
 }
 
 start_pre() {
+  mkdir -p "$(dirname "${pidfile}")"
   if [ "${RC_CMD}" != "restart" ]; then
     configtest || return $?
   fi
