@@ -255,6 +255,14 @@ The device or the path of the btrfs filesystem to check.
 .It Ar threshold
 Number of seconds allowed between checks.
 .El
+.It Cm task/btrfs_scrub_errors Ar device Op threshold
+Check that the last scrub of a btrfs filesystem didn't encounter errors.
+.Bl -tag -width "threshold"
+.It Ar device
+The device or the path of the btrfs filesystem to check.
+.It Op threshold
+Number of errors to accept. The default value is 0.
+.El
 .It Cm notifier/email
 Send notification using the local MTA.
 .It Cm notifier/ntfy Ar topic
