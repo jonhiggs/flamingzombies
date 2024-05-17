@@ -23,8 +23,8 @@ mdadm --detail "${md_dev}"                                \
         -v spare_device_count="${spare_device_count}"     \
         -v failed_device_count="${failed_device_count}"   \
     '
-      ($1~/Active Devices/) { if (int($2) != active_device_count ) { exit 1 }
-      ($1~/Working Devices/) { if (int($2) != working_device_count ) { exit 1 }
-      ($1~/Spare Devices/) { if (int($2) != spare_device_count ) { exit 1 }
-      ($1~/Failed Devices/) { if (int($2) != failed_device_count ) { exit 1 }
+      ($1~/Active Devices/)  { if ( int($2) != active_device_count  ) { print "incorrect number of active devices"; exit 1 } }
+      ($1~/Working Devices/) { if ( int($2) != working_device_count ) { print "incorrect number of working devices"; exit 1 } }
+      ($1~/Spare Devices/)   { if ( int($2) != spare_device_count   ) { print "incorrect number of spare devices"; exit 1 } }
+      ($1~/Failed Devices/)  { if ( int($2) != failed_device_count  ) { print "incorrect number of failed devices"; exit 1 } }
     '

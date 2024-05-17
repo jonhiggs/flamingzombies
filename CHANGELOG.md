@@ -2,8 +2,9 @@
 
 ## v0.0.22
 
-- Add installation instructions for Alpine Linux
-- Fix logic of the `task/disk_free` plugin.
+- Add installation instructions for Alpine Linux.
+- Fix logic of the `task/disk_free` task.
+- Fix errors in the `task/md_degraded` task.
 - Introduce `--pidfile` flag to `fz`.
 
 ## v0.0.21
