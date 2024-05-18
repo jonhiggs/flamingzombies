@@ -263,6 +263,16 @@ The device or the path of the btrfs filesystem to check.
 .It Op threshold
 Number of errors to accept. The default value is 0.
 .El
+.It Cm task/btrfs_snapshot_age Ar root Ar subvolume Ar threshold
+Check that a subvolume snapshot exists that is more recent than the threshold
+.Bl -tag -width "btrfs_subvolume"
+.It Ar root
+The path that a btrfs filesystem is mounted
+.It Ar subvolume
+The path within the btrfs filesystem containing the subvolume that is checked for a recent snapshot.
+.It Op threshold
+Maximum age in seconds of the latest snapshot.
+.El
 .It Cm notifier/email
 Send notification using the local MTA.
 .It Cm notifier/ntfy Ar topic
