@@ -9,6 +9,7 @@
 - Add `task/btrfs_scrub_errors`.
 - Add `task/btrfs_scrub_time`.
 - Add `task/btrfs_snapshot_age`.
+- Improve the output of `notifier/email`.
 
 ## v0.0.21
 
