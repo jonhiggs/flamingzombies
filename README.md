@@ -6,8 +6,13 @@ A simple yet extendable, lightweight monitoring daemon.
 * Configured with flat files.
 * Complete documentation in man pages.
 * Few dependencies.
+* Stateless¹.
 * Easily extended, and customised.
 * Liberal 2-clause BSD license.
+
+<small>
+1. State of course exists, but it isn't persisted between restarts.
+</small>
 
 ---
 
