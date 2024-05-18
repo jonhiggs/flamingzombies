@@ -6,4 +6,8 @@ fi
 
 SUBJECT="${NAME}: state ${STATE}"
 
-timeout 0.2 cat | mail -s "${SUBJECT}" "$@"
+cat <<EOF | mail -s "${SUBJECT}" "$@"
+${RESULT_OUTPUT}
+---
+$(timeout 0.2 cat)
+EOF
