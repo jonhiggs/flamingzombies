@@ -8,6 +8,7 @@
 - Introduce `--pidfile` flag to `fz`.
 - Add `task/btrfs_scrub_errors`.
 - Add `task/btrfs_scrub_time`.
+- Add `task/btrfs_snapshot_age`.
 
 ## v0.0.21
 

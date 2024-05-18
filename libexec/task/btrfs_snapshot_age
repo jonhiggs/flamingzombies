@@ -1,0 +1,57 @@
+#!/bin/sh
+
+# This plugin only supports Linux. Only Linux uses btrfs, right?
+
+set -eu
+
+_dateEpoch() { date --date="$1" +%s; }
+
+_subvolume_snapshots() {
+  btrfs subvolume show "$1/$2"              \
+    | sed -n '
+        /Snapshot(s):/,/Quota\ group:/ {
+          /Snapshot(s):/d;
+          /Quota group:/d;
+          s/^\t*//;
+          p
+        }
+      '                                     \
+    |  sed "s#^#/srv/storage/#"
+}
+
+_subvolume_age() {
+  _dateEpoch "$(btrfs subvolume show "$1" | awk '/Creation time:/ { print $3, $4, $5 }')"
+}
+
+if [ $# -ne 3 ]; then
+  echo "you must provide three arguments" >&2
+  exit 3
+fi
+
+root_dev="$1"
+subvolume="$2"
+threshold="$3"
+
+newest_snapshot="-1"
+for snap in $(_subvolume_snapshots "${root_dev}" "${subvolume}"); do
+  age=$(_subvolume_age "${snap}")
+
+  if [ "${newest_snapshot}" = "-1" ]; then
+    newest_snapshot=${age}
+    continue
+  fi
+
+  if [ "${age}" -gt "${newest_snapshot}" ]; then
+    newest_snapshot=${age}
+  fi
+done
+
+if [ "${newest_snapshot}" = "-1" ]; then
+  echo "no snapshots were found"
+  exit 1
+fi
+
+if [ "${newest_snapshot}" -lt "$(( $(date +%s) - threshold ))" ]; then
+  echo "the newest snapshot is too old ($(date --rfc-3339=seconds --date="@${newest_snapshot}"))."
+  exit 1
+fi
