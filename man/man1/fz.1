@@ -1,4 +1,4 @@
-.Dd 2024-05-02
+.Dd 2024-05-19
 .Dt fz 1
 .Os
 .Sh NAME
@@ -22,14 +22,18 @@ uses to perform the checks and decide whether a notification is raised. This mak
 The configuration file. See
 .Xr fz-config
 for details on how it can be configured.
+.It Fl C, Li --directory
+The working directory from which scripts are executed. You may use relative paths from this directory when specifying task, notifier or gate commands.
+.It Fl c, Li --help
+Basic usage information.
+.It Fl l, Li --loglevel
+The level of logs that will be emitted. Valid options are error, warn, info or debug.
 .It Fl n, Li --configtest
 Test the validity of the supplied configuration.
 .Xr fz-config
 for details on how it can be configured.
-.It Fl C, Li --directory
-The working directory from which scripts are executed. You may use relative paths from this directory when specifying task, notifier or gate commands.
-.It Fl l, Li --loglevel
-The level of logs that will be emitted. Valid options are error, warn, info or debug.
+.It Fl p, Li --pidfile
+The location where the pidfile will be written.
 .It Fl V, Li --version
 Print the version information.
 .El
@@ -43,7 +47,10 @@ Most settings can also be supplied with environment variables, but if a command 
 .El
 .Sh SEE ALSO
 .Xr fzctl 1 ,
-.Xr flamingzombies.toml 5
+.Xr flamingzombies.toml 5 ,
+.Xr fz-gates 7 ,
+.Xr fz-notifiers 7 ,
+.Xr fz-tasks 7
 .Sh "BUGS"
 .Nm flamingzombies
-is very immature. I'm sure it contains bugs and missing features.
+is still very immature. I'm sure it contains bugs and it is certainly missing features.
