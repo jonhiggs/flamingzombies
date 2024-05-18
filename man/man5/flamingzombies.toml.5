@@ -1,4 +1,4 @@
-.Dd 2024-05-14
+.Dd 2024-05-18
 .Dt flamingzombies.toml 5
 .Os
 .Sh NAME
@@ -218,9 +218,9 @@ It fails if the time is before the 'notBefore' value or after the 'notAfter' val
 seconds.
 .Bl -tag -width "servername"
 .It Ar address
-The address to connect to
+The address to connect to.
 .It Ar port
-The port on the address
+The port on the address to connect to.
 .It Ar servername
 The TLS Server Name Syndication (SNI) to check.
 .It Ar threshold
@@ -245,6 +245,24 @@ in kilobytes.
 .It Cm task/mount Ar mount_point
 Check that a file system is mounted at
 .Ar mount_point.
+.It Cm notifier/email
+Send notification using the local MTA.
+.It Cm task/btrfs_scrub_time Ar device Ar threshold
+Check that a btrfs filesystem has been recently scrubbed.
+.Bl -tag -width "threshold"
+.It Ar device
+The device or the path of the btrfs filesystem to check.
+.It Ar threshold
+Number of seconds allowed between checks.
+.El
+.It Cm task/btrfs_scrub_errors Ar device Op threshold
+Check that the last scrub of a btrfs filesystem didn't encounter errors.
+.Bl -tag -width "threshold"
+.It Ar device
+The device or the path of the btrfs filesystem to check.
+.It Op threshold
+Number of errors to accept. The default value is 0.
+.El
 .It Cm notifier/email
 Send notification using the local MTA.
 .It Cm notifier/ntfy Ar topic
@@ -351,7 +369,7 @@ args = ["300"]
 Tasks should be fast to detect issues, but it can sometimes be preferable to allow time for the task to recover before raising notifications. The 
 .Ar deferred_notifier
 in this example uses the
-.Ar task/defer
+.Ar gate/defer
 plugin to allow five minutes grace time before raising a notification.
 .Pp
 Re-raising notifications:

@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# This plugin only supports Linux. Only Linux uses btrfs, right?
+
+set -eu
+
+_dateEpoch() { date --date="$1" +%s; }
+
+if [ $# -ne 2 ]; then
+  echo "you must provide two arguments" >&2
+  exit 3
+fi
+
+path_or_device=$1
+threshold=$2
+
+# if there are any problems querying the device, capture the errors and exit 1.
+btrfs scrub status "${path_or_device}" 2>&1 \
+  | awk '/^ERROR/{print; e++} END{if (e>0) exit 1}'
+
+scrub_start_time=$(
+  btrfs scrub status "${path_or_device}" \
+    | awk '/^Scrub started/ { print $3, $4, $5, $6, $7 }'
+)
+
+scrub_start_time_epoch=$(_dateEpoch "${scrub_start_time}")
+
+if [ "${scrub_start_time_epoch}" -lt $(( $(date +%s) - threshold )) ]; then
+  echo "it has been too long since the last scrub"
+  exit 1
+fi

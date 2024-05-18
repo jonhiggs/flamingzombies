@@ -6,6 +6,8 @@
 - Fix logic of the `task/disk_free` task.
 - Fix errors in the `task/md_degraded` task.
 - Introduce `--pidfile` flag to `fz`.
+- Add `task/btrfs_scrub_errors`.
+- Add `task/btrfs_scrub_time`.
 
 ## v0.0.21
 

@@ -48,17 +48,17 @@ start=$(echo "${range}" | cut -d: -f1)
 end=$(echo "${range}" | cut -d: -f2)
 
 if [ "$(date +%s)" -lt "${start}" ]; then
-  echo "certificate is not yet valid" >&2
+  echo "certificate is not yet valid"
   exit 1
 fi
 
 if [ "$(date +%s)" -gt "${end}" ]; then
-  echo "certificate has expired" >&2
+  echo "certificate has expired"
   exit 1
 fi
 
 if [ "$(date +%s)" -gt "$((end-threshold))" ]; then
-  echo "certificate is close to expiring" >&2
+  echo "certificate is close to expiring"
   exit 1
 fi
 

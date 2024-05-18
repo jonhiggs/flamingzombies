@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# This plugin only supports Linux. Only Linux uses btrfs, right?
+
+set -eu
+
+if [ $# -lt 1 ]; then
+  echo "you must provide at least one argument" >&2
+  exit 3
+fi
+
+path_or_device=$1
+threshold=${2:-0}
+
+# if there are any problems querying the device, capture the errors and exit 1.
+btrfs scrub status "${path_or_device}" 2>&1 \
+  | awk '/^ERROR/{print; e+=1} END{if (e>0) exit 1}'
+
+btrfs scrub status -R "${path_or_device}" \
+  | awk -v t="${threshold}" '
+      ($1~/read_errors/)        && ($2>t) { print $1, $2; e++ }
+      ($1~/csum_errors/)        && ($2>t) { print $1, $2; e++ }
+      ($1~/verify_errors/)      && ($2>t) { print $1, $2; e++ }
+      ($1~/super_errors/)       && ($2>t) { print $1, $2; e++ }
+      ($1~/malloc_errors/)      && ($2>t) { print $1, $2; e++ }
+      ($1~/unverified_errors/)  && ($2>t) { print $1, $2; e++ }
+      ($1~/corrected_errors/)   && ($2>t) { print $1, $2; e++ }
+      END { if (e>0) exit 1 }
+    '
