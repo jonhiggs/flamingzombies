@@ -199,7 +199,7 @@ func usage() {
 	fmt.Println("")
 	fmt.Println("Commands:")
 	fmt.Println("  help                        This help")
-	fmt.Println("  list [ok] [fail] [unknown]  List the running tasks")
+	fmt.Println("  list [ok,fail,unknown]      List the running tasks")
 	fmt.Println("  show <task>                 Show the details of a task")
 	os.Exit(0)
 }

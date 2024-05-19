@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+TIMEOUT=${TIMEOUT:-3}
+
 if [ $# -eq 2 ]; then
   export FZ_LISTEN="$1:$2"
 fi
