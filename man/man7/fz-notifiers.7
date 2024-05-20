@@ -1,4 +1,4 @@
-.Dd 2024-05-14
+.Dd 2024-05-18
 .Dt fz-notifiers 7
 .Os
 .Sh NAME
@@ -18,22 +18,28 @@ when changing from fail to ok.
 .Pp
 It is expected that many tasks will share the same notifier, so it must handle concurrent executions.
 .Sh ENVIRONMENT
-Notifiers are executed with the metadata of the task that triggered the notifier inserted into the environment. These values are:
+Notifiers have metadata of their parent task available in the environment.
 .Bl -tag -width LAST_STATE
 .It Cm LAST_STATE
-The last state.
-.Op ok, fail
-.It Cm PRIORITY
-The
-.Ar priority
-of the task that triggered the notifier.
-.It Cm STATE
-The current state.
+The last state. See
+.Xr fz-gates 7
+for more details.
 .Op ok, fail
 .It Cm NAME
-The name of the task that the alert is for.
+The
+.Cm name
+of the parent task.
+.It Cm PRIORITY
+The
+.Cm priority
+of the parent task.
+.It Cm STATE
+The current state. See
+.Xr fz-gates 7
+for more details.
+.Op ok, fail
 .It Cm OPEN_GATES
-A comma-separated list of all open gates that caused the notifier to execute.
+A comma-separated list containing gates that allowed the notifier to execute.
 .El
 .Sh EXIT CODES
 The following exit codes are supported:
@@ -47,4 +53,8 @@ Any other exit code states that the notifier failed and
 .Xr fz
 will log an error.
 .Sh CONSIDERATIONS
-If you require more reliability than a script on a single host is capable of, you can offload the work to something else by treating the notifier as a wrapper script. For example, the wrapper might queue the message on a highly redundant service that does meet the reliability requirements.
+If you require more reliability than a script on a single host is capable of, a notifier can offload the work to another more capable system.
+.Sh SEE ALSO
+.Xr fz 1 ,
+.Xr fz-gates 7 ,
+.Xr fz-tasks 7

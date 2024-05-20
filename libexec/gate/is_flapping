@@ -1,10 +1,10 @@
 #!/bin/sh
-steps=$1
-threshold=$2
+threshold=$1
+window=${2:-32}
 state_changes=0
 
 # shellcheck disable=SC2034
-for n in $(seq 1 "${steps}"); do
+for n in $(seq 1 "${window}"); do
   # ran out of measurements
   if [ $((HISTORY_MASK & 3)) -ne 3 ]; then
     break

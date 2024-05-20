@@ -1,55 +1,94 @@
-.Dd 2024-05-03
+.Dd 2024-05-18
 .Dt fz-gates 7
 .Os
 .Sh NAME
 .Nm fz-gates
 .Nd A development guide for making your own fz gates.
 .Sh DESCRIPTION
-Gates govern when notifiers execute. They provide a high degree of control over exactly the conditions in which an alert may be raised. They base their decisions from the task's metadata received in the environment.
+Gates govern when notifiers execute. They provide a high degree of control over the exact conditions in which an alert may be raised. They base their decisions from the task's metadata received in the environment.
+.Pp
+Gates are attached to notifiers, which are attached to tasks.
 .Sh ENVIRONMENT
-Gates are executed with metadata of the triggering task available in its environment.
+Gates are executed with metadata of the triggering notifier and the parent task in the environment.
 .Bl -tag -width STATE_CHANGED
 .It Cm FREQUENCY
 The
-.Ar frequency
-of the task
-.It Cm TASK_COMMAND
-The
-.Ar command
+.Cm frequency
 of the task.
+.It Cm HISTORY
+A uint32 holding the result of the last 32 task executions. Read using bitwise operators; high is
+.Cm ok
+and low is
+.Cm fail .
+The least significant bit holds the most recent execution.
+.It Cm HISTORY_MASK
+A uint32 representing how many of the bits
+.CM HISTORY
+contains records. This needed to tell how many of the leading zeros are significant. Read using bitwise operators; high represents a measurement and low does not.
 .It Cm LAST_STATE
-The last stable state. Not to be confused with STATE.
+The last stable state. Not to be confused with
+.Cm STATE .
+The value is calculated by performing a bitwise right-shift on
+.Cm HISTORY .
+It continues shifting backwards until a stable state is found. This will usually only take one shift;
+.Cm LAST_STATE
+will equal
+.Cm STATE
+making
+.Cm STATE_CHANGED
+be false.
 .Op ok, fail
-.It Cm LAST_OK
-The epoch when the task was last in an ok state.
 .It Cm LAST_FAIL
-The epoch when the task was last in a fail state.
+The epoch when the task was last in a
+.Cm fail
+state.
+.It Cm LAST_OK
+The epoch when the task was last in an
+.Cm ok
+state.
 .It Cm LAST_NOTIFICATION
-The epoch of the last notification sent through this notifier. Tasks hold the last notification time for each notifier, but only the last notification time for this notifier is available in a gate.
+The epoch when the notifier which the gate is attached lasted sent a notification.
 .It Cm PRIORITY
 The
-.Ar priority
+.Cm priority
 of the task.
 .It Cm STATE
-The current state of the task. A value of 'unknown' represents that the task is in an unstable state and is executing at its retry_interval.
+The current state of the task. A value of
+.Cm unknown
+represents a task that is in an unstable state and is executing at its
+.Cm retry_interval .
+When the value is
+.Cm ok
+or
+.Cm fail
+the task is in that stable state.
 .Op ok, fail, unknown
 .It Cm STATE_CHANGED
-Whether the current stable state matches the last stable state.
+Whether
+.Cm STATE
+matches
+.Cm LAST_STATE .
 .Op true, false
-.It Cm HISTORY
-A uint32 representing the last 32 executions results of the task. Read using bitwise operators; high is ok and low is fail. The least significant bit is the most recent execution.
-.It Cm HISTORY_MASK
-A uint32 representing how much of the history contains values. This needed to tell how many of the leading zeros in HISTORY are significant. Read using bitwise operators; high represents a measurement and low does not.
+.It Cm TASK_COMMAND
+The
+.Cm command
+of the task.
+.El
 .Sh EXIT CODES
 The following exit codes are recognised:
 .Pp
 .Bl -tag -width XX
 .It Cm 0
-The gate is open, permitting the notifier to execute.
+The gate is open permitting the notifier to execute.
 .El
 .Pp
-Any other exit code closes the gate preventing the notifier from executing.
+All other exit codes indicate a closed gate.
 .Sh CONSIDERATIONS
-Gates should be stateless. Rarely, will they depend on more than the provided metadata. They have a fixed timeout of one second which if exceeded, results in the gate being closed. Gate timeouts are logged as errors and must be prevented otherwise alerts will be dropped.
-.Pp
-Gates are not retried, and cannot return an unknown state.
+Gates should be stateless. Rarely, will they depend on more than the
+.Cm ENVIRONMENT .
+They have a fixed timeout of one second which if exceeded, results in a closed gate and an error logged to the
+.Cm log_file .
+.Sh SEE ALSO
+.Xr fz 1 ,
+.Xr fz-notifiers 7 ,
+.Xr fz-tasks 7

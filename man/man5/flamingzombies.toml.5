@@ -8,11 +8,11 @@
 The
 .Nm
 file describes the tasks to execute, and the action(s) to take
-when a task changes state.
+when they change state.
 .Sh GENERAL SETTINGS
 The following setting affect the
 .Xr fz 1
-daemon and are unrelated to any single task:
+daemon and are to tasks:
 .Bl -tag -width Ds
 .It Ic directory = Ar path
 The working directory of the daemon. All tasks, notifiers and gates are executed using this as their working directory.
@@ -21,20 +21,22 @@ By default,
 .Pa /usr/libexec/flamingzombies
 is used.
 .It Ic listen_address = Ar ip:port
-The network port to open for
+The network port used by
 .Xr fzctl 1
 to query the state of the daemon.
 .Pp
-The internal state of each task is sent to any client connecting to this port. The output is formatted as JSON Lines with each line describing one task. No sensitive data is returned, and the client has no control over the daemon, but this may change in future versions. Limiting access to this port using a firewall is recommend.
+The internal state of each task is sent to any client connecting to this port. The output is formatted as JSON Lines with each line describing one task. No sensitive data is returned, and the client has no control over the daemon, but this may change in future versions. It is recommend that you limit access to this port using a firewall.
 .Pp
 By default, port 127.0.0.1:5891 is used.
 .It Ic log_file = Ar path
 The path to write the daemon's logs. A value of
 .Pa stdout
-or a single dash (-) will route the logs to stdout.
+or
+.Pa -
+(single dash) will route the logs to stdout.
 .It Ic log_level = Ar level
-The level at which the daemon logs. Any errors at or above the specified level are logged to the configured
-.Ic log_file.
+The level at which the daemon logs. All events at or above the specified level are logged to the configured
+.Ic log_file .
 .Pp
 Valid levels are:
 .Bl -tag -width "error"
@@ -45,107 +47,108 @@ Events which don't compromise the effectiveness of the service, but might indica
 .It Cm info
 Events that occur during normal operation.
 .It Cm debug
-Events that may help in debugging.
+Events that may help during debugging.
 .El
 .Sh TASKS
 Tasks are the commands that check that a service or system is operational. They run periodically and trigger each of their notifiers after every new measurement is recorded.
 .Pp
 There is no limit to the number of tasks that can be specified in the configuration file.
 .Pp
-Two executions of a task cannot overlap (have a concurrency greater than one) because it must have a
-.Ar timeout
-lower than its
-.Ar frequency
-or
-.Ar retry_frequency
-\&.
+A task cannot have concurrent executions. It's
+.Cm timeout
+must be lower than both its
+.Cm frequency
+and
+.Cm retry_frequency .
 .Pp
 Tasks are randomly (yet consistently) distributed across time to prevent their executions from clustering at the beginning of minutes, hours and days.
 .Pp
 The number of
-.Ar retries
-sets window size for how many historic checks are considered when evaluating a task's state. If all values in the window are are successful or successful, then the task is in an
-.Ar ok
+.Cm retries
+sets window size for how many historic checks are considered when evaluating a task's state. If all values within the window are are successful or successful, then the task is in an
+.Cm ok
 or
-.Ar fail
+.Cm fail
 state, respectfully. Otherwise, state is
-.Ar unknown
-and more tests are required before any decision can be made.
+.Cm unknown
+and more tests must be conducted before the tasks state can be known.
 .Pp
 While a task is in an
-.Ar unknown
-state, it is re-executed at the
-.Ar retry_frequency
-rate.
+.Cm unknown
+state, it is re-executed at the rate of its
+.Cm retry_frequency .
 .Pp
-Flapping tasks can remain in an unknown state indefinitely. It is important to not to set the
-.Ar retry
-value too high. If you wish to defer notifications allowing time to auto-recover before raising an alarm, you're better off writing a notification gate rather than increasing the number of retries.
+Flapping tasks can remain in an
+.Cm unknown
+state indefinitely. To avoid this risk, it is important to not to set the
+.Cm retry
+count too high. If you are tempted to raise the
+.Cm retry
+count to defer notifications until the task has had a chance to automatically recover, look into using the
+.Ar defer
+gate, instead.
 .Pp
 The configuration options of a task are:
 .Bl -tag -width Ds
-.It Ic name = Ar task_name
-The name you have given to the task. This is used by
-.Xr fzctl 1
-to select which task to operate on.
+.It Ic args = Op command_arguments...
+The arguments to send to the
+.Ar command .
 .It Ic command = Ar path
 The path to the task command to execute. This can be a fully qualified path, or one which is relative to the
 .Ar directory
 (See GENERAL_SETTINGS).
-.It Ic args = Op command_arguments...
-The command arguments to send to the
-.Ar command
+.It Ic error_body = Ar text
+The string of text used by notifiers when raising failure alerts.
 .It Ic frequency = Ar seconds
-The frequency in which to execute the task. If the task is in an
-.Ar unknown
-state, the check is executed at the
-.Ar retry_frequency
-rate, instead.
+The frequency in which to a task is executed. While the task's state is
+.Cm unknown ,
+the check is instead executed at the rate of
+.Cm retry_frequency .
 .Pp
 It must have a value less than
-.Ar timeout
+.Cm timeout
 to prevent concurrent executions of the task.
+.It Ic name = Ar task_name
+The name given to the task. This is used by
+.Xr fzctl 1
+when selecting a task to operate on.
+.It Ic notifiers = Op notifiers...
+A list of notifiers to trigger when a task is executed. Every task execution triggers a notifier. Gates on the notifiers are used to suppress unwanted notifications. See
+.Cm NOTIFIERS
+for more details.
+.It Ic priority = Ar number
+The priority is an integer greater than 1. The meaning of each value is up to the user. Typically, priority 1 is the most important and the importance decreasing as the number grows larger.
+.Pp
+The value is provided to gates and notifier commands but is otherwise unused.
+.It Ic recover_body = Ar text
+The string of text used by notifiers when raising recovery alerts.
+.It Ic retries = Ar count
+Number of measurements required to confirm a tasks state.
+.Pp
+.It Ic retry_frequency = Ar seconds
+The frequency a task is executed while its state is unknown. Must be less than the
+.Ar timeout .
 .It Ic timeout = Ar seconds
 How long to allow the
 .Ar command
 to execute before it is terminated. If the timeout is exceeded, no value is recorded and an error is logged. Since no measurement is taken, the notifier is not triggered and there is no way to alert when in this condition. Timeouts are serious issues that must be prevented.
-.It Ic retries = Ar count
-How many times to retry perform a task to confirm a state change. Use for accounting for intermittent issues when collecting measurements, rather than as a way to smooth flapping alerts.
-.Pp
-.It Ic retry_frequency = Ar seconds
-The frequency a task is executed while its state is unknown. Must be less than the
-.Ar timeout
-.It Ic notifiers = Op notifiers...
-A list of notifiers to trigger when a task is executed. Every task execution triggers a notifier. Gates on the notifiers are used to suppress unwanted notifications.
-.It Ic priority = Ar number
-The priority is an integer greater than 1. What each value means up to the user. Typically, priority 1 is the most important and the importance decreasing as the number grows larger.
-.Pp
-The priority is part of the payload sent to notification gates but is otherwise unused.
-.It Ic error_body = Ar text
-This string of text is intended to be used by notifiers when raising failure alerts.
-.It Ic recover_body = Ar text
-This string of text is intended to be used by notifiers when raising recovery alerts.
 .El
 .Sh NOTIFIERS
-Notifiers raise alerts for tasks. They're triggered each time a task using it records a new measurement. Before executing the notifier command (which results in an alert being sent), each of its gates are check to be open (return exit code of zero). A notifier is only responsible for raising alerts, and should never attempt to control when alerts are sent.
+Notifiers raise alerts for tasks. They're triggered each a new measurement a task takes. Before executing the notifier command (which results in an alert being sent), each gate is checked. A notifier is only responsible for raising alerts, and doesn't influence when alerts are sent.
 .Pp
 The configuration options of a notifier are:
 .Bl -tag -width Ds
-.It Ic name = Ar notifier_name
-The name of the notifier. This is the reference used in the tasks
-.Ar notifiers
-list.
+.It Ic args = Op command_arguments...
+The arguments to send to the
+.Ar command .
 .It Ic command = Ar path
 The path of the notifier command to execute. This can be a fully qualified path, or one which is relative to the
 .Ar directory
 (See GENERAL_SETTINGS).
-.It Ic args = Op command_arguments...
-The command arguments to send to the
-.Ar command
 .It Ic gates = Op [gates...]...
-A list of gatesets, each containing gates. Gatesets are evaluated by ANDing the results of its gates together. If any gate in the set is closed, then the gateset is closed. Then the gatesets are then ORed together to determine whether or not to execute the notifier.
+A list of gatesets, each containing gates. Gatesets are evaluated by ANDing the results of their gates together. If any gate in the set is closed, then the gateset is closed. Then the gatesets are then ORed together to determine whether or not to execute the notifier. If any gateset is open, then the notifier will execute.
 .Pp
-You may have unlimited gatesets, but each must contain no more than 30 gates.
+You may have unlimited gatesets, but each must contain fewer than 30 gates.
 .Pp
 So for the values:
 .Bd -literal -offset indent
@@ -153,22 +156,38 @@ So for the values:
 .Ed
 .Pp
 The result would evaluate to false, because neither gateset has a complete set of true values. The notifier command won't execute.
+.Pp
+And with the values:
+.Bd -literal -offset indent
+[open_gate, closed_gate], [open_gate, open_gate]
+.Ed
+.Pp
+The result would evaluate to true, because the second gateset has a complete set of true values. The notifier command will execute.
+.It Ic name = Ar notifier_name
+The name of the notifier. This is the reference used in the tasks
+.Ar notifiers
+list.
 .It Ic timeout = Ar seconds
 The number of seconds before the notifier times out. There is no retry logic for failed or timed out notifiers. These programs should be highly reliable, and manage their own retries. A notifier returning a non-zero exit code is a serious error which is logged.
 .Sh GATES
-Gates provide fine-grained control over when an notifier may executed. One or more gates must be applied to each notifier otherwise alerts are raised on every execution of the task.
+Gates provide fine-grained control over when an notifier may executed. One or more gates must be applied to each notifier otherwise alerts are raised on every execution of the task. A command that exits zero is an open gate and does not suppress the notifier from executing. See
+.Cm NOTIFIERS
+for more information about how they're used.
 .Bl -tag -width Ds
-.It Ic name = Ar gate_name
-The name of the gate. Referenced when applying a gate to a notifier.
-.It Ic command = Ar path
-The path of the gate command to execute. This can be a fully qualified path, or one which is relative to the
-.Ar directory
-(See GENERAL_SETTINGS).
 .It Ic args = Op command_arguments...
 The command arguments sent to the
-.Ar command
+.Cm command .
+.It Ic command = Ar path
+The path of the gate command to execute. This can be a fully qualified path, or one which is relative to the
+.Cm directory
+which is documented in
+.Cm "GENERAL SETTINGS" .
+.It Ic name = Ar gate_name
+The name of the gate. Referenced when applying a gate to a notifier. See
+.Cm NOTIFIERS .
+.El
 .Sh DEFAULTS
-Default task values can be specified so that they only need to be applied to the task if they differ from the default, minimising repetition.
+Default task values can be specified to reduce repetition.
 .Pp
 An example configuration:
 .Bd -literal -offset indent
@@ -183,34 +202,96 @@ priority = 3
 frequency = 60
 .Ed
 .Pp
-Default values can be supplied for any task parameter.
+Default values can be supplied for any task parameter. If value is required but the task hasn't been configured with one and a default value hasn't been provided either, an error will be raised on startup.
 .Sh PLUGINS
 .Xr fz
 comes with many plugins that are ready to use.
+.Ss Gates
+Gate plugins control when notifiers can execute. See
+.Cm GATES
+for details.
 .Bl -tag -width Ds
-.It Cm task/disk_free Ar mount_point Ar threshold
+.It Cm min_priority Ar priority
+Is open when the tasks priority is a smaller number than
+.Ar priority .
+.It Cm to_state Ar state
+Is open from the time when a task enters a new state until a notification has been sent.
+.Pp
+Valid options for state are:
+.Bl -tag -width "fail"
+.It Cm ok
+The gate opens after the state flips from fail to ok until a notification is sent.
+.It Cm fail
+The gate opens after the state flips from ok to fail until a notification is sent.
+.El
+.It Cm defer Ar seconds
+Hold gate closed until a task has remained in its current state for
+.Ar seconds .
+.It Cm renotify Ar seconds
+Open gate when the tasks state has remained in the current state and the last notification was sent more than
+.Ar seconds
+ago.
+.It Cm is_state Ar state
+Open while the current state matches
+.Ar state .
+.It Cm is_flapping Ar threshold Op window
+Detect if a task is flapping between states.
+.Pp
+The plugin expects two arguments:
+.Bl -tag -width "threshold"
+.It Cm threshold
+How many state changes are allowed within the window. A state change is a flip from ok to fail, or fail to ok.
+.It Cm window
+How many measurements to use from the history when searching for state changes. A maximum value of 32 is allowed. The default value is 32.
+.El
+.Pp
+When tuning, consider that the timespan covered by the measurements can vary wildly depending on the values for
+.Cm retries ,
+.Cm retry_frequency ,
+and
+.Cm frequency .
+The measurement history of an infrequent check with a low retry count might span weeks, while the opposite might span just minutes.
+.El
+.El
+.Ss Notifiers
+Notifier plugins handle deliver of notifications. See
+.Cm NOTIFIERS
+for details.
+.Bl -tag -width Ds
+.It Cm email
+Send notification using the local MTA.
+.It Cm ntfy Ar topic
+Send notification using the ntfy web service.
+.It Cm null
+A phony notifier for testing purposes.
+.El
+.Ss Tasks
+.Bl -tag -width Ds
+.It Cm disk_free Ar mount_point Ar threshold
 Ensure that the
 .Ar mount_point
 has no less than the
 .Ar threshold
 kilobytes of free disk space.
-.It Cm task/flappy
+.It Cm flappy
 This is a test task. It passes for 20 seconds, then fails for 20 seconds.
-.It Cm task/http_headers Ar url Op pattern...
-Query the URL and ensure that the response headers include all of the expected patterns.
-.It Cm task/http_resp_body Ar url Ar pattern
+.It Cm http_headers Ar url Op pattern...
+Query the URL and ensure that the response headers contain each expected pattern.
+.It Cm http_resp_body Ar url Ar pattern
 Query the URL and ensure that the response body contains the expected pattern.
-.It Cm task/md_degraded Ar md_device Ar active_devices Op working_devices] [spare_devices] [failed_devices
-Ensure that the md_device has the expected number of underlying block devices.
-.It Cm task/ping Ar host Op packets
+.It Cm md_degraded Ar md_device Ar active_devices Op working_devices] [spare_devices] [failed_devices
+Ensure that the
+.Ar md_device
+has the expected number of underlying block devices.
+.It Cm ping Ar host Op packets
 Ping the host with a number of packets. The task succeeds if all the expected packets are received.
-.It Cm task/port_open Ar host Ar port
+.It Cm port_open Ar host Ar port
 Check if host has an open port.
-.It Cm task/fz_errors Ar host Ar port
+.It Cm fz_errors Ar host Ar port
 Check that none of fz's tasks have experienced an error.
 .Pp
 It is unwise to point this to a local fz daemon.
-.It Cm task/tls_expiration Ar address Ar port Ar servername Ar threshold
+.It Cm tls_expiration Ar address Ar port Ar servername Ar threshold
 Check that the TLS certificate on a port is valid.
 .Pp
 It fails if the time is before the 'notBefore' value or after the 'notAfter' value, minus the
@@ -226,28 +307,26 @@ The TLS Server Name Syndication (SNI) to check.
 .It Ar threshold
 Number of seconds before the certificate expires that the task fails.
 .El
-.It Cm task/loadavg Op threshold
+.It Cm loadavg Op threshold
 Check that the 1m load average is below the threshold. The default threshold value is 1.0.
-.It Cm task/file_exists Ar file
+.It Cm file_exists Ar file
 Check that
 .Ar file
-exists and is a file.
-.It Cm task/file_max_age Ar file Ar seconds
-Check that the mtime of
+exists.
+.It Cm file_max_age Ar file Ar seconds
+Check that the modification time of
 .Ar file
 is no more than
 .Ar seconds
 ago.
-.It Cm task/swap_free Ar threshold
-Check that free space space is greater than the
+.It Cm swap_free Ar threshold
+Check that free swap space is greater than the
 .Ar threshold
 in kilobytes.
-.It Cm task/mount Ar mount_point
+.It Cm mount Ar mount_point
 Check that a file system is mounted at
 .Ar mount_point.
-.It Cm notifier/email
-Send notification using the local MTA.
-.It Cm task/btrfs_scrub_time Ar device Ar threshold
+.It Cm btrfs_scrub_time Ar device Ar threshold
 Check that a btrfs filesystem has been recently scrubbed.
 .Bl -tag -width "threshold"
 .It Ar device
@@ -255,66 +334,23 @@ The device or the path of the btrfs filesystem to check.
 .It Ar threshold
 Number of seconds allowed between checks.
 .El
-.It Cm task/btrfs_scrub_errors Ar device Op threshold
+.It Cm btrfs_scrub_errors Ar device Op threshold
 Check that the last scrub of a btrfs filesystem didn't encounter errors.
 .Bl -tag -width "threshold"
 .It Ar device
 The device or the path of the btrfs filesystem to check.
-.It Op threshold
+.It Ar threshold
 Number of errors to accept. The default value is 0.
 .El
-.It Cm task/btrfs_snapshot_age Ar root Ar subvolume Ar threshold
-Check that a subvolume snapshot exists that is more recent than the threshold
+.It Cm btrfs_snapshot_age Ar root Ar subvolume Ar threshold
+Check that a subvolume snapshot exists and that is more recent than the threshold.
 .Bl -tag -width "btrfs_subvolume"
 .It Ar root
-The path that a btrfs filesystem is mounted
+The path that the btrfs filesystem is mounted
 .It Ar subvolume
 The path within the btrfs filesystem containing the subvolume that is checked for a recent snapshot.
-.It Op threshold
+.It Ar threshold
 Maximum age in seconds of the latest snapshot.
-.El
-.It Cm notifier/email
-Send notification using the local MTA.
-.It Cm notifier/ntfy Ar topic
-Send notification using the ntfy web service.
-.It Cm notifier/null
-A phony notifier for testing purposes.
-.It Cm gate/min_priority Ar priority
-Open the gate if it's less than the minimum priority.
-.It Cm gate/to_state Ar state
-Open when state has changed, but a notification is yet to be executed.
-.Pp
-Valid options for state are:
-.Bl -tag -width "fail"
-.It Cm ok
-The gate opens after the state flips from fail to ok until a notification is sent.
-.It Cm fail
-The gate opens after the state flips from ok to fail until a notification is sent.
-.El
-.It Cm gate/defer Ar seconds
-Prevent a gate from opening until it been it its state for the specified time.
-.It Cm gate/renotify Ar seconds
-Open the gate if it as been longer than
-.It Cm gate/is_state Ar state
-Open while the current state matches the
-.Ar state
-argument.
-.It Cm gate/is_flapping Ar threshold Ar window
-Detect if a task is flapping between states.
-.Pp
-The plugin expects two arguments:
-.Bl -tag -width "threshold"
-.It Cm threshold
-How many state changes are allowed within the window. A state change is a flip from ok to fail, or fail to ok.
-.It Cm window
-How many measurements to consider when searching for state changes. A maximum window 32 will be used.
-.El
-.Pp
-When tuning, consider the timespan covered by the measurements can vary wildly based on the
-.Ar retry
-count, and
-.Ar frequency
-rate. A full set of measurements for an infrequent check with a low retry count might cover weeks, while the opposite might cover just minutes.
 .El
 .Sh EXAMPLES
 A minimal configuration:
