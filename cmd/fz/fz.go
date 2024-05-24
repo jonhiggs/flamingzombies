@@ -29,14 +29,20 @@ func init() {
 		os.Setenv("FZ_LISTEN", "127.0.0.1:5891")
 	}
 
+	if os.Getenv("FZ_STATSD_PREFIX") == "" {
+		os.Setenv("FZ_STATSD_PREFIX", "fz")
+	}
+
 	options := []optparse.Option{
 		{"config", 'c', optparse.KindRequired},
 		{"configtest", 'n', optparse.KindNone},
 		{"directory", 'C', optparse.KindRequired},
 		{"help", 'h', optparse.KindNone},
 		{"loglevel", 'l', optparse.KindRequired},
-		{"version", 'V', optparse.KindNone},
 		{"pidfile", 'p', optparse.KindRequired},
+		{"statsd-host", ' ', optparse.KindRequired},
+		{"statsd-prefix", ' ', optparse.KindRequired},
+		{"version", 'V', optparse.KindNone},
 	}
 
 	results, _, err := optparse.Parse(options, os.Args)
@@ -60,6 +66,10 @@ func init() {
 				fmt.Println(err)
 				os.Exit(1)
 			}
+		case "statsd-host":
+			os.Setenv("FZ_STATSD_HOST", result.Optarg)
+		case "statsd-prefix":
+			os.Setenv("FZ_STATSD_PREFIX", result.Optarg)
 		case "help":
 			usage()
 			return
@@ -110,12 +120,14 @@ func usage() {
 	fmt.Println("  fz [OPTIONS]")
 	fmt.Println("")
 	fmt.Println("Options:")
-	fmt.Println("  -c, --config <file>     Configuration file")
-	fmt.Println("  -C, --directory <path>  Change to directory")
-	fmt.Println("  -h, --help              This help")
-	fmt.Println("  -l, --loglevel <level>  Override the log level")
-	fmt.Println("  -n, --configtest        Test validity of the configuration")
-	fmt.Println("  -p, --pidfile           The pidfile to write")
-	fmt.Println("  -V, --version           Version")
+	fmt.Println("  -c, --config <file>            Configuration file")
+	fmt.Println("  -n, --configtest               Test validity of the configuration")
+	fmt.Println("  -C, --directory <path>         Change to directory")
+	fmt.Println("  -h, --help                     This help")
+	fmt.Println("  -l, --loglevel <level>         Override the log level")
+	fmt.Println("  -p, --pidfile                  The pidfile to write")
+	fmt.Println("      --statsd-host <host:port>  The host to deliver statsd metrics")
+	fmt.Println("      --statsd-prefix <str>      The prefix of the statsd metrics")
+	fmt.Println("  -V, --version                  Version")
 	os.Exit(0)
 }

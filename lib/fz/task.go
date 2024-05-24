@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/cactus/go-statsd-client/v5/statsd"
 )
 
 const GRACE_TIME = time.Duration(500) * time.Millisecond
@@ -106,6 +108,12 @@ func (t *Task) Run() bool {
 	t.LastRun = time.Now()
 	t.ExecutionCount++
 
+	StatsdClient.Inc(
+		"task.execution", 1, 1.0,
+		statsd.Tag{"host", Hostname},
+		statsd.Tag{"name", t.Name},
+	)
+
 	errorMessage, _ := io.ReadAll(stderr)
 	stdoutBytes, _ := io.ReadAll(stdout)
 	t.LastResultOutput = strings.TrimSuffix(string(stdoutBytes), "\n")
@@ -115,6 +123,19 @@ func (t *Task) Run() bool {
 	if ctx.Err() == context.DeadlineExceeded {
 		Logger.Error("time out exceeded while executing command", "task", t.Name)
 		t.ErrorCount++
+
+		StatsdClient.Inc(
+			"task.execution", 1, 1.0,
+			statsd.Tag{"host", Hostname},
+			statsd.Tag{"name", t.Name},
+		)
+
+		StatsdClient.Inc(
+			"task.error", 1, 1.0,
+			statsd.Tag{"host", Hostname},
+			statsd.Tag{"name", t.Name},
+		)
+
 		return false
 	}
 
@@ -122,6 +143,13 @@ func (t *Task) Run() bool {
 		if os.IsPermission(err) {
 			Logger.Error(fmt.Sprint(err), "task", t.Name)
 			t.ErrorCount++
+
+			StatsdClient.Inc(
+				"task.error", 1, 1.0,
+				statsd.Tag{"host", Hostname},
+				statsd.Tag{"name", t.Name},
+			)
+
 			return false
 		}
 	}
@@ -143,9 +171,23 @@ func (t *Task) Run() bool {
 		return false
 	case 0:
 		t.OKCount++
+
+		StatsdClient.Inc(
+			"task.ok", 1, 1.0,
+			statsd.Tag{"host", Hostname},
+			statsd.Tag{"name", t.Name},
+		)
+
 		t.RecordStatus(true)
 	default:
 		t.FailCount++
+
+		StatsdClient.Inc(
+			"task.fail", 1, 1.0,
+			statsd.Tag{"host", Hostname},
+			statsd.Tag{"name", t.Name},
+		)
+
 		t.RecordStatus(false)
 	}
 
