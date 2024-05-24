@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/cactus/go-statsd-client/v5/statsd"
 )
 
 type Gate struct {
@@ -36,9 +38,9 @@ func (g Gate) IsOpen(t *Task, n *Notifier) bool {
 	}
 
 	err := cmd.Run()
-
 	if ctx.Err() == context.DeadlineExceeded {
 		Logger.Error(fmt.Sprintf("time out exceeded while executing gate"), "gate", g.Name)
+		g.IncMetric("timeout")
 
 		return false
 	}
@@ -46,9 +48,13 @@ func (g Gate) IsOpen(t *Task, n *Notifier) bool {
 	if err != nil {
 		if os.IsPermission(err) {
 			Logger.Error(fmt.Sprint(err), "gate", g.Name)
+			g.IncMetric("error")
 		}
+
+		g.IncMetric("closed")
 		return false
 	}
+	g.IncMetric("open")
 	return true
 }
 
@@ -64,6 +70,14 @@ func (g Gate) validate() error {
 	}
 
 	return nil
+}
+
+func (g Gate) IncMetric(x string) {
+	StatsdClient.Inc(
+		fmt.Sprintf("gate.%s", x), 1, 1.0,
+		statsd.Tag{"host", Hostname},
+		statsd.Tag{"name", g.Name},
+	)
 }
 
 func GateByName(name string) (*Gate, error) {

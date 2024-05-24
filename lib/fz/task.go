@@ -108,12 +108,6 @@ func (t *Task) Run() bool {
 	t.LastRun = time.Now()
 	t.ExecutionCount++
 
-	StatsdClient.Inc(
-		"task.execution", 1, 1.0,
-		statsd.Tag{"host", Hostname},
-		statsd.Tag{"name", t.Name},
-	)
-
 	errorMessage, _ := io.ReadAll(stderr)
 	stdoutBytes, _ := io.ReadAll(stdout)
 	t.LastResultOutput = strings.TrimSuffix(string(stdoutBytes), "\n")
@@ -123,18 +117,7 @@ func (t *Task) Run() bool {
 	if ctx.Err() == context.DeadlineExceeded {
 		Logger.Error("time out exceeded while executing command", "task", t.Name)
 		t.ErrorCount++
-
-		StatsdClient.Inc(
-			"task.execution", 1, 1.0,
-			statsd.Tag{"host", Hostname},
-			statsd.Tag{"name", t.Name},
-		)
-
-		StatsdClient.Inc(
-			"task.error", 1, 1.0,
-			statsd.Tag{"host", Hostname},
-			statsd.Tag{"name", t.Name},
-		)
+		t.IncMetric("timeout")
 
 		return false
 	}
@@ -143,12 +126,7 @@ func (t *Task) Run() bool {
 		if os.IsPermission(err) {
 			Logger.Error(fmt.Sprint(err), "task", t.Name)
 			t.ErrorCount++
-
-			StatsdClient.Inc(
-				"task.error", 1, 1.0,
-				statsd.Tag{"host", Hostname},
-				statsd.Tag{"name", t.Name},
-			)
+			t.IncMetric("error")
 
 			return false
 		}
@@ -166,28 +144,18 @@ func (t *Task) Run() bool {
 
 	switch exitCode {
 	case 3: // unknown status
+		t.IncMetric("unknown")
 		return false
 	case 124: // unknown status due to timeout
+		t.IncMetric("unknown")
 		return false
 	case 0:
 		t.OKCount++
-
-		StatsdClient.Inc(
-			"task.ok", 1, 1.0,
-			statsd.Tag{"host", Hostname},
-			statsd.Tag{"name", t.Name},
-		)
-
+		t.IncMetric("ok")
 		t.RecordStatus(true)
 	default:
 		t.FailCount++
-
-		StatsdClient.Inc(
-			"task.fail", 1, 1.0,
-			statsd.Tag{"host", Hostname},
-			statsd.Tag{"name", t.Name},
-		)
-
+		t.IncMetric("fail")
 		t.RecordStatus(false)
 	}
 
@@ -199,6 +167,14 @@ func (t *Task) Run() bool {
 		}
 	}
 	return true
+}
+
+func (t *Task) IncMetric(x string) {
+	StatsdClient.Inc(
+		fmt.Sprintf("task.%s", x), 1, 1.0,
+		statsd.Tag{"host", Hostname},
+		statsd.Tag{"name", t.Name},
+	)
 }
 
 func (t *Task) RecordStatus(b bool) {
