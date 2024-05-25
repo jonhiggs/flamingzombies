@@ -3,8 +3,14 @@
 # spend 20 seconds up, and 20 seconds down.
 
 if [ $(( $(date +%s) % 40 )) -le 20 ]; then
+  echo "${STATSD_PREFIX}.flappy:1|g|${STATSD_TAGS}" \
+    | nc -w0 -u "$(echo "${STATSD_HOST}" | cut -d: -f1)" "$(echo "${STATSD_HOST}" | cut -d: -f2)"
+
   exit 0
 else
+  echo "${STATSD_PREFIX}.flappy:0|g|${STATSD_TAGS}" \
+    | nc -w0 -u "$(echo "${STATSD_HOST}" | cut -d: -f1)" "$(echo "${STATSD_HOST}" | cut -d: -f2)"
+
   echo "i'm a flappy error" >&2
   echo "i'm a flappy info"
   exit 1
