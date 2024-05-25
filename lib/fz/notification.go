@@ -63,6 +63,7 @@ func ProcessNotifications() {
 
 				stderr, _ := cmd.StderrPipe()
 
+				startTime := time.Now()
 				err = cmd.Start()
 				if err != nil {
 					if ctx.Err() == context.DeadlineExceeded {
@@ -76,6 +77,7 @@ func ProcessNotifications() {
 				errorMessage, _ := io.ReadAll(stderr)
 
 				err = cmd.Wait()
+				n.DurationMetric(time.Now().Sub(startTime))
 
 				if ctx.Err() == context.DeadlineExceeded {
 					Logger.Error(fmt.Sprintf("time out exceeded while executing notifier"), "notifier", n.Notifier.Name)
@@ -136,7 +138,15 @@ func (n Notification) body() string {
 
 func (n Notification) IncMetric(x string) {
 	StatsdClient.Inc(
-		fmt.Sprintf("notication.%s", x), 1, 1.0,
+		fmt.Sprintf("notifier.%s", x), 1, 1.0,
+		statsd.Tag{"host", Hostname},
+		statsd.Tag{"name", n.Notifier.Name},
+	)
+}
+
+func (n Notification) DurationMetric(d time.Duration) {
+	StatsdClient.TimingDuration(
+		"notifier.duration", d, 1.0,
 		statsd.Tag{"host", Hostname},
 		statsd.Tag{"name", n.Notifier.Name},
 	)

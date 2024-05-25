@@ -100,6 +100,7 @@ func (t *Task) Run() bool {
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
 
+	startTime := time.Now()
 	err := cmd.Start()
 	if err != nil {
 		panic(err)
@@ -113,6 +114,7 @@ func (t *Task) Run() bool {
 	t.LastResultOutput = strings.TrimSuffix(string(stdoutBytes), "\n")
 
 	err = cmd.Wait()
+	t.DurationMetric(time.Now().Sub(startTime))
 
 	if ctx.Err() == context.DeadlineExceeded {
 		Logger.Error("time out exceeded while executing command", "task", t.Name)
@@ -172,6 +174,14 @@ func (t *Task) Run() bool {
 func (t *Task) IncMetric(x string) {
 	StatsdClient.Inc(
 		fmt.Sprintf("task.%s", x), 1, 1.0,
+		statsd.Tag{"host", Hostname},
+		statsd.Tag{"name", t.Name},
+	)
+}
+
+func (t *Task) DurationMetric(d time.Duration) {
+	StatsdClient.TimingDuration(
+		"task.duration", d, 1.0,
 		statsd.Tag{"host", Hostname},
 		statsd.Tag{"name", t.Name},
 	)

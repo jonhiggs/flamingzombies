@@ -37,7 +37,9 @@ func (g Gate) IsOpen(t *Task, n *Notifier) bool {
 		fmt.Sprintf("TASK_COMMAND=%s", t.Command),
 	}
 
+	startTime := time.Now()
 	err := cmd.Run()
+	g.DurationMetric(time.Now().Sub(startTime))
 	if ctx.Err() == context.DeadlineExceeded {
 		Logger.Error(fmt.Sprintf("time out exceeded while executing gate"), "gate", g.Name)
 		g.IncMetric("timeout")
@@ -75,6 +77,14 @@ func (g Gate) validate() error {
 func (g Gate) IncMetric(x string) {
 	StatsdClient.Inc(
 		fmt.Sprintf("gate.%s", x), 1, 1.0,
+		statsd.Tag{"host", Hostname},
+		statsd.Tag{"name", g.Name},
+	)
+}
+
+func (g *Gate) DurationMetric(d time.Duration) {
+	StatsdClient.TimingDuration(
+		"gate.duration", d, 1.0,
 		statsd.Tag{"host", Hostname},
 		statsd.Tag{"name", g.Name},
 	)
