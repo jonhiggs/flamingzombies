@@ -1,17 +1,24 @@
 #!/bin/sh
 
+. "$(dirname "$0")/../helpers.inc"
+
 if [ $# -ne 1 ]; then
     echo "not enough arguments were provided" >&2
     exit 3
 fi
 
+swap_free() {
+  if [ "$(uname)" = "OpenBSD" ]; then
+    swapctl -s -k | awk -F, '/^total/ { print int($NF) }'
+  else
+    free -k | awk '/^Swap:/ { print $4 }'
+  fi
+}
+
 threshold=$1
 
-if [ "$(uname)" = "OpenBSD" ]; then
-  free=$(swapctl -s -k | awk -F, '/^total/ { print int($NF) }')
-else
-  free=$(free -k | awk '/^Swap:/ { print $4 }')
-fi
+free=$(swap_free)
+metric_gauge swap_free "${free}"
 
 if [ "${free}" -lt "${threshold}" ]; then
   echo "free swap space (${free}) is less than the threshold(${threshold})."
