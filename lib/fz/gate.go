@@ -88,6 +88,12 @@ func (g *Gate) DurationMetric(d time.Duration) {
 		statsd.Tag{"host", Hostname},
 		statsd.Tag{"name", g.Name},
 	)
+
+	StatsdClient.Gauge(
+		"gate.timeoutquota.percent", int64(float64(d)/float64(time.Duration(1)*time.Second)*100), 1.0,
+		statsd.Tag{"host", Hostname},
+		statsd.Tag{"name", g.Name},
+	)
 }
 
 func GateByName(name string) (*Gate, error) {

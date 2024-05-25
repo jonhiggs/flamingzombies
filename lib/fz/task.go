@@ -187,7 +187,7 @@ func (t *Task) DurationMetric(d time.Duration) {
 	)
 
 	StatsdClient.Gauge(
-		"task.timeoutquota.percent", int64((d/t.timeout())*100), 1.0,
+		"task.timeoutquota.percent", int64(float64(d)/float64(t.timeout())*100), 1.0,
 		statsd.Tag{"host", Hostname},
 		statsd.Tag{"name", t.Name},
 	)

@@ -150,4 +150,10 @@ func (n Notification) DurationMetric(d time.Duration) {
 		statsd.Tag{"host", Hostname},
 		statsd.Tag{"name", n.Notifier.Name},
 	)
+
+	StatsdClient.Gauge(
+		"notifier.timeoutquota.percent", int64(float64(d)/float64(n.Notifier.timeout())*100), 1.0,
+		statsd.Tag{"host", Hostname},
+		statsd.Tag{"name", n.Notifier.Name},
+	)
 }
