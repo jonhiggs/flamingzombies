@@ -3,15 +3,15 @@
 # checks that the 1m load average is below the threshold.
 #
 
+. "$(dirname "$0")/../helpers.inc"
+
 threshold=${1:-1}
 
 loadavg() { uptime | awk '{ sub(",","",$(NF-1)); print $(NF-1) }'; }
 
 la=$(loadavg)
 
-# publish the value as a statsd metric
-echo "${STATSD_PREFIX}.loadavg:${la}|g|${STATSD_TAGS}" \
-  | nc -w0 -u "$(echo "${STATSD_HOST}" | cut -d: -f1)" "$(echo "${STATSD_HOST}" | cut -d: -f2)"
+metric_gauge loadavg la
 
 echo "${la}" \
   | awk -v threshold="${threshold}" '
