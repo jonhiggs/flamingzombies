@@ -11,5 +11,5 @@ metric_gauge() {
   fi
 
   echo "${STATSD_PREFIX}.${name}:${value}|g|${STATSD_TAGS}" \
-    | nc -w0 -u "$(echo "${STATSD_HOST}" | cut -d: -f1)" "$(echo "${STATSD_HOST}" | cut -d: -f2)"
+    | nc -w1 -u "$(echo "${STATSD_HOST}" | cut -d: -f1)" "$(echo "${STATSD_HOST}" | cut -d: -f2)"
 }
