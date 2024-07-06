@@ -5,6 +5,7 @@ FZCTL_VERSION := $(shell cat cmd/fzctl/fzctl.go | awk '/const VERSION/ { gsub(/"
 VERSION := $(FZ_VERSION)
 
 BINS = $(addprefix dist/,fz_linux_amd64 fzctl_linux_amd64 fz_openbsd_amd64 fzctl_openbsd_amd64)
+TASKS = dist/task/ping
 
 release: prerelease_tests release_notes.txt $(BINS) dist/plugins.tar.gz
 	gh release create $(VERSION) -F release_notes.txt
