@@ -1,10 +1,14 @@
 #!/bin/sh
-
 # spend 20 seconds up, and 20 seconds down.
 
+. "$(dirname "$0")/../helpers.inc"
+
 if [ $(( $(date +%s) % 40 )) -le 20 ]; then
+  metric_gauge flappy 1
   exit 0
 else
+  metric_gauge flappy 0
+
   echo "i'm a flappy error" >&2
   echo "i'm a flappy info"
   exit 1

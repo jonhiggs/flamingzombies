@@ -1,12 +1,17 @@
 #!/bin/sh
 
-df -BK \
-  | awk -v mount="$1" -v threshold="$2" '
-    ($6==mount) {
-      free = int($4)
-      if (free < threshold) {
-        print "free disk space on", mount, "(" free, "KB) is less than threshold (" threshold, "KB)."
-        exit 1
-      }
-    }
-  '
+. "$(dirname "$0")/../helpers.inc"
+
+get_v() { df -k | awk -v mount="$1" '($6==mount) {print int($4)}'; }
+
+v=$(get_v "$1")
+threshold="$2"
+STATSD_TAGS="${STATSD_TAGS},mount=$1"
+metric_gauge disk_free "$v"
+
+if [ "$v" -lt "${threshold}" ]; then
+  echo "free disk space on $1 ($v KB) is less than threshold (${threshold} KB)."
+  exit 1
+fi
+
+exit 0

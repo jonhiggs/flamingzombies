@@ -43,8 +43,9 @@ gotest:
 	go test ./lib/fz
 
 shellcheck:
-	shellcheck -s sh libexec/{task,notifier,gate}/*
-	[[ $$(find libexec/ ! -executable ! -name README.md) = "" ]]
+	shellcheck -e SC1091 -x -s sh \
+		 libexec/helpers.inc libexec/{task,notifier,gate}/*
+	[[ $$(find libexec/ ! -executable ! -name README.md ! -name \*.inc) = "" ]]
 
 clean:
 	$(MAKE) -C dist clean

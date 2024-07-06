@@ -3,20 +3,24 @@
 # checks that the 1m load average is below the threshold.
 #
 
+. "$(dirname "$0")/../helpers.inc"
+
 threshold=${1:-1}
 
-uptime \
+loadavg() { uptime | awk '{ sub(",","",$(NF-1)); print $(NF-1) }'; }
+
+la=$(loadavg)
+
+metric_gauge loadavg la
+
+echo "${la}" \
   | awk -v threshold="${threshold}" '
       {
-        sub(",","",$(NF-1))
-        v=$(NF-1)
-      }
-      END {
-        if (v>threshold) {
-          print "loadavg (" v ") exceeded threshold (" threshold ")"
+        if ($1>threshold) {
+          print "loadavg (" $1 ") exceeded threshold (" threshold ")"
           exit 1
         } else {
-          print "loadavg (" v ") is ok"
+          print "loadavg (" $1 ") is ok"
         }
       }
     '

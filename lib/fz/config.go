@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/cactus/go-statsd-client/v5/statsd"
 	"github.com/pelletier/go-toml"
 )
 
@@ -15,6 +16,10 @@ const DEFAULT_FREQUENCY_SECONDS = 300
 const DEFAULT_PRIORITY = 5
 
 var DAEMON_START_TIME = time.Now()
+
+var StatsdClient statsd.Statter
+
+var Hostname string
 
 type Defaults struct {
 	FrequencySeconds      int      `toml:"frequency"`
@@ -33,11 +38,15 @@ type Config struct {
 	Gates         []Gate     `toml:"gate"`
 	ListenAddress string     `toml:"listen_address"`
 	Directory     string     `toml:"directory"`
+	StatsdHost    string     `toml:"statsd_host"`
+	StatsdPrefix  string     `toml:"statsd_prefix"`
 }
 
 var config Config
 
 func ReadConfig() Config {
+	Hostname, _ = os.Hostname()
+
 	file, err := os.Open(os.Getenv("FZ_CONFIG_FILE"))
 	if err != nil {
 		Fatal(fmt.Sprintf("Error opening the configuration file %s\n", os.Getenv("FZ_CONFIG_FILE")), fmt.Sprint(err))
@@ -64,6 +73,21 @@ func ReadConfig() Config {
 
 	if config.ListenAddress == "" {
 		config.ListenAddress = os.Getenv("FZ_LISTEN")
+	}
+
+	if config.StatsdHost == "" {
+		config.StatsdHost = os.Getenv("FZ_STATSD_HOST")
+	}
+
+	if config.StatsdPrefix == "" {
+		config.StatsdPrefix = os.Getenv("FZ_STATSD_PREFIX")
+	}
+
+	if config.StatsdHost != "" {
+		StatsdClient, err = statsd.NewClient(config.StatsdHost, config.StatsdPrefix)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	for i, t := range config.Tasks {

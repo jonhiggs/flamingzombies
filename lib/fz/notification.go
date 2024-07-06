@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/cactus/go-statsd-client/v5/statsd"
 )
 
 type Notification struct {
@@ -61,10 +63,12 @@ func ProcessNotifications() {
 
 				stderr, _ := cmd.StderrPipe()
 
+				startTime := time.Now()
 				err = cmd.Start()
 				if err != nil {
 					if ctx.Err() == context.DeadlineExceeded {
 						Logger.Error(fmt.Sprintf("time out exceeded while executing notifier"), "notifier", n.Notifier.Name)
+						n.IncMetric("timeout")
 					} else {
 						panic(err)
 					}
@@ -73,14 +77,17 @@ func ProcessNotifications() {
 				errorMessage, _ := io.ReadAll(stderr)
 
 				err = cmd.Wait()
+				n.DurationMetric(time.Now().Sub(startTime))
 
 				if ctx.Err() == context.DeadlineExceeded {
 					Logger.Error(fmt.Sprintf("time out exceeded while executing notifier"), "notifier", n.Notifier.Name)
+					n.IncMetric("timeout")
 				} else if err != nil {
 					exiterr, _ := err.(*exec.ExitError)
 					exitCode := exiterr.ExitCode()
 
 					Logger.Error(fmt.Sprintf("command returned stderr: %s", errorMessage), "notifier", n.Notifier.Name, "exit_code", exitCode)
+					n.IncMetric("error")
 				}
 			}
 		}
@@ -127,4 +134,26 @@ func (n Notification) body() string {
 	}
 
 	return fmt.Sprintf("The task %s is in an %s state", n.Task.Name, n.Task.State())
+}
+
+func (n Notification) IncMetric(x string) {
+	StatsdClient.Inc(
+		fmt.Sprintf("notifier.%s", x), 1, 1.0,
+		statsd.Tag{"host", Hostname},
+		statsd.Tag{"name", n.Notifier.Name},
+	)
+}
+
+func (n Notification) DurationMetric(d time.Duration) {
+	StatsdClient.TimingDuration(
+		"notifier.duration", d, 1.0,
+		statsd.Tag{"host", Hostname},
+		statsd.Tag{"name", n.Notifier.Name},
+	)
+
+	StatsdClient.Gauge(
+		"notifier.timeoutquota.percent", int64(float64(d)/float64(n.Notifier.timeout())*100), 1.0,
+		statsd.Tag{"host", Hostname},
+		statsd.Tag{"name", n.Notifier.Name},
+	)
 }

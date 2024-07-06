@@ -1,5 +1,10 @@
 #!/bin/sh
-if [ "${TIMEOUT:-0}" -lt 2 ]; then
+
+. "$(dirname "$0")/../helpers.inc"
+
+TIMEOUT=${TIMEOUT:-2}
+
+if [ "${TIMEOUT}" -lt 2 ]; then
   echo "timeout_seconds cannot be less than '2' seconds" >&2
   exit 1
 fi
@@ -9,10 +14,19 @@ COUNT="${2:-3}"
 DEADLINE="$((TIMEOUT - 1))"
 
 if ping --version 2>&1 | grep -q BusyBox; then
-  ARGS="-W 1 -w ${DEADLINE} -c \"${COUNT}\" -A \"${ADDRESS}\""
+  ARGS="-W 1 -w ${DEADLINE} -c ${COUNT} -A"
 else
-  ARGS="-f -c ${COUNT} -w ${DEADLINE}"
+  ARGS="-i0.01 -c ${COUNT} -w ${DEADLINE}"
 fi
 
+OUT=$(mktemp)
+
 # shellcheck disable=SC2086
-timeout ${TIMEOUT} ping ${ARGS} ${ADDRESS}
+timeout ${TIMEOUT} ping ${ARGS} ${ADDRESS} > ${OUT}
+
+awk '/bytes from/ { v=$(NF-1); gsub(/time=/,"",v); print v }' "${OUT}" \
+  | while read -r v; do metric_gauge ping "$v"; done
+
+cat "${OUT}"
+
+rm -f "${OUT}"

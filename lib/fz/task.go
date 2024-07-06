@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/cactus/go-statsd-client/v5/statsd"
 )
 
 const GRACE_TIME = time.Duration(500) * time.Millisecond
@@ -92,12 +94,16 @@ func (t *Task) Run() bool {
 	cmd.Dir = config.Directory
 
 	cmd.Env = []string{
+		fmt.Sprintf("STATSD_HOST=%s", config.StatsdHost),
+		fmt.Sprintf("STATSD_PREFIX=%s", config.StatsdPrefix),
+		fmt.Sprintf("STATSD_TAGS=#host:%s,name:%s", Hostname, t.Name),
 		fmt.Sprintf("TIMEOUT=%d", t.TimeoutSeconds),
 	}
 
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
 
+	startTime := time.Now()
 	err := cmd.Start()
 	if err != nil {
 		panic(err)
@@ -111,10 +117,13 @@ func (t *Task) Run() bool {
 	t.LastResultOutput = strings.TrimSuffix(string(stdoutBytes), "\n")
 
 	err = cmd.Wait()
+	t.DurationMetric(time.Now().Sub(startTime))
 
 	if ctx.Err() == context.DeadlineExceeded {
 		Logger.Error("time out exceeded while executing command", "task", t.Name)
 		t.ErrorCount++
+		t.IncMetric("timeout")
+
 		return false
 	}
 
@@ -122,6 +131,8 @@ func (t *Task) Run() bool {
 		if os.IsPermission(err) {
 			Logger.Error(fmt.Sprint(err), "task", t.Name)
 			t.ErrorCount++
+			t.IncMetric("error")
+
 			return false
 		}
 	}
@@ -138,14 +149,18 @@ func (t *Task) Run() bool {
 
 	switch exitCode {
 	case 3: // unknown status
+		t.IncMetric("unknown")
 		return false
 	case 124: // unknown status due to timeout
+		t.IncMetric("unknown")
 		return false
 	case 0:
 		t.OKCount++
+		t.IncMetric("ok")
 		t.RecordStatus(true)
 	default:
 		t.FailCount++
+		t.IncMetric("fail")
 		t.RecordStatus(false)
 	}
 
@@ -157,6 +172,28 @@ func (t *Task) Run() bool {
 		}
 	}
 	return true
+}
+
+func (t *Task) IncMetric(x string) {
+	StatsdClient.Inc(
+		fmt.Sprintf("task.%s", x), 1, 1.0,
+		statsd.Tag{"host", Hostname},
+		statsd.Tag{"name", t.Name},
+	)
+}
+
+func (t *Task) DurationMetric(d time.Duration) {
+	StatsdClient.TimingDuration(
+		"task.duration", d, 1.0,
+		statsd.Tag{"host", Hostname},
+		statsd.Tag{"name", t.Name},
+	)
+
+	StatsdClient.Gauge(
+		"task.timeoutquota.percent", int64(float64(d)/float64(t.timeout())*100), 1.0,
+		statsd.Tag{"host", Hostname},
+		statsd.Tag{"name", t.Name},
+	)
 }
 
 func (t *Task) RecordStatus(b bool) {
