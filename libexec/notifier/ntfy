@@ -24,7 +24,7 @@ _send() {
     -H "Title: ${subject}"                                       \
     -H "Priority: ${ntfy_priority}"                              \
     -H "X-Tags: ${status_tag},host:$(hostname -s),last_state:${LAST_STATE},${OPEN_GATES}" \
-    "ntfy.sh/${NTFY_TOPIC}"
+    "${NTFY_HOST}/${NTFY_TOPIC}"
 }
 
 if [ $# -eq 0 ]; then
@@ -33,6 +33,7 @@ if [ $# -eq 0 ]; then
 fi
 
 NTFY_TOPIC="$1"
+NTFY_HOST="${2:-https://ntfy.sh}"
 DATAFILE=$(mktemp)
 
 cat <<EOF > "${DATAFILE}"
