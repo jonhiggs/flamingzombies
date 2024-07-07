@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/jonhiggs/flamingzombies/lib/cli"
-	"golang.org/x/sys/unix"
 	"nullprogram.com/x/optparse"
 )
 
@@ -65,16 +64,6 @@ func init() {
 	}
 
 	path = rest[0]
-}
-
-func diskfree(dir string) {
-	var stat unix.Statfs_t
-	unix.Statfs(dir, &stat)
-
-	// Available blocks * size per block = available space in bytes, then
-	// converted to KB
-	free := (stat.Bavail * uint64(stat.Bsize)) / 1024
-	bytes <- int64(free)
 }
 
 func main() {
