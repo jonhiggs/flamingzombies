@@ -8,6 +8,8 @@ BINS = fz_linux_amd64 \
 	   fzctl_openbsd_amd64 \
 	   task/ping_linux_amd64 \
 	   task/ping_openbsd_amd64
+	   task/diskfree_linux_amd64 \
+	   task/diskfree_openbsd_amd64
 
 build: $(BINS)
 

@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	APP             = "disk_free"
+	APP             = "diskfree"
 	TIMEOUT_DEFAULT = 5 * time.Second
 	TIMEOUT_MINIMUM = 2 * time.Second
 	VERSION         = "v0.0.0"
@@ -67,7 +67,7 @@ func init() {
 	path = rest[0]
 }
 
-func disk_free(dir string) {
+func diskfree(dir string) {
 	var stat unix.Statfs_t
 	unix.Statfs(dir, &stat)
 
@@ -78,7 +78,7 @@ func disk_free(dir string) {
 }
 
 func main() {
-	go disk_free(path)
+	go diskfree(path)
 
 	for {
 		select {
