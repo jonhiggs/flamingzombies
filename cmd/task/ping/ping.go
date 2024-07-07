@@ -5,28 +5,37 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	probing "github.com/prometheus-community/pro-bing"
 	"nullprogram.com/x/optparse"
 )
 
 const (
-	DEFAULT_TIMEOUT_SECONDS = "5"
+	DEFAULT_TIMEOUT_SECONDS = 1
 	VERSION                 = "v0.0.0"
 )
 
 var (
-	count   int = 3
+	retries int = 3
 	address string
+	timeout time.Duration
+	pkts    = make(chan *probing.Packet, 1)
 )
 
 func init() {
 	if os.Getenv("TIMEOUT") == "" {
-		os.Setenv("TIMEOUT", DEFAULT_TIMEOUT_SECONDS)
+		timeout = DEFAULT_TIMEOUT_SECONDS * time.Second
+	} else {
+		t, err := strconv.Atoi(os.Getenv("TIMEOUT"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		timeout = time.Duration(t) * time.Second
 	}
 
 	options := []optparse.Option{
-		{"count", 'c', optparse.KindRequired},
+		{"retries", 'r', optparse.KindRequired},
 		{"help", 'h', optparse.KindNone},
 		{"version", 'V', optparse.KindNone},
 	}
@@ -38,9 +47,9 @@ func init() {
 
 	for _, result := range results {
 		switch result.Long {
-		case "count":
+		case "retries":
 			var err error
-			count, err = strconv.Atoi(result.Optarg)
+			retries, err = strconv.Atoi(result.Optarg)
 
 			if err != nil {
 				fmt.Println(err)
@@ -57,25 +66,44 @@ func init() {
 	}
 
 	if len(rest) != 1 {
-		fmt.Fprintln(os.Stderr, "Error: No hosts were provided")
-		os.Exit(1)
+		log.Fatal("No hosts were provided")
 	}
 
 	address = rest[0]
 }
 
-func main() {
+func ping() {
 	pinger, err := probing.NewPinger(address)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
-	pinger.Count = count
-	err = pinger.Run() // Blocks until finished.
+
+	pinger.OnRecv = func(pkt *probing.Packet) {
+		pkts <- pkt
+		pinger.Stop()
+	}
+
+	err = pinger.Run()
 	if err != nil {
 		panic(err)
 	}
-	stats := pinger.Statistics() // get send/receive/duplicate/rtt stats
-	fmt.Println(stats)
+
+}
+
+func main() {
+	go ping()
+
+	for {
+		select {
+		case p := <-pkts:
+			fmt.Printf("%v\n", p.Rtt)
+			os.Exit(0)
+		case <-time.After(timeout):
+			fmt.Println("out of time :(")
+			os.Exit(1)
+		}
+	}
 }
 
 func usage() {
@@ -83,8 +111,8 @@ func usage() {
 	fmt.Println("  ping [OPTIONS] HOST")
 	fmt.Println("")
 	fmt.Println("Options:")
-	fmt.Println("  -c, --count <number>           Number of ICMP packets to send")
-	fmt.Println("  -h, --help                     This help")
-	fmt.Println("  -V, --version                  Version")
+	fmt.Println("  -r, --retries <number>  Attempts for ICMP response")
+	fmt.Println("  -h, --help              This help")
+	fmt.Println("  -V, --version           Version")
 	os.Exit(0)
 }
