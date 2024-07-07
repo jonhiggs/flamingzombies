@@ -11,14 +11,21 @@ BINS = fz_linux_amd64              \
 	   task/diskfree_linux_amd64   \
 	   task/diskfree_openbsd_amd64
 
+CMDS = 	fz            \
+		fzctl         \
+		task/diskfree \
+		task/ping
+
+BINS = $(addprefix openbsd_amd64/,$(CMDS)) $(addprefix linux_amd64/,$(CMDS))
+
 build: $(BINS)
 
-$(BINS): BIN = $(word 1,$(subst _, ,$@))
-$(BINS): GOOS = $(word 2,$(subst _, ,$@))
-$(BINS): GOARCH = $(word 3,$(subst _, ,$@))
-$(BINS): TARGET_DIR = $(GOOS)_$(GOARCH)
+$(BINS): TYPE = $(word 1,$(subst /, ,$(dir $@)))
+$(BINS): BIN = $(subst $(TYPE)/,,$@)
+$(BINS): GOOS = $(word 1,$(subst _, ,$(TYPE)))
+$(BINS): GOARCH = $(word 2,$(subst _, ,$(TYPE)))
 $(BINS):
-	mkdir -p $(TARGET_DIR)/bin $(TARGET_DIR)/libexec
+	mkdir -p $(dir $@)
 	docker run                                                        \
 		--volume "$(shell pwd)/../:/go"                               \
 		--env "CGO_ENABLED=0"                                         \
@@ -26,8 +33,8 @@ $(BINS):
 		--env "GOARCH=$(GOARCH)"                                      \
 		golang:1.22-bookworm                                          \
 		bash -c '                                                     \
-			go build -o ./dist/$(TARGET_DIR)/$(BIN) -buildvcs=false ./cmd/$(BIN) \
-				&& chown $(UID):$(GID) ./dist/$(TARGET_DIR)/$(BIN)    \
+			go build -o ./dist/$@ -buildvcs=false ./cmd/$(BIN) \
+				&& chown $(UID):$(GID) ./dist/$@    \
 		'
 
 .PHONY: clean
