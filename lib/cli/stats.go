@@ -36,6 +36,13 @@ func StatsdDuration(d time.Duration) {
 	StatsdClient.TimingDuration("duration", d, 1.0, statsdTags()...)
 }
 
+func StatsdValue(v int64) {
+	if Debug {
+		fmt.Printf("%s.value: %d\n", statsdPrefix(), v)
+	}
+	StatsdClient.Gauge("value", v, 1.0, statsdTags()...)
+}
+
 func HasStatsd() bool {
 	return false
 }
