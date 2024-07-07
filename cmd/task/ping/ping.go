@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/jonhiggs/flamingzombies/lib/cli"
 	probing "github.com/prometheus-community/pro-bing"
 	"nullprogram.com/x/optparse"
 )
@@ -29,7 +29,7 @@ func init() {
 	} else {
 		t, err := strconv.Atoi(os.Getenv("TIMEOUT"))
 		if err != nil {
-			log.Fatal(err)
+			cli.Error(err)
 		}
 		timeout = time.Duration(t) * time.Second
 	}
@@ -42,7 +42,7 @@ func init() {
 
 	results, rest, err := optparse.Parse(options, os.Args)
 	if err != nil {
-		log.Fatal(err)
+		cli.Error(err)
 	}
 
 	for _, result := range results {
@@ -66,7 +66,7 @@ func init() {
 	}
 
 	if len(rest) != 1 {
-		log.Fatal("No hosts were provided")
+		cli.Error("No host targets were provided")
 	}
 
 	address = rest[0]
