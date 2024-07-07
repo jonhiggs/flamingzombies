@@ -1,9 +1,11 @@
 package cli
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/cactus/go-statsd-client/v5/statsd"
 )
@@ -25,6 +27,13 @@ func init() {
 
 func StatsdInc(metric string, n int64) {
 	StatsdClient.Inc(metric, n, 1.0, statsdTags()...)
+}
+
+func StatsdDuration(d time.Duration) {
+	if Debug {
+		fmt.Printf("%s.duration: %v\n", statsdPrefix(), d)
+	}
+	StatsdClient.TimingDuration("duration", d, 1.0, statsdTags()...)
 }
 
 func HasStatsd() bool {

@@ -7,16 +7,16 @@ import (
 	"time"
 )
 
+var Debug = false
+
 func Error(m interface{}) {
 	msg := fmt.Sprintf("Error: %v", m)
 	fmt.Fprintln(os.Stderr, msg)
-	// publish an error metric
 	os.Exit(3)
 }
 
 func Timeout() {
 	fmt.Fprintln(os.Stderr, "Timeout: task took too long to execute")
-	// publish a timeout metric
 	os.Exit(3)
 }
 

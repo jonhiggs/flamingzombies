@@ -22,8 +22,8 @@ const (
 
 var (
 	address string
-	timeout time.Duration
 	pkts    = make(chan *probing.Packet, 1)
+	timeout time.Duration
 )
 
 func init() {
@@ -31,8 +31,9 @@ func init() {
 	timeout = cli.GetTimeout(0, TIMEOUT_DEFAULT, TIMEOUT_MINIMUM)
 
 	options := []optparse.Option{
-		{"timeout", 't', optparse.KindRequired},
+		{"debug", 'd', optparse.KindNone},
 		{"help", 'h', optparse.KindNone},
+		{"timeout", 't', optparse.KindRequired},
 		{"version", 'V', optparse.KindNone},
 	}
 
@@ -43,6 +44,8 @@ func init() {
 
 	for _, result := range results {
 		switch result.Long {
+		case "debug":
+			cli.Debug = true
 		case "timeout":
 			t, err := strconv.Atoi(result.Optarg)
 			if err != nil {
@@ -60,7 +63,7 @@ func init() {
 	}
 
 	if len(rest) != 1 {
-		cli.Error("No host targets were provided")
+		cli.Error("no host targets were provided")
 	}
 
 	address = rest[0]
@@ -92,11 +95,11 @@ func main() {
 	for {
 		select {
 		case p := <-pkts:
-			fmt.Printf("%v\n", p.Rtt)
+			cli.StatsdDuration(p.Rtt)
 			os.Exit(0)
 		case <-time.After(timeout):
 			// if no packets were received by the timeout, then the host is down.
-			fmt.Printf("No packets received within timeout (%v)\n", timeout)
+			fmt.Printf("no packets received within timeout (%v)\n", timeout)
 			os.Exit(1)
 		}
 	}
@@ -107,8 +110,9 @@ func usage() {
 	fmt.Printf("  %s [OPTIONS] HOST\n", APP)
 	fmt.Println("")
 	fmt.Println("Options:")
-	fmt.Println("  -t, --timeout  Seconds to wait for a response")
+	fmt.Println("  -d, --debug    Print debugging info")
 	fmt.Println("  -h, --help     This help")
+	fmt.Println("  -t, --timeout  Seconds to wait for a response")
 	fmt.Println("  -V, --version  Version")
 	os.Exit(0)
 }
