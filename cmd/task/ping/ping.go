@@ -12,30 +12,26 @@ import (
 )
 
 const (
-	DEFAULT_TIMEOUT_SECONDS = 1
-	VERSION                 = "v0.0.0"
+	APP             = "ping"
+	TIMEOUT_DEFAULT = 5 * time.Second
+	TIMEOUT_MINIMUM = 2 * time.Second
+	VERSION         = "v0.0.0"
+
+	PACKETS = 5
 )
 
 var (
-	retries int = 3
 	address string
 	timeout time.Duration
 	pkts    = make(chan *probing.Packet, 1)
 )
 
 func init() {
-	if os.Getenv("TIMEOUT") == "" {
-		timeout = DEFAULT_TIMEOUT_SECONDS * time.Second
-	} else {
-		t, err := strconv.Atoi(os.Getenv("TIMEOUT"))
-		if err != nil {
-			cli.Error(err)
-		}
-		timeout = time.Duration(t) * time.Second
-	}
+	// set defaults
+	timeout = cli.GetTimeout(0, TIMEOUT_DEFAULT, TIMEOUT_MINIMUM)
 
 	options := []optparse.Option{
-		{"retries", 'r', optparse.KindRequired},
+		{"timeout", 't', optparse.KindRequired},
 		{"help", 'h', optparse.KindNone},
 		{"version", 'V', optparse.KindNone},
 	}
@@ -47,21 +43,19 @@ func init() {
 
 	for _, result := range results {
 		switch result.Long {
-		case "retries":
-			var err error
-			retries, err = strconv.Atoi(result.Optarg)
-
+		case "timeout":
+			t, err := strconv.Atoi(result.Optarg)
 			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				cli.Error(err)
 			}
+
+			td := time.Duration(t) * time.Second
+			timeout = cli.GetTimeout(td, TIMEOUT_DEFAULT, TIMEOUT_MINIMUM)
 
 		case "help":
 			usage()
-			return
 		case "version":
-			fmt.Printf("fz %s\n", VERSION)
-			os.Exit(0)
+			cli.Version("task/ping", VERSION)
 		}
 	}
 
@@ -79,6 +73,8 @@ func ping() {
 		os.Exit(1)
 	}
 
+	pinger.Count = 5
+
 	pinger.OnRecv = func(pkt *probing.Packet) {
 		pkts <- pkt
 		pinger.Stop()
@@ -88,7 +84,6 @@ func ping() {
 	if err != nil {
 		panic(err)
 	}
-
 }
 
 func main() {
@@ -100,7 +95,8 @@ func main() {
 			fmt.Printf("%v\n", p.Rtt)
 			os.Exit(0)
 		case <-time.After(timeout):
-			fmt.Println("out of time :(")
+			// if no packets were received by the timeout, then the host is down.
+			fmt.Printf("No packets received within timeout (%v)\n", timeout)
 			os.Exit(1)
 		}
 	}
@@ -108,11 +104,11 @@ func main() {
 
 func usage() {
 	fmt.Println("Usage:")
-	fmt.Println("  ping [OPTIONS] HOST")
+	fmt.Printf("  %s [OPTIONS] HOST\n", APP)
 	fmt.Println("")
 	fmt.Println("Options:")
-	fmt.Println("  -r, --retries <number>  Attempts for ICMP response")
-	fmt.Println("  -h, --help              This help")
-	fmt.Println("  -V, --version           Version")
+	fmt.Println("  -t, --timeout  Seconds to wait for a response")
+	fmt.Println("  -h, --help     This help")
+	fmt.Println("  -V, --version  Version")
 	os.Exit(0)
 }
