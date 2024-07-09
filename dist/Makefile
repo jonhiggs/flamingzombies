@@ -4,8 +4,10 @@ GID = $(shell id -g)
 GOOS = $(shell uname -s | tr '[:upper:]' '[:lower:]')
 GOARCH = $(shell uname -m | sed 's/x86_64/amd64/')
 
-DIR = $(GOOS)_$(GOARCH)
-
+ifeq ($(GOOS),linux)
+  LDD_VERSION = $(shell ldd --version 2>&1 | grep -q musl && echo musl || echo gnu)
+  DIR = $(GOOS)_$(GOARCH)_$(LDD_VERSION)
+endif
 
 BINS = $(DIR)/fz             \
 	$(DIR)/fzctl         \
@@ -16,7 +18,7 @@ BINS = $(DIR)/fz             \
 build: $(BINS)
 
 publish: DEST := git@janx.altos:/var/www/htdocs/artifacts.altos/flamingzombies/$(shell git rev-parse HEAD)
-publish:
+publish: $(BINS)
 	rsync -av $(DIR) $(DEST)
 
 $(BINS): export CGO_ENABLED = 1
@@ -26,5 +28,4 @@ $(BINS):
 
 .PHONY: clean
 clean:
-	uname -s | tr '[:upper:]' '[:lower:]'
-	#rm -rf $(DIR)
+	rm -rf $(DIR)
