@@ -14,7 +14,8 @@ BINS = fz_linux_amd64              \
 CMDS = 	fz            \
 		fzctl         \
 		task/diskfree \
-		task/ping
+		task/ping     \
+		task/swapfree
 
 BINS = $(addprefix openbsd_amd64/,$(CMDS)) $(addprefix linux_amd64/,$(CMDS))
 
@@ -28,11 +29,13 @@ $(BINS):
 	mkdir -p $(dir $@)
 	docker run                                                        \
 		--volume "$(shell pwd)/../:/go"                               \
-		--env "CGO_ENABLED=0"                                         \
+		--env "CGO_ENABLED=1"                                         \
 		--env "GOOS=$(GOOS)"                                          \
 		--env "GOARCH=$(GOARCH)"                                      \
+		-it \
 		golang:1.22-bookworm                                          \
 		bash -c '                                                     \
+			bash; \
 			go build -o ./dist/$@ -buildvcs=false ./cmd/$(BIN) \
 				&& chown $(UID):$(GID) ./dist/$@    \
 		'
