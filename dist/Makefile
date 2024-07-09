@@ -1,15 +1,13 @@
-SHELL = /bin/bash
 UID = $(shell id -u)
 GID = $(shell id -g)
 
-export GOOS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
-export GOARCH := $(shell uname -m | sed 's/x86_64/amd64/')
+GOOS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
+GOARCH := $(shell uname -m | sed 's/x86_64/amd64/')
 
 DIR = $(GOOS)_$(GOARCH)
 
 
 BINS = $(DIR)/fz             \
-	$(DIR)/fz            \
 	$(DIR)/fzctl         \
 	$(DIR)/task/ping     \
 	$(DIR)/task/diskfree \
@@ -20,7 +18,7 @@ build: $(BINS)
 $(BINS): export CGO_ENABLED = 1
 $(BINS):
 	mkdir -p $(dir $@)
-	go build -o $@ -buildvcs=false ../cmd/$(BIN)
+	go build -o $@ -buildvcs=false ../cmd/$(notdir $@)
 
 .PHONY: clean
 clean:
