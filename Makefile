@@ -1,4 +1,4 @@
-SHELL := /bin/bash
+SHELL := /usr/bin/env bash
 
 FZ_VERSION := $(shell cat cmd/fz/fz.go | awk '/const VERSION/ { gsub(/"/,"",$$NF); print $$NF }')
 FZCTL_VERSION := $(shell cat cmd/fzctl/fzctl.go | awk '/const VERSION/ { gsub(/"/,"",$$NF); print $$NF }')

@@ -1,3 +1,4 @@
+SHELL = /usr/bin/env bash
 UID = $(shell id -u)
 GID = $(shell id -g)
 
