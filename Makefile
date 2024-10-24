@@ -1,56 +1,53 @@
 SHELL := /usr/bin/env bash
 
-FZ_VERSION := $(shell cat cmd/fz/fz.go | awk '/const VERSION/ { gsub(/"/,"",$$NF); print $$NF }')
-FZCTL_VERSION := $(shell cat cmd/fzctl/fzctl.go | awk '/const VERSION/ { gsub(/"/,"",$$NF); print $$NF }')
-VERSION := $(FZ_VERSION)
+CMDS = dist/fzctl dist/fz
 
-BINS = $(addprefix dist/,fz_linux_amd64 fzctl_linux_amd64 fz_openbsd_amd64 fzctl_openbsd_amd64)
-TASKS = dist/task/ping
+GO_TASKS = $(addprefix dist/libexec/task/,diskfree ping swapfree)
+SH_TASKS = $(addprefix dist/,$(wildcard libexec/task/*))
 
-CMDS = $(addprefix dist/,fzctl fz task/diskfree task/ping task/swapfree)
+SH_GATES = $(addprefix dist/,$(wildcard libexec/gate/*))
 
-build: $(CMDS)
+SH_NOTIFIERS = $(addprefix dist/,$(wildcard libexec/notifier/*))
+
+MAN1_PAGES = $(addprefix dist/,$(wildcard man/man1/*.1))
+MAN5_PAGES = $(addprefix dist/,$(wildcard man/man5/*.5))
+MAN7_PAGES = $(addprefix dist/,$(wildcard man/man7/*.7))
+MAN_PAGES = $(MAN1_PAGES) $(MAN5_PAGES) $(MAN7_PAGES)
+
+build: $(CMDS) $(GO_TASKS) $(SH_TASKS) $(SH_GATES) $(SH_NOTIFIERS) $(MAN_PAGES)
+
 $(CMDS): src = ./cmd/$(subst dist/,,$@)
-$(CMDS): .FORCE
-	mkdir -p $(dir $@)
-	go build -o $@ $(src)
+$(CMDS): .FORCE | dist
+	go build -o $@ ./cmd/$(notdir $@)
 
+$(GO_TASKS):
+	go build -o $@ ./cmd/task/$(notdir $@)
 
-release: prerelease_tests release_notes.txt $(BINS) dist/plugins.tar.gz
-	gh release create $(VERSION) -F release_notes.txt
-	gh release upload $(VERSION) dist/fz_* dist/fzctl_* dist/plugins.tar.gz
+$(SH_TASKS): | dist/libexec/task
+	cp ./libexec/task/$(notdir $@) $@
 
-devrelease: gitsha := $(shell git rev-parse HEAD)
-devrelease: clean test $(BINS) dist/plugins.tar.gz
-	scp -r man/ janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
-	scp $(BINS) dist/plugins.tar.gz janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
-	scp scripts/openbsd_rc janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
-	scp scripts/openrc janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
+$(SH_GATES): | dist/libexec/gate
+	cp ./libexec/gate/$(notdir $@) $@
 
-devplugins: clean shellcheck dist/plugins.tar.gz
-	scp dist/plugins.tar.gz janx:/var/www/htdocs/artifacts.altos/flamingzombies/dev/
+$(SH_NOTIFIERS): | dist/libexec/notifier
+	cp ./libexec/notifier/$(notdir $@) $@
 
-$(BINS) dist/plugins.tar.gz:
-	make -C dist $(notdir $@)
+$(MAN1_PAGES): src = ./man/man1/$(notdir $@)
+$(MAN5_PAGES): src = ./man/man5/$(notdir $@)
+$(MAN7_PAGES): src = ./man/man7/$(notdir $@)
+$(MAN_PAGES): file_ts = $(shell date -r $$(git log -1 --pretty="format:%ct" $(src)) +%Y-%m-%d)
+$(MAN_PAGES): content_ts = $(shell awk '/.Dd/ { print $$2 }' $(src))
+$(MAN_PAGES): | dist/man/man1 dist/man/man5 dist/man/man7
+	echo testing timestamp of $@
+	[[ $(file_ts) = $(content_ts) ]]
+	cp $(src) $@
 
-release_notes.txt: CHANGELOG.md
-	sed -n '/^## $(VERSION)$$/,/##/ { /^#/d; /^\w*$$/d; p }' $< > $@
+dist dist/libexec/task dist/libexec/gate dist/libexec/notifier dist/man/man1 dist/man/man5 dist/man/man7:
+	mkdir -p $@
 
-prerelease_tests: test
-	[[ "$(FZCTL_VERSION)" == "$(FZ_VERSION)" ]]
-	git status | grep -q "nothing to commit"
-	git push
-	git fetch --tags
-	! git rev-parse $(VERSION) &>/dev/null
-	git status | grep -q "On branch main"
-	git status | grep -q "working tree clean"
-	grep -q "^## $(VERSION)$$" CHANGELOG.md
-	$(MAKE) -C ./man test
-
-test: gotest shellcheck
-
-gotest:
-	go test ./lib/fz
+test: dirs = $(shell find . -name \*_test.go | xargs -I{} dirname {})
+test: shellcheck
+	go test $(dirs)
 
 shellcheck:
 	shellcheck -e SC1091 -x -s sh \
@@ -58,7 +55,6 @@ shellcheck:
 	#[[ $$(find libexec/ ! -executable ! -name README.md ! -name \*.inc) = "" ]]
 
 clean:
-	$(MAKE) -C dist clean
-	rm -f release_notes.txt
+	rm -Rf ./dist/*
 
 .FORCE:
