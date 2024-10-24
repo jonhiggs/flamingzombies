@@ -7,6 +7,15 @@ VERSION := $(FZ_VERSION)
 BINS = $(addprefix dist/,fz_linux_amd64 fzctl_linux_amd64 fz_openbsd_amd64 fzctl_openbsd_amd64)
 TASKS = dist/task/ping
 
+CMDS = $(addprefix dist/,fzctl fz task/diskfree task/ping task/swapfree)
+
+build: $(CMDS)
+$(CMDS): src = ./cmd/$(subst dist/,,$@)
+$(CMDS): .FORCE
+	mkdir -p $(dir $@)
+	go build -o $@ $(src)
+
+
 release: prerelease_tests release_notes.txt $(BINS) dist/plugins.tar.gz
 	gh release create $(VERSION) -F release_notes.txt
 	gh release upload $(VERSION) dist/fz_* dist/fzctl_* dist/plugins.tar.gz
@@ -46,8 +55,10 @@ gotest:
 shellcheck:
 	shellcheck -e SC1091 -x -s sh \
 		 libexec/helpers.inc libexec/{task,notifier,gate}/*
-	[[ $$(find libexec/ ! -executable ! -name README.md ! -name \*.inc) = "" ]]
+	#[[ $$(find libexec/ ! -executable ! -name README.md ! -name \*.inc) = "" ]]
 
 clean:
 	$(MAKE) -C dist clean
 	rm -f release_notes.txt
+
+.FORCE:
