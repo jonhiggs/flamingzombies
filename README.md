@@ -22,7 +22,7 @@ THIS IS STILL A WORK IN PROGRESS... but it's ready to test.
 
 Flaming Zombies ties together three components with three distinct responsibilities; `tasks`, `notifiers` and `gates`.
 
-* [`tasks`](libexec/task) check whether a condition is true or false, like if a host responds to pings?
+* [`tasks`](libexec/task) check whether a condition is true or false, like if a host responds to pings.
 * [`notifiers`](libexec/notifier) raise alerts.
 * [`gates`](libexec/gate) control when a `notifier` may execute.
 
@@ -56,20 +56,20 @@ Before you can build `fz` and `fzctl`, you'll need to have [Go](https://go.dev/d
 To build, run:
 
 ```
-go build ./cmd/fzctl/fzctl.go
-go build ./cmd/fz/fz.go
+go build ./cmd/fzctl/
+go build ./cmd/fz/
 ```
 
-That will produce the binaries for your system. The plugins are at `./libexec` and the man pages are at `./man`. Adapting the OpenBSD installation instructions should get you a long way to installing it on most UNIX-like system. You may find an init script for your operating system at `./scripts`. If you end up writing one, I would appreciate it if you could share it back.
+That will produce the binaries for your system. The plugins are at `./libexec` and the man pages are at `./man`. Adapting the OpenBSD installation instructions should get you a long way towards installing it on most UNIX-like system. You may find an init script for your operating system at `./scripts`. If you end up writing one, I would appreciate it if you could share it back.
 
 
 ## Installation
 
-Installation is intended to be very simple. Eventually, I'd like to provide installation packages, but until then a manual process will need to suffice.
+Installation is intended to be very simple. Eventually, I'd like to provide installation packages, but until then a manual process must suffice.
 
 ### OpenBSD
 
-The below sequence of commands will install the daemon on OpenBSD:
+The below sequence of commands will install the daemon to an OpenBSD system:
 
 ```sh
 ## fz
@@ -117,7 +117,7 @@ rcctl set flamingzombies logger daemon.info
 
 ### Alpine Linux
 
-The below sequence of commands will install the daemon on Alpine Linux:
+The below sequence of commands will install the daemon to an Alpine Linux system:
 
 ```sh
 ## fz
