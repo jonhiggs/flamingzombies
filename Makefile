@@ -35,7 +35,7 @@ $(SH_NOTIFIERS): | dist/libexec/notifier
 $(MAN1_PAGES): src = ./man/man1/$(notdir $@)
 $(MAN5_PAGES): src = ./man/man5/$(notdir $@)
 $(MAN7_PAGES): src = ./man/man7/$(notdir $@)
-$(MAN_PAGES): file_ts = $(shell date -r $$(git log -1 --pretty="format:%ct" $(src)) +%Y-%m-%d)
+$(MAN_PAGES): file_ts = $(shell date $(DATE_EPOCH)$$(git log -1 --pretty="format:%ct" $(src)) +%Y-%m-%d)
 $(MAN_PAGES): content_ts = $(shell awk '/.Dd/ { print $$2 }' $(src))
 $(MAN_PAGES): | dist/man/man1 dist/man/man5 dist/man/man7
 	echo testing timestamp of $@
@@ -57,4 +57,12 @@ shellcheck:
 clean:
 	rm -Rf ./dist/*
 
+
+###############################################################################
 .FORCE:
+
+ifeq ($(shell uname),OpenBSD)
+  DATE_EPOCH = -r 
+else
+  DATE_EPOCH = --date=@
+endif
