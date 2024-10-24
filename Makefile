@@ -38,7 +38,7 @@ $(MAN7_PAGES): src = ./man/man7/$(notdir $@)
 $(MAN_PAGES): file_ts = $(shell date $(DATE_EPOCH)$$(git log -1 --pretty="format:%ct" $(src)) +%Y-%m-%d)
 $(MAN_PAGES): content_ts = $(shell awk '/.Dd/ { print $$2 }' $(src))
 $(MAN_PAGES): | dist/man/man1 dist/man/man5 dist/man/man7
-	echo testing timestamp of $@
+	@echo testing timestamp of '$@'
 	[[ $(file_ts) = $(content_ts) ]]
 	cp $(src) $@
 
@@ -59,6 +59,7 @@ clean:
 
 
 ###############################################################################
+
 .FORCE:
 
 ifeq ($(shell uname),OpenBSD)
