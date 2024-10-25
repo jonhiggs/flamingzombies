@@ -2,6 +2,9 @@ FZ_VERSION := $(shell cat cmd/fz/fz.go | awk '/const VERSION/ { gsub(/"/,"",$$NF
 FZCTL_VERSION := $(shell cat cmd/fzctl/fzctl.go | awk '/const VERSION/ { gsub(/"/,"",$$NF); print $$NF }')
 VERSION := $(FZ_VERSION)
 
+# make and publish a release
+# I don't know if this won't be moved to a post_recieve hook.
+
 release: prerelease_tests release_notes.txt
 	gh release create $(VERSION) -F release_notes.txt
 	gh release upload $(VERSION) dist/fz_* dist/fzctl_* dist/plugins.tar.gz
