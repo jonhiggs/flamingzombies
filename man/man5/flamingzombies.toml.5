@@ -50,39 +50,37 @@ Events that occur during normal operation.
 Events that may help during debugging.
 .El
 .Sh TASKS
-Tasks are the commands that check that a service or system is operational. They run periodically and trigger each of their notifiers after every new measurement is recorded.
+Tasks
+are the commands that check that a service or system is operational. They run periodically and trigger each of their notifiers after every new measurement is recorded.
 .Pp
 There is no limit to the number of tasks that can be specified in the configuration file.
-.Pp
-A task cannot have concurrent executions. It's
-.Cm timeout
-must be lower than both its
-.Cm frequency
-and
-.Cm retry_frequency .
 .Pp
 Tasks are randomly (yet consistently) distributed across time to prevent their executions from clustering at the beginning of minutes, hours and days.
 .Pp
 The number of
 .Cm retries
-sets window size for how many historic checks are considered when evaluating a task's state. If all values within the window are are successful or successful, then the task is in an
+sets window size for how many historic checks are considered when evaluating a task's state. If all execution attempts within the window are succeeded for failed, then the task is in either an
 .Cm ok
 or
 .Cm fail
-state, respectfully. Otherwise, state is
-.Cm unknown
-and more tests must be conducted before the tasks state can be known.
+state, respectfully. Otherwise the state is
+.Cm unknown.
 .Pp
-While a task is in an
+While a tasks state is
 .Cm unknown
-state, it is re-executed at the rate of its
-.Cm retry_frequency .
+it is re-executed at the rate of its
+.Cm retry_frequency
+until stabilises to an
+.Cm ok
+or
+.Cm fail
+state.
 .Pp
-Flapping tasks can remain in an
+To avoid flapping tasks remaining in an
 .Cm unknown
-state indefinitely. To avoid this risk, it is important to not to set the
+state indefinitely, it is important that the
 .Cm retry
-count too high. If you are tempted to raise the
+count isn't too high. If you are tempted to raise the
 .Cm retry
 count to defer notifications until the task has had a chance to automatically recover, look into using the
 .Ar defer
@@ -105,9 +103,9 @@ The frequency in which to a task is executed. While the task's state is
 the check is instead executed at the rate of
 .Cm retry_frequency .
 .Pp
-It must have a value less than
+It must be greater than the
 .Cm timeout
-to prevent concurrent executions of the task.
+to prevent concurrent executions.
 .It Ic name = Ar task_name
 The name given to the task. This is used by
 .Xr fzctl 1
@@ -117,21 +115,33 @@ A list of notifiers to trigger when a task is executed. Every task execution tri
 .Cm NOTIFIERS
 for more details.
 .It Ic priority = Ar number
-The priority is an integer greater than 1. The meaning of each value is up to the user. Typically, priority 1 is the most important and the importance decreasing as the number grows larger.
+The priority is an integer greater than 1. It is up to the user to specify the meaning of each priority. Typically, priority 1 will be the most important and the importance would decrease as the number grows.
 .Pp
-The value is provided to gates and notifier commands but is otherwise unused.
+The value of is provided to
+.Xr fz-gates 7
+and 
+.Xr fz-notifier 7
+commands but is otherwise unused.
 .It Ic recover_body = Ar text
 The string of text used by notifiers when raising recovery alerts.
 .It Ic retries = Ar count
 Number of measurements required to confirm a tasks state.
 .Pp
 .It Ic retry_frequency = Ar seconds
-The frequency a task is executed while its state is unknown. Must be less than the
-.Ar timeout .
+The frequency that a task is executed while its state is unknown. It must be greater than than the
+.Cm timeout .
 .It Ic timeout = Ar seconds
 How long to allow the
 .Ar command
 to execute before it is terminated. If the timeout is exceeded, no value is recorded and an error is logged. Since no measurement is taken, the notifier is not triggered and there is no way to alert when in this condition. Timeouts are serious issues that must be prevented.
+.Pp
+The task's
+.Cm timeout
+must be lower than both its
+.Cm frequency
+and
+.Cm retry_frequency
+to prevent concurrent executions.
 .El
 .Sh NOTIFIERS
 Notifiers raise alerts for tasks. They're triggered each a new measurement a task takes. Before executing the notifier command (which results in an alert being sent), each gate is checked. A notifier is only responsible for raising alerts, and doesn't influence when alerts are sent.
@@ -459,7 +469,10 @@ args = ["4", "32"]
 This gate will open if there have been four state-changes in the last 32 measurements.
 .Sh SEE ALSO
 .Xr fz 1 ,
-.Xr fzctl 1
+.Xr fzctl 1 ,
+.Xr fz-tasks 7 ,
+.Xr fz-gates 7 ,
+.Xr fz-notifiers 7
 .Pp
 TOML docs: https://toml.io/en/
 .Pp

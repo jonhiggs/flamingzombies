@@ -1,11 +1,11 @@
-.Dd 2024-10-24
+.Dd 2024-10-26
 .Dt fz-tasks 7
 .Os
 .Sh NAME
 .Nm fz-tasks
 .Nd A development guide to create your own fz tasks.
 .Sh DESCRIPTION
-Tasks are typically short scripts that measure whether or not a condition is true.
+Tasks are typically short scripts that measure whether a system or service is in a known good state.
 .Sh ENVIRONMENT
 Tasks are executed with metadata inserted into the environment. These values are:
 .Bl -tag -width TIMEOUT
@@ -16,19 +16,16 @@ times out the script. A little grace time is added to the
 .Cm TIMEOUT
 to prevent scripts from ever being prematurely terminated.
 .Sh OUTPUT
-Tasks use both stdout and stderr output streams.
+Tasks use both stdout and stderr.
 .Bl -tag -width Ds
 .It Cm stdout
-Everything sent to stdout is provided to the notifier in the
+Everything sent to stdout is made available to the connected notifier(s) in the
 .Cm RESULT_OUTPUT
-environment variable.
-One line should be sufficient. If you need more detail than this, it's usually better to configure an
-.Ar error_body
-or
-.Ar recover_body
-on the task's definition.
+environment variable. One line should be sufficient.
 .It Cm stderr
-All data sent to stderr is written to DEBUG logs.
+All data is written to the
+.Xr fz 1
+DEBUG logs.
 .El
 .Sh EXIT CODES
 The following exit codes are supported:
@@ -49,15 +46,15 @@ command. It has the same traits as exit code
 .Cm 3.
 .El
 .Pp
-Any other exit code is a failure.
+All other exit codes are considered a failure.
 .Sh CONSIDERATIONS
 When writing tasks, ensure the script exits before the
 .Xr fz
-timeout. If your script is timed out, no status will be recorded the task will not be executed again until the
+timeout. If your script exceeds the configured time out, no status is recorded and the task isn't retried until the
 .Ar frequency
 elapses again.
 .Pp
-An error will be logged, but this situation can stall the task. It is a serious issue, but can be easily avoided by running your slow-running command with
+An error is logged, but this situation can stall the task. It is a serious issue, but can be easily avoided by running your slow-running command with
 .Xr timeout 1
 \&.
 .Pp
@@ -88,11 +85,11 @@ fi
 timeout 1 sh -c 'curl -v http://www.google.com 2>&1 >/dev/null | grep -q "HTTP/1.1 200"'
 .Ed
 .Pp
-I'm intentionally avoiding many features of curl to demonstrate how to safely manage more variable runtime conditions using plain shell scripts.
+I'm intentionally avoiding many features of curl to demonstrate how to safely manage more variable runtime conditions while using plain shell scripts.
 .Pp
-Firstly I'm checking that the timeout isn't too low. If it is, the task timeout will be be reached and no measurement will taken. The error is directed to stderr so that is injected into the
+Firstly, I'm checking that the timeout isn't too low. We cannot allow the task to run longer than the specified timeout, otherwise no measurement will be taken. The error is directed to stderr and injected into the
 .Xr fz
-logs. Any output on stdout is thought to be insignificant and is ignored.
+DEBUG logs. Output on stdout is insignificant and ignored.
 .Pp
 The
 .Xr timeout 1

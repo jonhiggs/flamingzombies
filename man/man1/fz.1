@@ -1,9 +1,9 @@
-.Dd 2024-10-24
+.Dd 2024-10-26
 .Dt fz 1
 .Os
 .Sh NAME
 .Nm fz
-.Nd A monitoring scheduler to detect failure and raise alerts.
+.Nd A highly customisable monitoring daemon
 .Sh SYNOPSIS
 .Nm
 .Op Fl n
@@ -12,28 +12,28 @@
 .Sh DESCRIPTION
 The
 .Nm
-daemon is a scheduler to perform monitoring tasks, detect state changes and raise alerts when appropriate.
+daemon is a specialised task scheduler for monitoring. It raises alerts under specific conditions. The scripts themselves are typically shell scripts or small programs. They must adhere to a specific interface, but what they do specifically is up to you.
 .Pp
-Although some scripts are provided, users are expected to write their own scripts which
+Although some scripts are provided, you are expected and encouraged to write your own making
 .Nm
-uses to perform the checks and decide whether a notification is raised. This makes it infinitely flexible, but does require a small amount of programming experience.
+infinitely flexible, though it does require a small amount of programming experience.
 .Bl -tag -width Ds
 .It Fl c, Li --config
 The configuration file. See
-.Xr fz-config
+.Xr flamingzombies.toml 5
 for details on how it can be configured.
 .It Fl C, Li --directory
-The working directory from which scripts are executed. You may use relative paths from this directory when specifying task, notifier or gate commands.
-.It Fl c, Li --help
+Change to this directory before executing any script.
+.It Fl h, Li --help
 Basic usage information.
 .It Fl l, Li --loglevel
-The level of logs that will be emitted. Valid options are error, warn, info or debug.
+The log level to set when running the daemon. Valid options are error, warn, info or debug.
 .It Fl n, Li --configtest
 Test the validity of the supplied configuration.
-.Xr fz-config
+.Xr flamingzombies.toml 5
 for details on how it can be configured.
 .It Fl p, Li --pidfile
-The location where the pidfile will be written.
+Path to write the daemons pidfile.
 .It Fl V, Li --version
 Print the version information.
 .El
@@ -52,5 +52,5 @@ Most settings can also be supplied with environment variables, but if a command 
 .Xr fz-notifiers 7 ,
 .Xr fz-tasks 7
 .Sh "BUGS"
-.Nm flamingzombies
+.Nm fz
 is still very immature. I'm sure it contains bugs and it is certainly missing features.
