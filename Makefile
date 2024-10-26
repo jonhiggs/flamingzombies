@@ -14,7 +14,9 @@ MAN5_PAGES = $(addprefix dist/,$(wildcard man/man5/*.5))
 MAN7_PAGES = $(addprefix dist/,$(wildcard man/man7/*.7))
 MAN_PAGES = $(MAN1_PAGES) $(MAN5_PAGES) $(MAN7_PAGES)
 
-build: $(CMDS) $(GO_TASKS) $(SH_TASKS) $(SH_GATES) $(SH_NOTIFIERS) $(MAN_PAGES)
+SCRIPTS = $(addprefix dist/,$(wildcard scripts/*))
+
+build: $(CMDS) $(GO_TASKS) $(SH_TASKS) $(SH_GATES) $(SH_NOTIFIERS) $(MAN_PAGES) $(SCRIPTS)
 
 $(CMDS): src = ./cmd/$(subst dist/,,$@)
 $(CMDS): .FORCE | dist
@@ -42,7 +44,10 @@ $(MAN_PAGES): | dist/man/man1 dist/man/man5 dist/man/man7
 	[[ $(file_ts) = $(content_ts) ]]
 	cp $(src) $@
 
-dist dist/libexec/task dist/libexec/gate dist/libexec/notifier dist/man/man1 dist/man/man5 dist/man/man7:
+$(SCRIPTS): | dist/scripts
+	cp $(subst dist/,,$@) $@
+
+dist dist/libexec/task dist/libexec/gate dist/libexec/notifier dist/man/man1 dist/man/man5 dist/man/man7 dist/scripts:
 	mkdir -p $@
 
 test: dirs = $(shell find . -name \*_test.go | xargs -I{} dirname {})
