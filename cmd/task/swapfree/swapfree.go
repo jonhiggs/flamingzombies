@@ -68,7 +68,7 @@ func main() {
 			cli.StatsdValue(b)
 			os.Exit(0)
 		case <-time.After(timeout):
-			// if no packets were received by the timeout, then the host is down.
+			// unless packets are received before timeout, the host is down.
 			fmt.Printf("no packets received within timeout (%v)\n", timeout)
 			os.Exit(1)
 		}

@@ -1,5 +1,7 @@
 package cli
 
+// XXX: Handles the boilerplate stuff needed by tasks, notifiers and gates.
+
 import (
 	"fmt"
 	"os"
