@@ -17,7 +17,7 @@ const DEFAULT_PRIORITY = 5
 
 var DAEMON_START_TIME = time.Now()
 
-var StatsdClient statsd.Statter
+var StatsdClient statsd.Statter = (*statsd.Client)(nil)
 
 var Hostname string
 
