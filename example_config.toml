@@ -1,6 +1,6 @@
 log_file = "-"
 log_level = "info"
-directory = "/home/jon/src/flamingzombies/libexec"
+directory = "/usr/local/libexec/flamingzombies"
 
 listen_address = "127.0.0.1:5891"
 
