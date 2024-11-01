@@ -3,8 +3,9 @@ DIST_LIBEXEC_GO = $(addprefix dist/libexec/flamingzombies/task/,diskfree ping sw
 DIST_LIBEXEC = $(subst libexec/,dist/libexec/flamingzombies/,$(wildcard libexec/task/* libexec/gate/* libexec/notifier/*))
 DIST_MAN = $(addprefix dist/,$(wildcard man/man1/*.1) $(wildcard man/man5/*.5) $(wildcard man/man7/*.7))
 DIST_SCRIPTS = $(addprefix dist/,$(wildcard scripts/*))
+DIST_CONF = dist/example_config.toml
 
-build: $(DIST_GO) $(DIST_LIBEXEC_GO) $(DIST_LIBEXEC) $(DIST_MAN) $(DIST_SCRIPTS)
+build: $(DIST_GO) $(DIST_LIBEXEC_GO) $(DIST_LIBEXEC) $(DIST_MAN) $(DIST_SCRIPTS) $(DIST_CONF)
 
 $(DIST_GO): src = ./cmd/$(subst dist/,,$@)
 $(DIST_GO): .FORCE | dist/bin
@@ -22,7 +23,7 @@ $(DIST_MAN): src = $(subst dist/,,$@)
 $(DIST_MAN): | $(addprefix dist/man/, man1 man5 man7)
 	cp $(src) $@
 
-$(DIST_SCRIPTS): | dist/scripts
+$(DIST_SCRIPTS) $(DIST_CONF): | dist/scripts
 	cp $(subst dist/,,$@) $@
 
 dist/bin dist/libexec/flamingzombies/task dist/libexec/flamingzombies/gate dist/libexec/flamingzombies/notifier dist/man/man1 dist/man/man5 dist/man/man7 dist/scripts:
