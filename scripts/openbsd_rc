@@ -3,7 +3,6 @@
 # $OpenBSD: flamingzombies, 0.0.1 2020/05/13 18:49:00 rpe Exp $
 
 daemon="/usr/local/bin/fz"
-rc_bg="YES"
 
 . /etc/rc.d/rc.subr
 
