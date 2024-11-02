@@ -105,8 +105,6 @@ func main() {
 		cntxt := &daemon.Context{
 			PidFileName: pidfile,
 			PidFilePerm: 0644,
-			LogFileName: "sample.log", // TODO: get logfile
-			LogFilePerm: 0640,
 			WorkDir:     "./",
 			Umask:       027,
 			Args:        []string{"[fz]"},
