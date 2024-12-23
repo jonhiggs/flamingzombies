@@ -1,5 +1,5 @@
 DIST_GO = dist/bin/fzctl dist/bin/fz
-DIST_LIBEXEC_GO = $(addprefix dist/libexec/flamingzombies/task/,diskfree ping swapfree)
+DIST_LIBEXEC_GO = dist/libexec/flamingzombies/task/ping
 DIST_LIBEXEC = $(subst libexec/,dist/libexec/flamingzombies/,$(wildcard libexec/helpers.inc libexec/README.md libexec/task/* libexec/gate/* libexec/notifier/*))
 DIST_MAN = $(addprefix dist/,$(wildcard man/man1/*.1) $(wildcard man/man5/*.5) $(wildcard man/man7/*.7))
 DIST_SCRIPTS = $(addprefix dist/,$(wildcard scripts/*))
