@@ -8,42 +8,12 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/cactus/go-statsd-client/v5/statsd"
 )
 
 const GRACE_TIME = time.Duration(500) * time.Millisecond
-
-type Task struct {
-	Name                  string   `toml:"name"`            // friendly name
-	Command               string   `toml:"command"`         // command
-	Args                  []string `toml:"args"`            // command arguments
-	FrequencySeconds      int      `toml:"frequency"`       // how often to run
-	RetryFrequencySeconds int      `toml:"retry_frequency"` // how quickly to retry when state unknown
-	TimeoutSeconds        int      `toml:"timeout"`         // how long an execution may run
-	Retries               int      `toml:"retries"`         // number of retries before changing the state
-	NotifierNames         []string `toml:"notifiers"`       // notifiers to trigger upon state change
-	Priority              int      `toml:"priority"`        // the priority of the notifications
-	ErrorBody             string   `toml:"error_body"`      // the body of the notification when entering an error state
-	RecoverBody           string   `toml:"recover_body"`    // the body of the notification when recovering from an error state
-
-	// public, but not configurable
-	ErrorCount       int       // task failed to executed
-	ExecutionCount   int       // task was executed
-	FailCount        int       // task failed
-	History          uint32    // represented in binary. Successes are high
-	HistoryMask      uint32    // the bits in the history with a recorded value. Needed to understand a history of 0
-	LastFail         time.Time // the time of the last failed execution
-	LastOk           time.Time // the time of the last successfull execution
-	LastResultOutput string    // the result output of the last execution
-	LastRun          time.Time // the time of the last execution
-	OKCount          int       // task passed
-
-	mutex             sync.Mutex  // lock to ensure one task runs at a time
-	lastNotifications []time.Time // times that each notifier was last executed
-}
 
 func (t Task) Hash() uint32 {
 	// To help with testing, return hash of zero when there isn't a command or

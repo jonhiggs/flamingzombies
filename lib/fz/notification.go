@@ -11,11 +11,6 @@ import (
 	"github.com/cactus/go-statsd-client/v5/statsd"
 )
 
-type Notification struct {
-	Notifier *Notifier
-	Task     *Task
-}
-
 var NotifyCh = make(chan Notification, 100)
 
 func ProcessNotifications() {

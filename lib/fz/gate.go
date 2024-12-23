@@ -11,12 +11,6 @@ import (
 	"github.com/cactus/go-statsd-client/v5/statsd"
 )
 
-type Gate struct {
-	Name    string   `toml:"name"`    // friendly name
-	Command string   `toml:"command"` // command
-	Args    []string `toml:"args"`    // command arguments
-}
-
 func (g Gate) IsOpen(t *Task, n *Notifier) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()

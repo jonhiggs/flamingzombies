@@ -7,16 +7,6 @@ import (
 	"time"
 )
 
-type Notifier struct {
-	Name           string
-	Command        string
-	Args           []string
-	GateSets       [][]string `toml:"gates"`
-	TimeoutSeconds int        `toml:"timeout"`
-
-	gates [][]*Gate
-}
-
 func (n Notifier) timeout() time.Duration {
 	return time.Duration(n.TimeoutSeconds) * time.Second
 }

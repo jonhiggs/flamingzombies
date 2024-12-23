@@ -21,27 +21,6 @@ var StatsdClient statsd.Statter = (*statsd.Client)(nil)
 
 var Hostname string
 
-type Defaults struct {
-	FrequencySeconds      int      `toml:"frequency"`
-	NotifierNames         []string `toml:"notifiers"`
-	Retries               int      `toml:"retries"`
-	RetryFrequencySeconds int      `toml:"retry_frequency"`
-	TimeoutSeconds        int      `toml:"timeout"` // better to put the timeout into the commmand
-	Priority              int      `toml:"priority"`
-}
-
-type Config struct {
-	Defaults      Defaults
-	LogLevel      string     `toml:"log_level"`
-	Notifiers     []Notifier `toml:"notifier"`
-	Tasks         []Task     `toml:"task"`
-	Gates         []Gate     `toml:"gate"`
-	ListenAddress string     `toml:"listen_address"`
-	Directory     string     `toml:"directory"`
-	StatsdHost    string     `toml:"statsd_host"`
-	StatsdPrefix  string     `toml:"statsd_prefix"`
-}
-
 var config Config
 
 func ReadConfig() Config {
