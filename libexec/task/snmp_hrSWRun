@@ -1,0 +1,17 @@
+#!/bin/sh
+if [ $# -lt 3 ]; then
+  echo "usage: $0 <host> <procName> <community> <version>" >&2
+  exit 1
+fi
+
+host=$1
+name=$2
+community=${3:-public}
+version=${4:-2c}
+
+proc() {
+  snmp walk -v ${version} -c ${community} ${host} hrSWRunName \
+    | awk -v n="$1" '($NF==n) { sub("hrSWRunName\.","",$1); print $1}'
+}
+
+proc "${name}"

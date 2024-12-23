@@ -1,7 +1,0 @@
-#!/bin/sh
-if [ $# -ne 2 ]; then
-  echo "usage: $0 <host> <port>" >&2
-  exit 1
-fi
-
-/usr/bin/nc -zv "$1" "$2" 2>&1
