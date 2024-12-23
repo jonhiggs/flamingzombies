@@ -4,7 +4,6 @@
 
 daemon="/usr/local/bin/fz"
 daemon_logger="daemon.info"
-daemon_flags="-F"
 rc_bg=YES
 
 . /etc/rc.d/rc.subr
