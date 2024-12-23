@@ -1,6 +1,6 @@
 SHELL := /usr/bin/env bash
 
-build clean:
+build clean fz.tar.bz2:
 	$(MAKE) -f dist.mk $@
 
 test: dirs = $(shell find . -name \*_test.go | xargs -I{} dirname {})
