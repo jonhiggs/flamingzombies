@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if [ $# -lt 3 ]; then
+  echo "usage: $0 <host> <interface> <community> <version>" >&2
+  exit 1
+fi
+
+host=$1
+interface=$2
+community=${3:-public}
+version=${4:-2c}
+
+snmp get -v ${version} -c ${community} ${host} ifSpeed.$2 \
+  | awk '{ print $NF }'
