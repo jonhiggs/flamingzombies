@@ -1,36 +1,35 @@
 #!/bin/sh
 if [ $# -lt 3 ]; then
-  echo "usage: $0 <host> <path> <community> <version>" >&2
+  echo "usage: $0 <host> <path>" >&2
   exit 1
 fi
 
-host=$1
-path=$2
-community=${3:-public}
-version=${4:-2c}
+SNMP_HOST=$1
+SNMP_VERSION=${SNMP_VERSION:-2c}
+SNMP_COMMUNITY=${SNMP_COMMUNITY:-public}
 
 storageInt() {
-  snmp walk -v ${version} -c ${community} ${host} hrStorageDescr \
+  snmp walk -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" hrStorageDescr \
     | awk '($NF=="/") { sub("hrStorageDescr\.","",$1); print $1 }'
 }
 
 storageAllocationUnits() {
-  snmp get -v ${version} -c ${community} ${host} hrStorageAllocationUnits.$1 \
+  snmp get -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" "hrStorageAllocationUnits.$1" \
     | awk '{ print $NF }'
 }
 
 storageSize() {
-  snmp get -v ${version} -c ${community} ${host} hrStorageSize.$1 \
-    | awk -v n=$n '{ print $NF * n }'
+  snmp get -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" "hrStorageSize.$1" \
+    | awk -v n="$2" '{ print $NF * n }'
 }
 
 storageUsed() {
-  snmp get -v ${version} -c ${community} ${host} hrStorageUsed.$1 \
-    | awk -v n=$n '{ print $NF * n }'
+  snmp get -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" "hrStorageUsed.$1" \
+    | awk -v n="$2" '{ print $NF * n }'
 }
 
-i=$(storageInt ${path})
-n=$(storageAllocationUnits $i)
+i=$(storageInt "$2")
+n=$(storageAllocationUnits "$i")
 
-storageSize $i $n
-storageUsed $i $n
+storageSize "$i" "$n"
+storageUsed "$i" "$n"

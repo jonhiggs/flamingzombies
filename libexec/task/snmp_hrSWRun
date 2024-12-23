@@ -1,17 +1,14 @@
 #!/bin/sh
-if [ $# -lt 3 ]; then
-  echo "usage: $0 <host> <procName> <community> <version>" >&2
+set -eu
+
+if [ $# -ne 2 ]; then
+  echo "usage: $0 <host> <procName>" >&2
   exit 1
 fi
 
-host=$1
-name=$2
-community=${3:-public}
-version=${4:-2c}
+SNMP_HOST=$1
+SNMP_VERSION=${SNMP_VERSION:-2c}
+SNMP_COMMUNITY=${SNMP_COMMUNITY:-public}
 
-proc() {
-  snmp walk -v ${version} -c ${community} ${host} hrSWRunName \
-    | awk -v n="$1" '($NF==n) { sub("hrSWRunName\.","",$1); print $1}'
-}
-
-proc "${name}"
+snmp walk -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" hrSWRunName \
+  | awk -v n="$2" '($NF==n) { sub("hrSWRunName\.","",$1); print $1}'

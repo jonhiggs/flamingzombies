@@ -18,12 +18,13 @@ type Config struct {
 }
 
 type ConfigDefaults struct {
-	FrequencySeconds      int      `toml:"frequency"`
-	NotifierNames         []string `toml:"notifiers"`
-	Retries               int      `toml:"retries"`
-	RetryFrequencySeconds int      `toml:"retry_frequency"`
-	TimeoutSeconds        int      `toml:"timeout"` // better to put the timeout into the commmand
-	Priority              int      `toml:"priority"`
+	FrequencySeconds      int        `toml:"frequency"`
+	NotifierNames         []string   `toml:"notifiers"`
+	Priority              int        `toml:"priority"`
+	Retries               int        `toml:"retries"`
+	RetryFrequencySeconds int        `toml:"retry_frequency"`
+	TaskEnvs              [][]string `toml:"task_envs`
+	TimeoutSeconds        int        `toml:"timeout"` // better to put the timeout into the command
 }
 
 type Notifier struct {
@@ -37,17 +38,18 @@ type Notifier struct {
 }
 
 type Task struct {
-	Name                  string   `toml:"name"`            // friendly name
-	Command               string   `toml:"command"`         // command
-	Args                  []string `toml:"args"`            // command arguments
-	FrequencySeconds      int      `toml:"frequency"`       // how often to run
-	RetryFrequencySeconds int      `toml:"retry_frequency"` // how quickly to retry when state unknown
-	TimeoutSeconds        int      `toml:"timeout"`         // how long an execution may run
-	Retries               int      `toml:"retries"`         // number of retries before changing the state
-	NotifierNames         []string `toml:"notifiers"`       // notifiers to trigger upon state change
-	Priority              int      `toml:"priority"`        // the priority of the notifications
-	ErrorBody             string   `toml:"error_body"`      // the body of the notification when entering an error state
-	RecoverBody           string   `toml:"recover_body"`    // the body of the notification when recovering from an error state
+	Name                  string     `toml:"name"`            // friendly name
+	Command               string     `toml:"command"`         // command
+	Args                  []string   `toml:"args"`            // command arguments
+	FrequencySeconds      int        `toml:"frequency"`       // how often to run
+	RetryFrequencySeconds int        `toml:"retry_frequency"` // how quickly to retry when state unknown
+	TimeoutSeconds        int        `toml:"timeout"`         // how long an execution may run
+	Retries               int        `toml:"retries"`         // number of retries before changing the state
+	NotifierNames         []string   `toml:"notifiers"`       // notifiers to trigger upon state change
+	Priority              int        `toml:"priority"`        // the priority of the notifications
+	Envs                  [][]string `toml:"envs`             // environment variables supplied to task
+	ErrorBody             string     `toml:"error_body"`      // the body of the notification when entering an error state
+	RecoverBody           string     `toml:"recover_body"`    // the body of the notification when recovering from an error state
 
 	// public, but not configurable
 	ErrorCount       int       // task failed to executed
@@ -56,7 +58,7 @@ type Task struct {
 	History          uint32    // represented in binary. Successes are high
 	HistoryMask      uint32    // the bits in the history with a recorded value. Needed to understand a history of 0
 	LastFail         time.Time // the time of the last failed execution
-	LastOk           time.Time // the time of the last successfull execution
+	LastOk           time.Time // the time of the last successful execution
 	LastResultOutput string    // the result output of the last execution
 	LastRun          time.Time // the time of the last execution
 	OKCount          int       // task passed

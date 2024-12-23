@@ -70,6 +70,14 @@ func (t *Task) Run() bool {
 		fmt.Sprintf("TIMEOUT=%d", t.TimeoutSeconds),
 	}
 
+	for _, v := range config.Defaults.TaskEnvs {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", v[0], v[1]))
+	}
+
+	for _, v := range t.Envs {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", v[0], v[1]))
+	}
+
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
 

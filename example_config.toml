@@ -11,6 +11,10 @@ notifiers = [
     "logger",
 ]
 priority = 3
+task_envs = [
+    "SNMP_COMMUNITY" = "default"
+    "SNMP_VERSION" = "2c"
+]
 
 [[task]]
 name = "flappy"
