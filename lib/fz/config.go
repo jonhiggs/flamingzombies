@@ -150,3 +150,10 @@ func ReadConfig() Config {
 func (c Config) Listen() bool {
 	return c.ListenAddress != ""
 }
+
+func (c Config) ErrorNotification() {
+	//for _, n := range c.ErrorNotifiers {
+	//	NotifyCh <- Notification{n, t}
+	//}
+
+}

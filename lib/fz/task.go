@@ -9,8 +9,6 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-
-	"github.com/cactus/go-statsd-client/v5/statsd"
 )
 
 const GRACE_TIME = time.Duration(500) * time.Millisecond
@@ -81,7 +79,7 @@ func (t *Task) Run() bool {
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
 
-	startTime := time.Now()
+	//startTime := time.Now()
 	err := cmd.Start()
 	if err != nil {
 		panic(err)
@@ -95,12 +93,12 @@ func (t *Task) Run() bool {
 	t.LastResultOutput = strings.TrimSuffix(string(stdoutBytes), "\n")
 
 	err = cmd.Wait()
-	t.DurationMetric(time.Now().Sub(startTime))
+	//t.DurationMetric(time.Now().Sub(startTime))
 
 	if ctx.Err() == context.DeadlineExceeded {
 		Logger.Error("time out exceeded while executing command", "task", t.Name)
 		t.ErrorCount++
-		t.IncMetric("timeout")
+		//t.IncMetric("timeout")
 
 		return false
 	}
@@ -109,7 +107,7 @@ func (t *Task) Run() bool {
 		if os.IsPermission(err) {
 			Logger.Error(fmt.Sprint(err), "task", t.Name)
 			t.ErrorCount++
-			t.IncMetric("error")
+			//t.IncMetric("error")
 
 			return false
 		}
@@ -127,18 +125,18 @@ func (t *Task) Run() bool {
 
 	switch exitCode {
 	case 3: // unknown status
-		t.IncMetric("unknown")
+		//t.IncMetric("unknown")
 		return false
 	case 124: // unknown status due to timeout
-		t.IncMetric("unknown")
+		//t.IncMetric("unknown")
 		return false
 	case 0:
 		t.OKCount++
-		t.IncMetric("ok")
+		//t.IncMetric("ok")
 		t.RecordStatus(true)
 	default:
 		t.FailCount++
-		t.IncMetric("fail")
+		//t.IncMetric("fail")
 		t.RecordStatus(false)
 	}
 
@@ -150,28 +148,6 @@ func (t *Task) Run() bool {
 		}
 	}
 	return true
-}
-
-func (t *Task) IncMetric(x string) {
-	StatsdClient.Inc(
-		fmt.Sprintf("task.%s", x), 1, 1.0,
-		statsd.Tag{"host", Hostname},
-		statsd.Tag{"name", t.Name},
-	)
-}
-
-func (t *Task) DurationMetric(d time.Duration) {
-	StatsdClient.TimingDuration(
-		"task.duration", d, 1.0,
-		statsd.Tag{"host", Hostname},
-		statsd.Tag{"name", t.Name},
-	)
-
-	StatsdClient.Gauge(
-		"task.timeoutquota.percent", int64(float64(d)/float64(t.timeout())*100), 1.0,
-		statsd.Tag{"host", Hostname},
-		statsd.Tag{"name", t.Name},
-	)
 }
 
 func (t *Task) RecordStatus(b bool) {
@@ -276,16 +252,18 @@ func (t Task) retryFrequency() time.Duration {
 }
 
 func (t Task) notifiers() []*Notifier {
-	var not []*Notifier
+	var ns []*Notifier
 	for _, nName := range t.NotifierNames {
 		for i, _ := range config.Notifiers {
 			if nName == config.Notifiers[i].Name {
-				not = append(not, &config.Notifiers[i])
+				n := &config.Notifiers[i]
+				n.kind = TaskNotifierKind
+				ns = append(ns, n)
 			}
 		}
 	}
 
-	return not
+	return ns
 }
 
 // return the arguments after interpolating the values

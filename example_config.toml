@@ -10,6 +10,9 @@ timeout = 1
 notifiers = [
     "logger",
 ]
+error_notifiers = [
+    "error_emailer",
+]
 priority = 3
 task_envs = [
     "SNMP_COMMUNITY" = "default"
@@ -35,6 +38,17 @@ gates = [
     ["to_failed", "defer"],
     ["is_failed", "renotify"],
 ]
+
+[[notifier]]
+name = "error_emailer"
+command = "notifier/email"
+envs = [
+    [ "EMAIL_ADDRESS", "jon@altos.au" ],
+    [ "EMAIL_FROM", "fz@altos.au" ],
+    [ "EMAIL_SUBJECT", "fz experienced a critical error" ],
+]
+timeout = 5
+gates = []
 
 [[gate]]
 name = "to_failed"

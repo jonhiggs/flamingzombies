@@ -28,13 +28,21 @@ type ConfigDefaults struct {
 	TimeoutSeconds        int        `toml:"timeout"` // better to put the timeout into the command
 }
 
-type Notifier struct {
-	Args           []string
-	Command        string
-	GateSets       [][]string `toml:"gates"`
-	Name           string
-	TimeoutSeconds int `toml:"timeout"`
+type NotifierKind int
 
+const (
+	TaskNotifierKind NotifierKind = iota
+	ErrorNotifierKind
+)
+
+type Notifier struct {
+	GateSets       [][]string `toml:"gates"`
+	TimeoutSeconds int        `toml:"timeout"`
+	Args           []string   `toml:"args"`
+	Command        string     `toml:"command"`
+	Name           string     `toml:"name"`
+
+	kind  NotifierKind
 	gates [][]*Gate
 }
 
