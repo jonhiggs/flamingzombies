@@ -6,15 +6,16 @@ import (
 )
 
 type Config struct {
-	Defaults      ConfigDefaults
-	LogLevel      string     `toml:"log_level"`
-	Notifiers     []Notifier `toml:"notifier"`
-	Tasks         []Task     `toml:"task"`
-	Gates         []Gate     `toml:"gate"`
-	ListenAddress string     `toml:"listen_address"`
-	Directory     string     `toml:"directory"`
-	StatsdHost    string     `toml:"statsd_host"`
-	StatsdPrefix  string     `toml:"statsd_prefix"`
+	Defaults       ConfigDefaults
+	Directory      string     `toml:"directory"`
+	ErrorNotifiers []Notifier `toml:"error_notifier"`
+	Gates          []Gate     `toml:"gate"`
+	ListenAddress  string     `toml:"listen_address"`
+	LogLevel       string     `toml:"log_level"`
+	Notifiers      []Notifier `toml:"notifier"`
+	StatsdHost     string     `toml:"statsd_host"`
+	StatsdPrefix   string     `toml:"statsd_prefix"`
+	Tasks          []Task     `toml:"task"`
 }
 
 type ConfigDefaults struct {
@@ -28,11 +29,11 @@ type ConfigDefaults struct {
 }
 
 type Notifier struct {
-	Name           string
-	Command        string
 	Args           []string
+	Command        string
 	GateSets       [][]string `toml:"gates"`
-	TimeoutSeconds int        `toml:"timeout"`
+	Name           string
+	TimeoutSeconds int `toml:"timeout"`
 
 	gates [][]*Gate
 }

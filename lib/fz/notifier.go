@@ -47,7 +47,8 @@ func (n Notifier) validate() error {
 	}
 
 	for i, gates := range n.GateSets {
-		if len(gates) > 3 {
+		if len(gates) > 30 {
+			// TODO: why can't it have more than 30 elements?
 			return fmt.Errorf("gateset %d: cannot have more than 30 elements", i)
 		}
 
