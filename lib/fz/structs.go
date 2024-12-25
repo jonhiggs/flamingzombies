@@ -10,7 +10,6 @@ type Config struct {
 	Directory      string     `toml:"directory"`
 	ErrorNotifiers []Notifier `toml:"error_notifier"`
 	Gates          []Gate     `toml:"gate"`
-	ListenAddress  string     `toml:"listen_address"`
 	LogLevel       string     `toml:"log_level"`
 	Notifiers      []Notifier `toml:"notifier"`
 	StatsdHost     string     `toml:"statsd_host"`

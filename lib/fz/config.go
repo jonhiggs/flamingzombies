@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/cactus/go-statsd-client/v5/statsd"
 	"github.com/pelletier/go-toml"
 )
 
@@ -16,8 +15,6 @@ const DEFAULT_FREQUENCY_SECONDS = 300
 const DEFAULT_PRIORITY = 5
 
 var DAEMON_START_TIME = time.Now()
-
-var StatsdClient statsd.Statter = (*statsd.Client)(nil)
 
 var Hostname string
 
@@ -48,21 +45,6 @@ func ReadConfig() Config {
 
 	if config.Directory == "" {
 		config.Directory = os.Getenv("FZ_DIRECTORY")
-	}
-
-	if config.StatsdHost == "" {
-		config.StatsdHost = os.Getenv("FZ_STATSD_HOST")
-	}
-
-	if config.StatsdPrefix == "" {
-		config.StatsdPrefix = os.Getenv("FZ_STATSD_PREFIX")
-	}
-
-	if config.StatsdHost != "" {
-		StatsdClient, err = statsd.NewClient(config.StatsdHost, config.StatsdPrefix)
-		if err != nil {
-			panic(err)
-		}
 	}
 
 	for i, t := range config.Tasks {

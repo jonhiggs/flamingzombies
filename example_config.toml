@@ -2,8 +2,6 @@ log_file = "-"
 log_level = "info"
 directory = "/usr/local/libexec/flamingzombies"
 
-listen_address = "127.0.0.1:5891"
-
 [defaults]
 retries = 5
 timeout = 1
