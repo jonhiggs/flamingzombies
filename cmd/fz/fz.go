@@ -6,7 +6,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/jonhiggs/flamingzombies/lib/daemon"
 	"github.com/jonhiggs/flamingzombies/lib/fz"
 	"nullprogram.com/x/optparse"
 )
@@ -23,10 +22,6 @@ func init() {
 
 	if os.Getenv("FZ_DIRECTORY") == "" {
 		os.Setenv("FZ_DIRECTORY", "/usr/libexec/flamingzombies")
-	}
-
-	if os.Getenv("FZ_LISTEN") == "" {
-		os.Setenv("FZ_LISTEN", "127.0.0.1:5891")
 	}
 
 	if os.Getenv("FZ_STATSD_PREFIX") == "" {
@@ -93,10 +88,6 @@ func init() {
 	}
 
 	fz.ProcessNotifications()
-
-	if config.Listen() {
-		go daemon.Listen(&config)
-	}
 }
 
 func main() {

@@ -1,5 +1,4 @@
 DIST_GO = dist/bin/fz
-DIST_LIBEXEC_GO = dist/libexec/flamingzombies/task/ping
 DIST_LIBEXEC = $(subst libexec/,dist/libexec/flamingzombies/,$(wildcard libexec/helpers.inc libexec/README.md libexec/task/* libexec/gate/* libexec/notifier/*))
 DIST_MAN = $(addprefix dist/,$(wildcard man/man1/*.1) $(wildcard man/man5/*.5) $(wildcard man/man7/*.7))
 DIST_SCRIPTS = $(addprefix dist/,$(wildcard scripts/*))
@@ -12,15 +11,11 @@ else
 	TAR := tar
 endif
 
-build: $(DIST_GO) $(DIST_LIBEXEC_GO) $(DIST_LIBEXEC) $(DIST_MAN) $(DIST_SCRIPTS) $(DIST_CONF) $(DIST_MAKEFILE)
+build: $(DIST_GO) $(DIST_LIBEXEC) $(DIST_MAN) $(DIST_SCRIPTS) $(DIST_CONF) $(DIST_MAKEFILE)
 
 $(DIST_GO): src = ./cmd/$(subst dist/,,$@)
 $(DIST_GO): .FORCE | dist/bin
 	go build -o $@ ./cmd/$(notdir $@)
-
-$(DIST_LIBEXEC_GO): src = ./$(subst dist/libexec/flamingzombies/,cmd/,$@)
-$(DIST_LIBEXEC_GO): .FORCE | $(addprefix dist/libexec/flamingzombies/, task gate notifier)
-	go build -o $@ $(src)
 
 $(DIST_LIBEXEC): src = $(subst dist/libexec/flamingzombies/,libexec/,$@)
 $(DIST_LIBEXEC): | $(addprefix dist/libexec/flamingzombies/, task gate notifier)

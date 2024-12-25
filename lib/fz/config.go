@@ -50,10 +50,6 @@ func ReadConfig() Config {
 		config.Directory = os.Getenv("FZ_DIRECTORY")
 	}
 
-	if config.ListenAddress == "" {
-		config.ListenAddress = os.Getenv("FZ_LISTEN")
-	}
-
 	if config.StatsdHost == "" {
 		config.StatsdHost = os.Getenv("FZ_STATSD_HOST")
 	}
@@ -145,10 +141,6 @@ func ReadConfig() Config {
 	}
 
 	return config
-}
-
-func (c Config) Listen() bool {
-	return c.ListenAddress != ""
 }
 
 func (c Config) ErrorNotification() {
