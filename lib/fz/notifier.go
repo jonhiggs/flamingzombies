@@ -7,10 +7,18 @@ import (
 	"time"
 )
 
-func (n Notifier) timeout() time.Duration {
-	return time.Duration(n.TimeoutSeconds) * time.Second
+// Find and return a notifier by its name.
+func NotifierByName(name string) *Notifier {
+	for i, n := range config.Notifiers {
+		if n.Name == name {
+			return &config.Notifiers[i]
+		}
+	}
+
+	return nil
 }
 
+// Return the gates attached to a notifier
 func (n Notifier) Gates() [][]*Gate {
 	if len(n.gates) < 0 {
 		return n.gates
@@ -29,6 +37,10 @@ func (n Notifier) Gates() [][]*Gate {
 	}
 
 	return n.gates
+}
+
+func (n Notifier) Timeout() time.Duration {
+	return time.Duration(n.TimeoutSeconds) * time.Second
 }
 
 func (n Notifier) validate() error {
@@ -57,16 +69,6 @@ func (n Notifier) validate() error {
 			if err != nil {
 				return fmt.Errorf("gateset %d: %s", i, err)
 			}
-		}
-	}
-
-	return nil
-}
-
-func NotifierByName(name string) *Notifier {
-	for i, n := range config.Notifiers {
-		if n.Name == name {
-			return &config.Notifiers[i]
 		}
 	}
 

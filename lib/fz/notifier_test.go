@@ -2,16 +2,16 @@ package fz
 
 import (
 	"testing"
+	"time"
 )
 
 func init() {
-	StartLogger("info")
-
 	config = Config{
 		Notifiers: []Notifier{
 
 			Notifier{
-				Name: "zero",
+				Name:           "zero",
+				TimeoutSeconds: 3,
 				GateSets: [][]string{
 					[]string{"gate_zero"},
 					//[]string{}, TODO: later
@@ -53,5 +53,14 @@ func TestNotifierGates(t *testing.T) {
 
 	if len(got[0]) != 1 {
 		t.Errorf("length 0: got %d, want 1", len(got[0]))
+	}
+}
+
+func TestNotifierTimeout(t *testing.T) {
+	got := config.Notifiers[0].Timeout()
+	want := time.Second * 3
+
+	if got != want {
+		t.Errorf("length: got %d, want %d", got, want)
 	}
 }

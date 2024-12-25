@@ -86,3 +86,8 @@ type Notification struct {
 	Notifier *Notifier
 	Task     *Task
 }
+
+type ErrorNotification struct {
+	Notifier *Notifier
+	Error    error
+}

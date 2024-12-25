@@ -7,17 +7,62 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-
-	"github.com/cactus/go-statsd-client/v5/statsd"
 )
 
 var NotifyCh = make(chan Notification, 100)
+var ErrorNotifyCh = make(chan ErrorNotification, 100)
 
 func ProcessNotifications() {
 	go func() {
 		for {
 		C:
 			select {
+			case n := <-ErrorNotifyCh:
+				Logger.Info("sending notification", "notifier", n.Notifier.Name)
+				//n.Task.SetLastNotification(n.Notifier.Name, time.Now())
+
+				ctx, cancel := context.WithTimeout(context.Background(), n.Notifier.Timeout())
+				defer cancel()
+
+				cmd := exec.CommandContext(ctx, n.Notifier.Command, n.Notifier.Args...)
+
+				stdin, err := cmd.StdinPipe()
+				if err != nil {
+					Logger.Error(fmt.Sprint(err), "notifier", n.Notifier.Name)
+				}
+
+				cmd.Dir = config.Directory
+
+				//io.WriteString(stdin, n.body())
+				stdin.Close()
+
+				stderr, _ := cmd.StderrPipe()
+
+				//startTime := time.Now()
+				err = cmd.Start()
+				if err != nil {
+					if ctx.Err() == context.DeadlineExceeded {
+						Logger.Error(fmt.Sprintf("time out exceeded while executing notifier"), "notifier", n.Notifier.Name)
+					} else {
+						// TODO: Handle this error
+						panic(err)
+					}
+				}
+
+				errorMessage, _ := io.ReadAll(stderr)
+
+				err = cmd.Wait()
+				//n.DurationMetric(time.Now().Sub(startTime))
+
+				if ctx.Err() == context.DeadlineExceeded {
+					Logger.Error(fmt.Sprintf("time out exceeded while executing error notifier"), "notifier", n.Notifier.Name)
+				} else if err != nil {
+					exiterr, _ := err.(*exec.ExitError)
+					exitCode := exiterr.ExitCode()
+
+					Logger.Error(fmt.Sprintf("command returned stderr: %s", errorMessage), "notifier", n.Notifier.Name, "exit_code", exitCode)
+				}
+
 			case n := <-NotifyCh:
 				openGates, ok := n.gateState()
 				if !ok {
@@ -33,7 +78,7 @@ func ProcessNotifications() {
 				Logger.Info("sending notification", "notifier", n.Notifier.Name)
 				n.Task.SetLastNotification(n.Notifier.Name, time.Now())
 
-				ctx, cancel := context.WithTimeout(context.Background(), n.Notifier.timeout())
+				ctx, cancel := context.WithTimeout(context.Background(), n.Notifier.Timeout())
 				defer cancel()
 
 				cmd := exec.CommandContext(ctx, n.Notifier.Command, n.Notifier.Args...)
@@ -58,13 +103,14 @@ func ProcessNotifications() {
 
 				stderr, _ := cmd.StderrPipe()
 
-				startTime := time.Now()
+				//startTime := time.Now()
 				err = cmd.Start()
 				if err != nil {
 					if ctx.Err() == context.DeadlineExceeded {
 						Logger.Error(fmt.Sprintf("time out exceeded while executing notifier"), "notifier", n.Notifier.Name)
-						n.IncMetric("timeout")
+						//n.IncMetric("timeout")
 					} else {
+						// TODO: handle this error
 						panic(err)
 					}
 				}
@@ -72,17 +118,17 @@ func ProcessNotifications() {
 				errorMessage, _ := io.ReadAll(stderr)
 
 				err = cmd.Wait()
-				n.DurationMetric(time.Now().Sub(startTime))
+				//n.DurationMetric(time.Now().Sub(startTime))
 
 				if ctx.Err() == context.DeadlineExceeded {
 					Logger.Error(fmt.Sprintf("time out exceeded while executing notifier"), "notifier", n.Notifier.Name)
-					n.IncMetric("timeout")
+					//n.IncMetric("timeout")
 				} else if err != nil {
 					exiterr, _ := err.(*exec.ExitError)
 					exitCode := exiterr.ExitCode()
 
 					Logger.Error(fmt.Sprintf("command returned stderr: %s", errorMessage), "notifier", n.Notifier.Name, "exit_code", exitCode)
-					n.IncMetric("error")
+					//n.IncMetric("error")
 				}
 			}
 		}
@@ -131,24 +177,25 @@ func (n Notification) body() string {
 	return fmt.Sprintf("The task %s is in an %s state", n.Task.Name, n.Task.State())
 }
 
-func (n Notification) IncMetric(x string) {
-	StatsdClient.Inc(
-		fmt.Sprintf("notifier.%s", x), 1, 1.0,
-		statsd.Tag{"host", Hostname},
-		statsd.Tag{"name", n.Notifier.Name},
-	)
-}
-
-func (n Notification) DurationMetric(d time.Duration) {
-	StatsdClient.TimingDuration(
-		"notifier.duration", d, 1.0,
-		statsd.Tag{"host", Hostname},
-		statsd.Tag{"name", n.Notifier.Name},
-	)
-
-	StatsdClient.Gauge(
-		"notifier.timeoutquota.percent", int64(float64(d)/float64(n.Notifier.timeout())*100), 1.0,
-		statsd.Tag{"host", Hostname},
-		statsd.Tag{"name", n.Notifier.Name},
-	)
-}
+// TODO: Provide the data to the notifier so it can publish the metrics to statsd or elsewhere.
+//func (n Notification) IncMetric(x string) {
+//	StatsdClient.Inc(
+//		fmt.Sprintf("notifier.%s", x), 1, 1.0,
+//		statsd.Tag{"host", Hostname},
+//		statsd.Tag{"name", n.Notifier.Name},
+//	)
+//}
+//
+//func (n Notification) DurationMetric(d time.Duration) {
+//	StatsdClient.TimingDuration(
+//		"notifier.duration", d, 1.0,
+//		statsd.Tag{"host", Hostname},
+//		statsd.Tag{"name", n.Notifier.Name},
+//	)
+//
+//	StatsdClient.Gauge(
+//		"notifier.timeoutquota.percent", int64(float64(d)/float64(n.Notifier.timeout())*100), 1.0,
+//		statsd.Tag{"host", Hostname},
+//		statsd.Tag{"name", n.Notifier.Name},
+//	)
+//}
