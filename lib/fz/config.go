@@ -261,10 +261,10 @@ func (c Config) validateNotifiersExist() error {
 
 func (c Config) validateGatesExist() error {
 	for _, n := range c.Notifiers {
-		for _, gs := range n.GateSets {
-			for _, g := range gs {
+		for i, gs := range n.GateSets {
+			for ii, g := range gs {
 				if c.GetGateByName(g) == nil {
-					return fmt.Errorf("gate %s: %w", g, ErrNotExist)
+					return fmt.Errorf("gate [%d][%d]: %w", i, ii, ErrNotExist)
 				}
 			}
 		}
@@ -276,7 +276,7 @@ func (c Config) validateGatesExist() error {
 func (c Config) validateCommandsExist() error {
 	for i, t := range config.Tasks {
 		if _, err := os.Stat(t.Command); os.IsNotExist(err) {
-			return fmt.Errorf("command %s: %w", t.Command, ErrCommandNotExist)
+			return fmt.Errorf("command [%d]: %w", i, ErrCommandNotExist)
 		}
 	}
 
@@ -289,4 +289,6 @@ func (c Config) validateNames() error {
 			return fmt.Errorf("task [%d] name: %w", i, ErrNoSpaces)
 		}
 	}
+
+	return nil
 }

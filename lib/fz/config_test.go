@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var workDir string
+
 func init() {
 	workDir, _ = os.Getwd()
 	for !strings.HasSuffix(workDir, "flamingzombies") {
@@ -181,8 +183,8 @@ func TestConfigNotifierLogger(t *testing.T) {
 }
 
 func TestConfigNotifierErrorEmailer(t *testing.T) {
-	config := ReadConfig("/home/jon/src/flamingzombies/example_config.toml")
-	config.Directory = "/home/jon/src/flamingzombies/libexec"
+	config := ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	config.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := Notifier{
 		Name:           "error_emailer",
 		Command:        "notifier/email",
@@ -220,8 +222,8 @@ func TestConfigNotifierErrorEmailer(t *testing.T) {
 }
 
 func TestConfigGateToFailed(t *testing.T) {
-	config := ReadConfig("/home/jon/src/flamingzombies/example_config.toml")
-	config.Directory = "/home/jon/src/flamingzombies/libexec"
+	config := ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	config.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := Gate{
 		Name:    "to_failed",
 		Command: "gate/to_state",
