@@ -44,7 +44,7 @@ envs = [
     [ "EMAIL_FROM", "fz@altos.au" ],
     [ "EMAIL_SUBJECT", "fz experienced a critical error" ],
 ]
-timeout = 5
+timeout = 3
 gates = []
 
 [[gate]]

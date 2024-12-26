@@ -6,7 +6,33 @@ import (
 	"time"
 )
 
-func init() {
+func TestConfig(t *testing.T) {
+	config := ReadConfig("/home/jon/src/flamingzombies/example_config.toml")
+	config.Directory = "/home/jon/src/flamingzombies/libexec"
+
+	wantLogFile := "-"
+	wantLogLevel := "info"
+	got := config
+
+	if got.LogFile != wantLogFile {
+		t.Errorf("got %s, want %s", got.LogFile, wantLogFile)
+	}
+
+	if got.LogLevel != wantLogLevel {
+		t.Errorf("got %s, want %s", got.LogLevel, wantLogLevel)
+	}
+
+	if len(got.Tasks) != 1 {
+		t.Errorf("got %d, want %d", len(got.Tasks), 1)
+	}
+
+	if len(got.Notifiers) != 2 {
+		t.Errorf("got %d, want %d", len(got.Notifiers), 2)
+	}
+
+	if len(got.Gates) != 5 {
+		t.Errorf("got %d, want %d", len(got.Gates), 5)
+	}
 }
 
 func TestConfigDefaults(t *testing.T) {
@@ -19,7 +45,7 @@ func TestConfigDefaults(t *testing.T) {
 		ErrorNotifierNames: []string{"error_emailer"},
 		Priority:           3,
 		FrequencySeconds:   0,
-		TaskEnvs: [][]string{
+		Envs: [][]string{
 			[]string{"SNMP_COMMUNITY", "default"},
 			[]string{"SNMP_VERSION", "2c"},
 		},
@@ -46,8 +72,8 @@ func TestConfigDefaults(t *testing.T) {
 		t.Errorf("got %d, want %d", got.Priority, want.Priority)
 	}
 
-	if fmt.Sprintf("%v", got.TaskEnvs) != fmt.Sprintf("%s", want.TaskEnvs) {
-		t.Errorf("got %v, want %v", got.TaskEnvs, want.TaskEnvs)
+	if fmt.Sprintf("%v", got.Envs) != fmt.Sprintf("%s", want.Envs) {
+		t.Errorf("got %v, want %v", got.Envs, want.Envs)
 	}
 
 	if got.FrequencySeconds != want.FrequencySeconds {
@@ -99,6 +125,10 @@ func TestConfigNotifierLogger(t *testing.T) {
 		Name:           "logger",
 		Command:        "notifier/null",
 		TimeoutSeconds: 5,
+		GateSets: [][]string{
+			[]string{"to_failed", "defer"},
+			[]string{"is_failed", "renotify"},
+		},
 	}
 	got := config.Notifiers[0]
 
@@ -112,6 +142,70 @@ func TestConfigNotifierLogger(t *testing.T) {
 
 	if got.TimeoutSeconds != want.TimeoutSeconds {
 		t.Errorf("got %d, want %d", got.TimeoutSeconds, want.TimeoutSeconds)
+	}
+
+	if fmt.Sprintf("%v", got.GateSets) != fmt.Sprintf("%s", want.GateSets) {
+		t.Errorf("got %v, want %v", got.GateSets, want.GateSets)
+	}
+}
+
+func TestConfigNotifierErrorEmailer(t *testing.T) {
+	config := ReadConfig("/home/jon/src/flamingzombies/example_config.toml")
+	config.Directory = "/home/jon/src/flamingzombies/libexec"
+	want := Notifier{
+		Name:           "error_emailer",
+		Command:        "notifier/email",
+		TimeoutSeconds: 3,
+		GateSets:       [][]string{},
+		Envs: [][]string{
+			[]string{"EMAIL_ADDRESS", "jon@altos.au"},
+			[]string{"EMAIL_FROM", "fz@altos.au"},
+			[]string{"EMAIL_SUBJECT", "fz experienced a critical error"},
+		},
+	}
+	got := config.Notifiers[1]
+
+	if got.Name != want.Name {
+		t.Errorf("got %s, want %s", got.Name, want.Name)
+	}
+
+	if got.Command != want.Command {
+		t.Errorf("got %s, want %s", got.Command, want.Command)
+	}
+
+	if got.TimeoutSeconds != want.TimeoutSeconds {
+		t.Errorf("got %d, want %d", got.TimeoutSeconds, want.TimeoutSeconds)
+	}
+
+	if fmt.Sprintf("%v", got.GateSets) != fmt.Sprintf("%s", want.GateSets) {
+		t.Errorf("got %v, want %v", got.GateSets, want.GateSets)
+	}
+
+	if fmt.Sprintf("%v", got.Envs) != fmt.Sprintf("%s", want.Envs) {
+		t.Errorf("got %v, want %v", got.Envs, want.Envs)
+	}
+}
+
+func TestConfigGateToFailed(t *testing.T) {
+	config := ReadConfig("/home/jon/src/flamingzombies/example_config.toml")
+	config.Directory = "/home/jon/src/flamingzombies/libexec"
+	want := Gate{
+		Name:    "to_failed",
+		Command: "gate/to_state",
+		Args:    []string{"fail"},
+	}
+	got := config.Gates[0]
+
+	if got.Name != want.Name {
+		t.Errorf("got %s, want %s", got.Name, want.Name)
+	}
+
+	if got.Command != want.Command {
+		t.Errorf("got %s, want %s", got.Command, want.Command)
+	}
+
+	if fmt.Sprintf("%v", got.Args) != fmt.Sprintf("%s", want.Args) {
+		t.Errorf("got %v, want %v", got.Args, want.Args)
 	}
 }
 

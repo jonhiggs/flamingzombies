@@ -10,6 +10,7 @@ type Config struct {
 	Directory      string         `toml:"directory"`
 	ErrorNotifiers []Notifier     `toml:"error_notifier"`
 	Gates          []Gate         `toml:"gate"`
+	LogFile        string         `toml:"log_file"`
 	LogLevel       string         `toml:"log_level"`
 	Notifiers      []Notifier     `toml:"notifier"`
 	StatsdHost     string         `toml:"statsd_host"`
@@ -24,7 +25,7 @@ type ConfigDefaults struct {
 	Priority              int        `toml:"priority"`
 	Retries               int        `toml:"retries"`
 	RetryFrequencySeconds int        `toml:"retry_frequency"`
-	TaskEnvs              [][]string `toml:"task_envs`
+	Envs                  [][]string `toml:"envs`
 	TimeoutSeconds        int        `toml:"timeout"` // better to put the timeout into the command
 }
 
@@ -41,6 +42,7 @@ type Notifier struct {
 	Args           []string   `toml:"args"`
 	Command        string     `toml:"command"`
 	Name           string     `toml:"name"`
+	Envs           [][]string `toml:"envs`
 
 	kind NotifierKind
 }
