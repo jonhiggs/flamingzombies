@@ -258,19 +258,19 @@ func TestRecordStatus(t *testing.T) {
 
 func TestTaskEnvironment(t *testing.T) {
 	tests := []struct {
-		name string
-		ta   Task
+		task Task
 		want []string
 	}{
 		{
-			"nothing",
 			Task{
-				Envs:             []string{},
-				FrequencySeconds: 300,
-				History:          0b10,
-				Priority:         3,
-				Retries:          4,
-				TimeoutSeconds:   10,
+				Envs:                  []string{},
+				FrequencySeconds:      300,
+				History:               0b10,
+				Name:                  "nothing",
+				Priority:              3,
+				Retries:               4,
+				RetryFrequencySeconds: 60,
+				TimeoutSeconds:        10,
 			},
 			[]string{
 				"FREQUENCY=300",
@@ -287,17 +287,18 @@ func TestTaskEnvironment(t *testing.T) {
 			},
 		},
 		{
-			"with snmp vars",
 			Task{
 				Envs: []string{
 					"SNMP_COMMUNITY=public",
 					"SNMP_VERSION=2c",
 				},
-				FrequencySeconds: 300,
-				History:          0b10,
-				Priority:         3,
-				Retries:          4,
-				TimeoutSeconds:   10,
+				FrequencySeconds:      300,
+				History:               0b10,
+				Name:                  "with_snmp_vars",
+				Priority:              3,
+				Retries:               4,
+				RetryFrequencySeconds: 60,
+				TimeoutSeconds:        10,
 			},
 			[]string{
 				"FREQUENCY=300",
@@ -318,13 +319,14 @@ func TestTaskEnvironment(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			//if tt.ta.Validate() != nil {
-			//	t.Errorf("valid got %v, want %v", tt.ta.Validate(), nil)
-			//}
+		t.Run(tt.task.Name, func(t *testing.T) {
+			// we only need to check data that's valid
+			if tt.task.Validate() != nil {
+				t.Errorf("valid got %v, want %v", tt.task.Validate(), nil)
+			}
 
-			if fmt.Sprintf("%v", tt.ta.Environment()) != fmt.Sprintf("%v", tt.want) {
-				t.Errorf("environment got %v, want %v", tt.ta.Environment(), tt.want)
+			if fmt.Sprintf("%v", tt.task.Environment()) != fmt.Sprintf("%v", tt.want) {
+				t.Errorf("environment got %v, want %v", tt.task.Environment(), tt.want)
 			}
 		})
 	}
