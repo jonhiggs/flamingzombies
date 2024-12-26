@@ -19,14 +19,6 @@ var dir = "/usr/libexec/flamingzombies"
 var logLevel = "info"
 
 func init() {
-	if os.Getenv("FZ_DIRECTORY") == "" {
-		os.Setenv("FZ_DIRECTORY", "/usr/libexec/flamingzombies")
-	}
-
-	if os.Getenv("FZ_STATSD_PREFIX") == "" {
-		os.Setenv("FZ_STATSD_PREFIX", "fz")
-	}
-
 	options := []optparse.Option{
 		{"config", 'c', optparse.KindRequired},
 		{"configtest", 'n', optparse.KindNone},

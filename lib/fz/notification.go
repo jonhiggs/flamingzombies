@@ -174,6 +174,10 @@ func (n Notification) body() string {
 	return fmt.Sprintf("The task %s is in an %s state", n.Task.Name, n.Task.State())
 }
 
+// The environment variables provided to the notifier
+func (n Notification) environment() {
+}
+
 // TODO: Provide the data to the notifier so it can publish the metrics to statsd or elsewhere.
 //func (n Notification) IncMetric(x string) {
 //	StatsdClient.Inc(

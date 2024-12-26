@@ -236,19 +236,28 @@ func (c Config) validateGatesExist() error {
 
 func (c Config) validateCommandsExist() error {
 	for i, t := range config.Tasks {
-		if _, err := os.Stat(filepath.Join(c.Directory, t.Command)); os.IsNotExist(err) {
+		cmd := filepath.Join(c.Directory, t.Command)
+		Logger.Debug("checking command", "cmd", cmd)
+
+		if _, err := os.Stat(cmd); os.IsNotExist(err) {
 			return fmt.Errorf("task [%d]: command '%s': %w", i, t.Command, ErrCommandNotExist)
 		}
 	}
 
 	for i, n := range config.Notifiers {
-		if _, err := os.Stat(filepath.Join(c.Directory, n.Command)); os.IsNotExist(err) {
+		cmd := filepath.Join(c.Directory, n.Command)
+		Logger.Debug("checking command", "cmd", cmd)
+
+		if _, err := os.Stat(cmd); os.IsNotExist(err) {
 			return fmt.Errorf("notifier [%d]: command '%s': %w", i, n.Command, ErrCommandNotExist)
 		}
 	}
 
 	for i, g := range config.Gates {
-		if _, err := os.Stat(filepath.Join(c.Directory, g.Command)); os.IsNotExist(err) {
+		cmd := filepath.Join(c.Directory, g.Command)
+		Logger.Debug("checking command", "cmd", cmd)
+
+		if _, err := os.Stat(cmd); os.IsNotExist(err) {
 			return fmt.Errorf("gate [%d]: command '%s': %w", i, g.Command, ErrCommandNotExist)
 		}
 	}
