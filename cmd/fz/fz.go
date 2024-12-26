@@ -13,13 +13,12 @@ import (
 const VERSION = "v0.0.21"
 
 var config fz.Config
-var configtestMode = false
+var configTest = false
+var configFile = "/etc/flamingzombies.toml"
+var dir = "/usr/libexec/flamingzombies"
+var logLevel = "info"
 
 func init() {
-	if os.Getenv("FZ_CONFIG_FILE") == "" {
-		os.Setenv("FZ_CONFIG_FILE", "/etc/flamingzombies.toml")
-	}
-
 	if os.Getenv("FZ_DIRECTORY") == "" {
 		os.Setenv("FZ_DIRECTORY", "/usr/libexec/flamingzombies")
 	}
@@ -48,23 +47,19 @@ func init() {
 	for _, result := range results {
 		switch result.Long {
 		case "config":
-			os.Setenv("FZ_CONFIG_FILE", result.Optarg)
+			configFile = result.Optarg
 		case "configtest":
-			configtestMode = true
+			configTest = true
 		case "loglevel":
-			os.Setenv("FZ_LOG_LEVEL", result.Optarg)
+			logLevel = result.Optarg
 		case "directory":
-			os.Setenv("FZ_DIRECTORY", result.Optarg)
+			fzDirectory = result.Optarg
 		case "pidfile":
 			err := os.WriteFile(result.Optarg, []byte(fmt.Sprintf("%d\n", os.Getpid())), 0644)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)
 			}
-		case "statsd-host":
-			os.Setenv("FZ_STATSD_HOST", result.Optarg)
-		case "statsd-prefix":
-			os.Setenv("FZ_STATSD_PREFIX", result.Optarg)
 		case "help":
 			usage()
 			return
@@ -74,15 +69,33 @@ func init() {
 		}
 	}
 
-	config = fz.ReadConfig()
-
-	if os.Getenv("FZ_LOG_LEVEL") != "" {
-		fz.StartLogger(os.Getenv("FZ_LOG_LEVEL"))
-	} else {
-		fz.StartLogger(config.LogLevel)
+	if os.Getenv("FZ_CONFIG_FILE") != "" {
+		configFile = os.Getenv("FZ_CONFIG_FILE")
 	}
 
-	if configtestMode {
+	config = fz.ReadConfig(configFile)
+
+	// working directory
+	if os.Getenv("FZ_DIRECTORY") == "" {
+		config.Directory = dir
+	} else {
+		config.Directory = os.Getenv("FZ_DIRECTORY")
+	}
+
+	// logging
+	if os.Getenv("FZ_LOG_LEVEL") == "" {
+		config.LogLevel = logLevel
+	} else {
+		config.LogLevel = os.Getenv("FZ_LOG_LEVEL")
+	}
+	fz.StartLogger(config.LogLevel)
+
+	// validation
+	if err = config.Validate(); err != nil {
+		log.Fatal(err)
+	}
+	if configTest {
+		// break out if we're in config test mode.
 		fmt.Println("The configuration is valid")
 		os.Exit(0)
 	}
@@ -117,8 +130,6 @@ func usage() {
 	fmt.Println("  -h, --help                     This help")
 	fmt.Println("  -l, --loglevel <level>         Override the log level")
 	fmt.Println("  -p, --pidfile                  The pidfile to write")
-	fmt.Println("      --statsd-host <host:port>  The host to deliver statsd metrics")
-	fmt.Println("      --statsd-prefix <str>      The prefix of the statsd metrics")
 	fmt.Println("  -V, --version                  Version")
 	os.Exit(0)
 }

@@ -7,8 +7,6 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-
-	"github.com/cactus/go-statsd-client/v5/statsd"
 )
 
 func (g Gate) IsOpen(t *Task, n *Notifier) bool {
@@ -31,12 +29,12 @@ func (g Gate) IsOpen(t *Task, n *Notifier) bool {
 		fmt.Sprintf("TASK_COMMAND=%s", t.Command),
 	}
 
-	startTime := time.Now()
+	//startTime := time.Now()
 	err := cmd.Run()
-	g.DurationMetric(time.Now().Sub(startTime))
+	//g.DurationMetric(time.Now().Sub(startTime))
 	if ctx.Err() == context.DeadlineExceeded {
 		Logger.Error(fmt.Sprintf("time out exceeded while executing gate"), "gate", g.Name)
-		g.IncMetric("timeout")
+		//g.IncMetric("timeout")
 
 		return false
 	}
@@ -44,13 +42,13 @@ func (g Gate) IsOpen(t *Task, n *Notifier) bool {
 	if err != nil {
 		if os.IsPermission(err) {
 			Logger.Error(fmt.Sprint(err), "gate", g.Name)
-			g.IncMetric("error")
+			//g.IncMetric("error")
 		}
 
-		g.IncMetric("closed")
+		//g.IncMetric("closed")
 		return false
 	}
-	g.IncMetric("open")
+	//g.IncMetric("open")
 	return true
 }
 
@@ -68,27 +66,27 @@ func (g Gate) validate() error {
 	return nil
 }
 
-func (g Gate) IncMetric(x string) {
-	StatsdClient.Inc(
-		fmt.Sprintf("gate.%s", x), 1, 1.0,
-		statsd.Tag{"host", Hostname},
-		statsd.Tag{"name", g.Name},
-	)
-}
-
-func (g *Gate) DurationMetric(d time.Duration) {
-	StatsdClient.TimingDuration(
-		"gate.duration", d, 1.0,
-		statsd.Tag{"host", Hostname},
-		statsd.Tag{"name", g.Name},
-	)
-
-	StatsdClient.Gauge(
-		"gate.timeoutquota.percent", int64(float64(d)/float64(time.Duration(1)*time.Second)*100), 1.0,
-		statsd.Tag{"host", Hostname},
-		statsd.Tag{"name", g.Name},
-	)
-}
+//func (g Gate) IncMetric(x string) {
+//	StatsdClient.Inc(
+//		fmt.Sprintf("gate.%s", x), 1, 1.0,
+//		statsd.Tag{"host", Hostname},
+//		statsd.Tag{"name", g.Name},
+//	)
+//}
+//
+//func (g *Gate) DurationMetric(d time.Duration) {
+//	StatsdClient.TimingDuration(
+//		"gate.duration", d, 1.0,
+//		statsd.Tag{"host", Hostname},
+//		statsd.Tag{"name", g.Name},
+//	)
+//
+//	StatsdClient.Gauge(
+//		"gate.timeoutquota.percent", int64(float64(d)/float64(time.Duration(1)*time.Second)*100), 1.0,
+//		statsd.Tag{"host", Hostname},
+//		statsd.Tag{"name", g.Name},
+//	)
+//}
 
 func GateByName(name string) (*Gate, error) {
 	for i, g := range config.Gates {
