@@ -11,7 +11,7 @@ error_notifiers = [
     "error_emailer",
 ]
 priority = 3
-task_envs = [
+envs = [
     ["SNMP_COMMUNITY", "default"],
     ["SNMP_VERSION", "2c"],
 ]

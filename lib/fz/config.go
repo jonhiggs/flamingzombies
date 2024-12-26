@@ -80,6 +80,10 @@ func ReadConfig(f string) Config {
 			}
 		}
 
+		for _, e := range config.Defaults.Envs {
+			config.Tasks[i].Envs = append(config.Tasks[i].Envs, e)
+		}
+
 		if len(t.ErrorBody) == 0 {
 			config.Tasks[i].ErrorBody = "The task has entered an error state"
 		}
@@ -96,6 +100,18 @@ func ReadConfig(f string) Config {
 
 		// hit the notifiers() method to check that all specified notifiers exist
 		config.Tasks[i].notifiers()
+	}
+
+	for i, _ := range config.Notifiers {
+		for _, e := range config.Defaults.Envs {
+			config.Notifiers[i].Envs = append(config.Notifiers[i].Envs, e)
+		}
+	}
+
+	for i, _ := range config.Gates {
+		for _, e := range config.Defaults.Envs {
+			config.Gates[i].Envs = append(config.Gates[i].Envs, e)
+		}
 	}
 
 	return config

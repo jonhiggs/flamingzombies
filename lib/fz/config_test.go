@@ -90,6 +90,10 @@ func TestConfigTaskFlappy(t *testing.T) {
 		FrequencySeconds: 1,
 		ErrorBody:        "flappy has entered an error state\n",
 		RecoverBody:      "flappy has recovered\n",
+		Envs: [][]string{
+			[]string{"SNMP_COMMUNITY", "default"},
+			[]string{"SNMP_VERSION", "2c"},
+		},
 	}
 	got := config.Tasks[0]
 
@@ -116,6 +120,10 @@ func TestConfigTaskFlappy(t *testing.T) {
 	if got.RecoverBody != want.RecoverBody {
 		t.Errorf("got %s, want %s", got.RecoverBody, want.RecoverBody)
 	}
+
+	if fmt.Sprintf("%v", got.Envs) != fmt.Sprintf("%s", want.Envs) {
+		t.Errorf("got %v, want %v", got.Envs, want.Envs)
+	}
 }
 
 func TestConfigNotifierLogger(t *testing.T) {
@@ -128,6 +136,10 @@ func TestConfigNotifierLogger(t *testing.T) {
 		GateSets: [][]string{
 			[]string{"to_failed", "defer"},
 			[]string{"is_failed", "renotify"},
+		},
+		Envs: [][]string{
+			[]string{"SNMP_COMMUNITY", "default"},
+			[]string{"SNMP_VERSION", "2c"},
 		},
 	}
 	got := config.Notifiers[0]
@@ -147,6 +159,10 @@ func TestConfigNotifierLogger(t *testing.T) {
 	if fmt.Sprintf("%v", got.GateSets) != fmt.Sprintf("%s", want.GateSets) {
 		t.Errorf("got %v, want %v", got.GateSets, want.GateSets)
 	}
+
+	if fmt.Sprintf("%v", got.Envs) != fmt.Sprintf("%s", want.Envs) {
+		t.Errorf("got %v, want %v", got.Envs, want.Envs)
+	}
 }
 
 func TestConfigNotifierErrorEmailer(t *testing.T) {
@@ -161,6 +177,8 @@ func TestConfigNotifierErrorEmailer(t *testing.T) {
 			[]string{"EMAIL_ADDRESS", "jon@altos.au"},
 			[]string{"EMAIL_FROM", "fz@altos.au"},
 			[]string{"EMAIL_SUBJECT", "fz experienced a critical error"},
+			[]string{"SNMP_COMMUNITY", "default"},
+			[]string{"SNMP_VERSION", "2c"},
 		},
 	}
 	got := config.Notifiers[1]
@@ -193,6 +211,10 @@ func TestConfigGateToFailed(t *testing.T) {
 		Name:    "to_failed",
 		Command: "gate/to_state",
 		Args:    []string{"fail"},
+		Envs: [][]string{
+			[]string{"SNMP_COMMUNITY", "default"},
+			[]string{"SNMP_VERSION", "2c"},
+		},
 	}
 	got := config.Gates[0]
 
@@ -206,6 +228,10 @@ func TestConfigGateToFailed(t *testing.T) {
 
 	if fmt.Sprintf("%v", got.Args) != fmt.Sprintf("%s", want.Args) {
 		t.Errorf("got %v, want %v", got.Args, want.Args)
+	}
+
+	if fmt.Sprintf("%v", got.Envs) != fmt.Sprintf("%s", want.Envs) {
+		t.Errorf("got %v, want %v", got.Envs, want.Envs)
 	}
 }
 

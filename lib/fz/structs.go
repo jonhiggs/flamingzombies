@@ -78,9 +78,10 @@ type Task struct {
 }
 
 type Gate struct {
-	Name    string   `toml:"name"`    // friendly name
-	Command string   `toml:"command"` // command
-	Args    []string `toml:"args"`    // command arguments
+	Args    []string   `toml:"args"`    // command arguments
+	Command string     `toml:"command"` // command
+	Envs    [][]string `toml:"envs`     // environment variables
+	Name    string     `toml:"name"`    // friendly name
 }
 
 type Notification struct {
