@@ -363,11 +363,11 @@ func (t Task) validate() error {
 		return fmt.Errorf("must have a priority between 1 and 100")
 	}
 
-	for _, n := range t.NotifierNames {
-		if NotifierByName(n) == nil {
-			return fmt.Errorf("unknown notifier")
-		}
-	}
+	//for _, n := range t.NotifierNames {
+	//	if NotifierByName(n) == nil {
+	//		return fmt.Errorf("unknown notifier")
+	//	}
+	//}
 
 	return nil
 }

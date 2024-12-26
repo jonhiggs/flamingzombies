@@ -6,20 +6,21 @@ import (
 )
 
 type Config struct {
-	Defaults       ConfigDefaults
-	Directory      string     `toml:"directory"`
-	ErrorNotifiers []Notifier `toml:"error_notifier"`
-	Gates          []Gate     `toml:"gate"`
-	LogLevel       string     `toml:"log_level"`
-	Notifiers      []Notifier `toml:"notifier"`
-	StatsdHost     string     `toml:"statsd_host"`
-	StatsdPrefix   string     `toml:"statsd_prefix"`
-	Tasks          []Task     `toml:"task"`
+	Defaults       ConfigDefaults `toml:"defaults"`
+	Directory      string         `toml:"directory"`
+	ErrorNotifiers []Notifier     `toml:"error_notifier"`
+	Gates          []Gate         `toml:"gate"`
+	LogLevel       string         `toml:"log_level"`
+	Notifiers      []Notifier     `toml:"notifier"`
+	StatsdHost     string         `toml:"statsd_host"`
+	StatsdPrefix   string         `toml:"statsd_prefix"`
+	Tasks          []Task         `toml:"task"`
 }
 
 type ConfigDefaults struct {
 	FrequencySeconds      int        `toml:"frequency"`
 	NotifierNames         []string   `toml:"notifiers"`
+	ErrorNotifierNames    []string   `toml:"error_notifiers"`
 	Priority              int        `toml:"priority"`
 	Retries               int        `toml:"retries"`
 	RetryFrequencySeconds int        `toml:"retry_frequency"`
@@ -41,8 +42,7 @@ type Notifier struct {
 	Command        string     `toml:"command"`
 	Name           string     `toml:"name"`
 
-	kind  NotifierKind
-	gates [][]*Gate
+	kind NotifierKind
 }
 
 type Task struct {

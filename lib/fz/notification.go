@@ -139,7 +139,7 @@ func ProcessNotifications() {
 func (n Notification) gateState() ([]*Gate, bool) {
 	openGates := []*Gate{}
 X:
-	for gsi, gs := range n.Notifier.Gates() {
+	for gsi, gs := range config.GetNotifierGateSets(n.Notifier.Name) {
 		openGates = []*Gate{} // ignore the gates from prior gateset
 
 		for _, g := range gs {

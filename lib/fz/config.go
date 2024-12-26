@@ -102,19 +102,19 @@ func ReadConfig(f string) Config {
 }
 
 func (c Config) Validate() error {
-	var err error
+	//var err error
 
-	if err = config.validateTasks(); err != nil {
-		return err
-	}
+	//if err = config.validateTasks(); err != nil {
+	//	return err
+	//}
 
-	if err = config.validateNotifiers(); err != nil {
-		return err
-	}
+	//if err = config.validateNotifiers(); err != nil {
+	//	return err
+	//}
 
-	if err = config.validateGates(); err != nil {
-		return err
-	}
+	//if err = config.validateGates(); err != nil {
+	//	return err
+	//}
 
 	return nil
 }
@@ -130,25 +130,29 @@ func (c Config) GetNotifierByName(name string) *Notifier {
 	return nil
 }
 
-// Return the gates attached to a notifier
-func (n Notifier) GetNotifierGates() [][]*Gate {
-	if len(n.gates) < 0 {
-		return n.gates
-	}
-
-	n.gates = make([][]*Gate, len(n.GateSets))
-	for i, gs := range n.GateSets {
-		n.gates[i] = make([]*Gate, len(gs))
-	}
-
-	for gsi, gs := range n.GateSets {
-		for gi, gn := range gs {
-			g, _ := GateByName(gn)
-			n.gates[gsi][gi] = g
+func (c Config) GetGateByName(name string) *Gate {
+	for i, g := range c.Gates {
+		if g.Name == name {
+			return &c.Gates[i]
 		}
 	}
 
-	return n.gates
+	return nil
+}
+
+// Return the GateSets attached to a notifier
+func (c Config) GetNotifierGateSets(notifierName string) [][]*Gate {
+	var r = [][]*Gate{}
+
+	n := c.GetNotifierByName(notifierName)
+	for igs, gateSet := range n.GateSets {
+		for ig, gateName := range gateSet {
+			g := config.GetGateByName(gateName)
+			r[igs][ig] = g
+		}
+	}
+
+	return r
 }
 
 func (c Config) validateTasks() error {
@@ -162,11 +166,11 @@ func (c Config) validateTasks() error {
 }
 
 func (c Config) validateNotifiers() error {
-	for _, o := range config.Notifiers {
-		if err := o.validate(); err != nil {
-			return err
-		}
-	}
+	//for _, o := range config.Notifiers {
+	//	if err := o.validate(); err != nil {
+	//		return err
+	//	}
+	//}
 
 	//func (n Notifier) validate() error {
 	//	if _, err := os.Stat(n.Command); os.IsNotExist(err) {
