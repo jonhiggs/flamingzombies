@@ -356,7 +356,6 @@ func TestConfigValidateNameForTask(t *testing.T) {
 
 func TestConfigValidateNameForNotifier(t *testing.T) {
 	config = Config{
-		Directory: fmt.Sprintf("%s/libexec", workDir),
 		Notifiers: []Notifier{
 			Notifier{Name: "with spaces"},
 		},
@@ -364,6 +363,33 @@ func TestConfigValidateNameForNotifier(t *testing.T) {
 
 	want := ErrHasSpaces
 	got := errors.Unwrap(config.validateName())
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestConfigValidateFrequencySecondsDefault(t *testing.T) {
+	config = Config{
+		Defaults: ConfigDefaults{},
+	}
+
+	want := ErrTooFrequent
+	got := errors.Unwrap(config.validateFrequencySeconds())
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestConfigValidateFrequencySecondsTask(t *testing.T) {
+	config = Config{
+		Defaults: ConfigDefaults{FrequencySeconds: 5},
+		Tasks: []Task{
+			Task{FrequencySeconds: 0},
+		},
+	}
+
+	want := ErrTooFrequent
+	got := errors.Unwrap(config.validateFrequencySeconds())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}

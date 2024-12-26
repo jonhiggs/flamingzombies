@@ -225,12 +225,6 @@ func (c Config) validateNotifiers() error {
 }
 
 func (c Config) validateGates() error {
-	for _, o := range config.Gates {
-		if err := o.validate(); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -311,6 +305,20 @@ func (c Config) validateName() error {
 	for i, g := range config.Gates {
 		if strings.ContainsRune(g.Name, ' ') {
 			return fmt.Errorf("gate [%d]: name '%s': %w", i, g.Name, ErrHasSpaces)
+		}
+	}
+
+	return nil
+}
+
+func (c Config) validateFrequencySeconds() error {
+	if c.Defaults.FrequencySeconds < 1 {
+		return fmt.Errorf("default: frequency '%d': %w", c.Defaults.FrequencySeconds, ErrTooFrequent)
+	}
+
+	for i, t := range config.Tasks {
+		if t.FrequencySeconds < 1 {
+			return fmt.Errorf("task [%d]: freqency '%d': %w", i, t.FrequencySeconds, ErrTooFrequent)
 		}
 	}
 
