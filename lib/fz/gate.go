@@ -19,7 +19,6 @@ func (g Gate) IsOpen(t *Task, n *Notifier) bool {
 		fmt.Sprintf("HISTORY=%d", t.History),
 		fmt.Sprintf("HISTORY_MASK=%d", t.HistoryMask),
 		fmt.Sprintf("LAST_FAIL=%d", t.LastFail.Unix()),
-		fmt.Sprintf("LAST_NOTIFICATION=%d", t.GetLastNotification(n.Name).Unix()),
 		fmt.Sprintf("LAST_OK=%d", t.LastOk.Unix()),
 		fmt.Sprintf("LAST_STATE=%s", t.LastState()),
 		fmt.Sprintf("PRIORITY=%d", t.Priority),

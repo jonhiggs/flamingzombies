@@ -185,7 +185,6 @@ func (c Config) ErrorNotification() {
 	//for _, n := range c.ErrorNotifiers {
 	//	NotifyCh <- Notification{n, t}
 	//}
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////

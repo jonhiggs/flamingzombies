@@ -6,7 +6,6 @@ import (
 	"io"
 	"os/exec"
 	"strings"
-	"time"
 )
 
 var NotifyCh = make(chan Notification, 100)
@@ -76,7 +75,6 @@ func ProcessNotifications() {
 				}
 
 				Logger.Info("sending notification", "notifier", n.Notifier.Name)
-				n.Task.SetLastNotification(n.Notifier.Name, time.Now())
 
 				ctx, cancel := context.WithTimeout(context.Background(), n.Notifier.Timeout())
 				defer cancel()

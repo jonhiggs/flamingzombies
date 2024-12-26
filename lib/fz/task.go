@@ -84,7 +84,6 @@ func (t *Task) Run() bool {
 	}
 
 	t.LastRun = time.Now()
-	t.ExecutionCount++
 
 	errorMessage, _ := io.ReadAll(stderr)
 	stdoutBytes, _ := io.ReadAll(stdout)
@@ -95,7 +94,6 @@ func (t *Task) Run() bool {
 
 	if ctx.Err() == context.DeadlineExceeded {
 		Logger.Error("time out exceeded while executing command", "task", t.Name)
-		t.ErrorCount++
 		//t.IncMetric("timeout")
 
 		return false
@@ -104,7 +102,6 @@ func (t *Task) Run() bool {
 	if err != nil {
 		if os.IsPermission(err) {
 			Logger.Error(fmt.Sprint(err), "task", t.Name)
-			t.ErrorCount++
 			//t.IncMetric("error")
 
 			return false
@@ -129,11 +126,9 @@ func (t *Task) Run() bool {
 		//t.IncMetric("unknown")
 		return false
 	case 0:
-		t.OKCount++
 		//t.IncMetric("ok")
 		t.RecordStatus(true)
 	default:
-		t.FailCount++
 		//t.IncMetric("fail")
 		t.RecordStatus(false)
 	}
@@ -282,49 +277,4 @@ func (t Task) NotifierIndex(name string) (int, error) {
 		}
 	}
 	return -1, fmt.Errorf("unknown notifier name")
-}
-
-// get the last notification of all notifiers.
-func (t Task) LastNotification() time.Time {
-	var ts time.Time
-
-	for i, n := range t.lastNotifications {
-		if i == 0 {
-			ts = n
-		} else {
-			if n.Unix() > ts.Unix() {
-				ts = n
-			}
-		}
-	}
-
-	return ts
-}
-
-func (t Task) GetLastNotification(name string) time.Time {
-	i, err := t.NotifierIndex(name)
-	if err != nil {
-		panic(err)
-	}
-
-	if len(t.lastNotifications) != len(t.NotifierNames) {
-		return DAEMON_START_TIME
-	}
-
-	return t.lastNotifications[i]
-}
-
-func (t *Task) SetLastNotification(name string, ts time.Time) error {
-	if len(t.lastNotifications) != len(t.NotifierNames) {
-		t.lastNotifications = make([]time.Time, len(t.NotifierNames))
-	}
-
-	i, err := t.NotifierIndex(name)
-	if err != nil {
-		return err
-	}
-
-	t.lastNotifications[i] = ts
-
-	return nil
 }

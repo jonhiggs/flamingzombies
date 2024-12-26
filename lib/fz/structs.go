@@ -79,19 +79,14 @@ type Task struct {
 	RecoverBody           string     `toml:"recover_body"`    // the body of the notification when recovering from an error state
 
 	// public, but not configurable
-	ErrorCount       int       // task failed to executed
-	ExecutionCount   int       // task was executed
-	FailCount        int       // task failed
 	History          uint32    // represented in binary. Successes are high
 	HistoryMask      uint32    // the bits in the history with a recorded value. Needed to understand a history of 0
 	LastFail         time.Time // the time of the last failed execution
 	LastOk           time.Time // the time of the last successful execution
 	LastResultOutput string    // the result output of the last execution
 	LastRun          time.Time // the time of the last execution
-	OKCount          int       // task passed
 
-	mutex             sync.Mutex  // lock to ensure one task runs at a time
-	lastNotifications []time.Time // times that each notifier was last executed
+	mutex sync.Mutex // lock to ensure one task runs at a time
 }
 
 // The gate is the control mechanism to governs whether a Notifier executes.
