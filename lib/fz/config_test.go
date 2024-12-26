@@ -27,6 +27,10 @@ func TestConfig(t *testing.T) {
 	wantLogLevel := "info"
 	got := config
 
+	if !strings.HasSuffix(got.Directory, "/libexec") {
+		t.Errorf("expected '%s' to have '/libexec' suffix", got.Directory)
+	}
+
 	if got.LogFile != wantLogFile {
 		t.Errorf("got %s, want %s", got.LogFile, wantLogFile)
 	}
@@ -47,8 +51,8 @@ func TestConfig(t *testing.T) {
 		t.Errorf("got %d, want %d", len(got.Gates), 5)
 	}
 
-	if err := config.validateNotifiersExist(); err != nil {
-		t.Errorf("validateNotifiersExist: got %v, want %v", err, nil)
+	if err := config.Validate(); err != nil {
+		t.Errorf("got %v, want %v", err, nil)
 	}
 }
 
@@ -61,7 +65,7 @@ func TestConfigDefaults(t *testing.T) {
 		NotifierNames:      []string{"logger"},
 		ErrorNotifierNames: []string{"error_emailer"},
 		Priority:           3,
-		FrequencySeconds:   0,
+		FrequencySeconds:   300,
 		Envs: [][]string{
 			[]string{"SNMP_COMMUNITY", "default"},
 			[]string{"SNMP_VERSION", "2c"},
@@ -347,7 +351,7 @@ func TestConfigValidateNameForTask(t *testing.T) {
 		},
 	}
 
-	want := ErrHasSpaces
+	want := ErrInvalidName
 	got := errors.Unwrap(config.validateName())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
@@ -361,7 +365,7 @@ func TestConfigValidateNameForNotifier(t *testing.T) {
 		},
 	}
 
-	want := ErrHasSpaces
+	want := ErrInvalidName
 	got := errors.Unwrap(config.validateName())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)

@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
+	"path/filepath"
+	"regexp"
 	"time"
 
 	"github.com/pelletier/go-toml"
@@ -40,45 +41,45 @@ func ReadConfig(f string) Config {
 		Fatal(fmt.Sprintf("Error parsing the configuration file '%s'\n", f), fmt.Sprint(err))
 	}
 
+	if config.Defaults.Retries == 0 {
+		config.Defaults.Retries = DEFAULT_RETRIES
+	}
+
+	if config.Defaults.FrequencySeconds == 0 {
+		config.Defaults.FrequencySeconds = DEFAULT_FREQUENCY_SECONDS
+	}
+
+	if config.Defaults.RetryFrequencySeconds == 0 {
+		config.Defaults.RetryFrequencySeconds = config.Defaults.FrequencySeconds
+	}
+
+	if config.Defaults.TimeoutSeconds == 0 {
+		config.Defaults.TimeoutSeconds = DEFAULT_TIMEOUT_SECONDS
+	}
+
+	if config.Defaults.Priority == 0 {
+		config.Defaults.Priority = DEFAULT_PRIORITY
+	}
+
 	for i, t := range config.Tasks {
 		if t.Retries == 0 {
-			if config.Defaults.Retries == 0 {
-				config.Tasks[i].Retries = DEFAULT_RETRIES
-			} else {
-				config.Tasks[i].Retries = config.Defaults.Retries
-			}
+			config.Tasks[i].Retries = config.Defaults.Retries
 		}
 
 		if t.TimeoutSeconds == 0 {
-			if config.Defaults.TimeoutSeconds == 0 {
-				config.Tasks[i].TimeoutSeconds = DEFAULT_TIMEOUT_SECONDS
-			} else {
-				config.Tasks[i].TimeoutSeconds = config.Defaults.TimeoutSeconds
-			}
+			config.Tasks[i].TimeoutSeconds = config.Defaults.TimeoutSeconds
 		}
 
 		if t.FrequencySeconds == 0 {
-			if config.Defaults.FrequencySeconds == 0 {
-				config.Tasks[i].FrequencySeconds = DEFAULT_FREQUENCY_SECONDS
-			} else {
-				config.Tasks[i].FrequencySeconds = config.Defaults.FrequencySeconds
-			}
+			config.Tasks[i].FrequencySeconds = config.Defaults.FrequencySeconds
 		}
 
 		if t.RetryFrequencySeconds == 0 {
-			if config.Defaults.RetryFrequencySeconds == 0 {
-				config.Tasks[i].RetryFrequencySeconds = config.Tasks[i].TimeoutSeconds
-			} else {
-				config.Tasks[i].RetryFrequencySeconds = config.Defaults.RetryFrequencySeconds
-			}
+			config.Tasks[i].RetryFrequencySeconds = config.Defaults.RetryFrequencySeconds
 		}
 
 		if t.Priority == 0 {
-			if config.Defaults.Priority == 0 {
-				config.Tasks[i].Priority = DEFAULT_PRIORITY
-			} else {
-				config.Tasks[i].Priority = config.Defaults.Priority
-			}
+			config.Tasks[i].Priority = config.Defaults.Priority
 		}
 
 		for _, e := range config.Defaults.Envs {
@@ -119,19 +120,33 @@ func ReadConfig(f string) Config {
 }
 
 func (c Config) Validate() error {
-	//var err error
+	if err := c.validateNotifiersExist(); err != nil {
+		return err
+	}
 
-	//if err = config.validateTasks(); err != nil {
-	//	return err
-	//}
+	if err := c.validateGatesExist(); err != nil {
+		return err
+	}
 
-	//if err = config.validateNotifiers(); err != nil {
-	//	return err
-	//}
+	if err := c.validateCommandsExist(); err != nil {
+		return err
+	}
 
-	//if err = config.validateGates(); err != nil {
-	//	return err
-	//}
+	if err := c.validateName(); err != nil {
+		return err
+	}
+
+	if err := c.validateFrequencySeconds(); err != nil {
+		return err
+	}
+
+	if err := c.validateTimeoutSeconds(); err != nil {
+		return err
+	}
+
+	if err := c.validatePriority(); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -170,62 +185,6 @@ func (c Config) GetNotifierGateSets(notifierName string) [][]*Gate {
 	}
 
 	return r
-}
-
-func (c Config) validateTasks() error {
-	for _, o := range config.Tasks {
-		if err := o.validate(); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (c Config) validateNotifiers() error {
-	//for _, o := range config.Notifiers {
-	//	if err := o.validate(); err != nil {
-	//		return err
-	//	}
-	//}
-
-	//func (n Notifier) validate() error {
-	//	if _, err := os.Stat(n.Command); os.IsNotExist(err) {
-	//		if _, err := os.Stat(fmt.Sprintf("%s/%s", config.Directory, n.Command)); os.IsNotExist(err) {
-	//			return fmt.Errorf("notifier command not found")
-	//		}
-	//	}
-	//
-	//	if strings.ContainsRune(n.Name, ' ') {
-	//		return fmt.Errorf("name cannot contain spaces")
-	//	}
-	//
-	//	if strings.ContainsRune(n.Name, ',') {
-	//		return fmt.Errorf("name cannot contain commas")
-	//	}
-	//
-	//	for i, gates := range n.GateSets {
-	//		if len(gates) > 30 {
-	//			// TODO: why can't it have more than 30 elements?
-	//			return fmt.Errorf("gateset %d: cannot have more than 30 elements", i)
-	//		}
-	//
-	//		for _, g := range gates {
-	//			_, err := GateByName(g)
-	//			if err != nil {
-	//				return fmt.Errorf("gateset %d: %s", i, err)
-	//			}
-	//		}
-	//	}
-	//
-	//	return nil
-	//}
-
-	return nil
-}
-
-func (c Config) validateGates() error {
-	return nil
 }
 
 func (c Config) ErrorNotification() {
@@ -269,19 +228,19 @@ func (c Config) validateGatesExist() error {
 
 func (c Config) validateCommandsExist() error {
 	for i, t := range config.Tasks {
-		if _, err := os.Stat(t.Command); os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(c.Directory, t.Command)); os.IsNotExist(err) {
 			return fmt.Errorf("task [%d]: command '%s': %w", i, t.Command, ErrCommandNotExist)
 		}
 	}
 
 	for i, n := range config.Notifiers {
-		if _, err := os.Stat(n.Command); os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(c.Directory, n.Command)); os.IsNotExist(err) {
 			return fmt.Errorf("notifier [%d]: command '%s': %w", i, n.Command, ErrCommandNotExist)
 		}
 	}
 
 	for i, g := range config.Gates {
-		if _, err := os.Stat(g.Command); os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(c.Directory, g.Command)); os.IsNotExist(err) {
 			return fmt.Errorf("gate [%d]: command '%s': %w", i, g.Command, ErrCommandNotExist)
 		}
 	}
@@ -290,21 +249,23 @@ func (c Config) validateCommandsExist() error {
 }
 
 func (c Config) validateName() error {
+	re := regexp.MustCompile(`^[a-z0-9_]+$`)
+
 	for i, t := range config.Tasks {
-		if strings.ContainsRune(t.Name, ' ') {
-			return fmt.Errorf("task [%d]: name '%s': %w", i, t.Name, ErrHasSpaces)
+		if !re.Match([]byte(t.Name)) {
+			return fmt.Errorf("task [%d]: name '%s': %w", i, t.Name, ErrInvalidName)
 		}
 	}
 
 	for i, n := range config.Notifiers {
-		if strings.ContainsRune(n.Name, ' ') {
-			return fmt.Errorf("notifier [%d]: name '%s': %w", i, n.Name, ErrHasSpaces)
+		if !re.Match([]byte(n.Name)) {
+			return fmt.Errorf("notifier [%d]: name '%s': %w", i, n.Name, ErrInvalidName)
 		}
 	}
 
 	for i, g := range config.Gates {
-		if strings.ContainsRune(g.Name, ' ') {
-			return fmt.Errorf("gate [%d]: name '%s': %w", i, g.Name, ErrHasSpaces)
+		if !re.Match([]byte(g.Name)) {
+			return fmt.Errorf("notifier [%d]: name '%s': %w", i, g.Name, ErrInvalidName)
 		}
 	}
 
