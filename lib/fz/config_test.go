@@ -3,6 +3,7 @@ package fz
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func init() {
@@ -51,6 +52,66 @@ func TestConfigDefaults(t *testing.T) {
 
 	if got.FrequencySeconds != want.FrequencySeconds {
 		t.Errorf("got %d, want %d", got.FrequencySeconds, want.FrequencySeconds)
+	}
+}
+
+func TestConfigTaskFlappy(t *testing.T) {
+	config := ReadConfig("/home/jon/src/flamingzombies/example_config.toml")
+	config.Directory = "/home/jon/src/flamingzombies/libexec"
+	want := Task{
+		Name:             "flappy",
+		Command:          "task/flappy",
+		FrequencySeconds: 1,
+		ErrorBody:        "flappy has entered an error state\n",
+		RecoverBody:      "flappy has recovered\n",
+	}
+	got := config.Tasks[0]
+
+	if got.Name != want.Name {
+		t.Errorf("got %s, want %s", got.Name, want.Name)
+	}
+
+	if got.Command != want.Command {
+		t.Errorf("got %s, want %s", got.Command, want.Command)
+	}
+
+	if got.FrequencySeconds != want.FrequencySeconds {
+		t.Errorf("got %d, want %d", got.FrequencySeconds, want.FrequencySeconds)
+	}
+
+	if got.Frequency() != time.Duration(want.FrequencySeconds)*time.Second {
+		t.Errorf("got %d, want %d", got.Frequency(), time.Duration(want.FrequencySeconds)*time.Second)
+	}
+
+	if got.ErrorBody != want.ErrorBody {
+		t.Errorf("got %s, want %s", got.ErrorBody, want.ErrorBody)
+	}
+
+	if got.RecoverBody != want.RecoverBody {
+		t.Errorf("got %s, want %s", got.RecoverBody, want.RecoverBody)
+	}
+}
+
+func TestConfigNotifierLogger(t *testing.T) {
+	config := ReadConfig("/home/jon/src/flamingzombies/example_config.toml")
+	config.Directory = "/home/jon/src/flamingzombies/libexec"
+	want := Notifier{
+		Name:           "logger",
+		Command:        "notifier/null",
+		TimeoutSeconds: 5,
+	}
+	got := config.Notifiers[0]
+
+	if got.Name != want.Name {
+		t.Errorf("got %s, want %s", got.Name, want.Name)
+	}
+
+	if got.Command != want.Command {
+		t.Errorf("got %s, want %s", got.Command, want.Command)
+	}
+
+	if got.TimeoutSeconds != want.TimeoutSeconds {
+		t.Errorf("got %d, want %d", got.TimeoutSeconds, want.TimeoutSeconds)
 	}
 }
 
