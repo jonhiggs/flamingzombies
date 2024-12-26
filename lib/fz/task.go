@@ -240,10 +240,6 @@ func (t Task) timeout() time.Duration {
 	return GRACE_TIME + time.Duration(t.TimeoutSeconds)*time.Second
 }
 
-func (t Task) retryFrequency() time.Duration {
-	return time.Duration(t.RetryFrequencySeconds) * time.Second
-}
-
 func (t Task) notifiers() []*Notifier {
 	var ns []*Notifier
 	for _, nName := range t.NotifierNames {
@@ -256,13 +252,4 @@ func (t Task) notifiers() []*Notifier {
 	}
 
 	return ns
-}
-
-func (t Task) NotifierIndex(name string) (int, error) {
-	for i, n := range t.NotifierNames {
-		if n == name {
-			return i, nil
-		}
-	}
-	return -1, fmt.Errorf("unknown notifier name")
 }
