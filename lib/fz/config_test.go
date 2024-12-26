@@ -3,13 +3,23 @@ package fz
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
 
+func init() {
+	workDir, _ = os.Getwd()
+	for !strings.HasSuffix(workDir, "flamingzombies") {
+		workDir = filepath.Dir(workDir)
+	}
+}
+
 func TestConfig(t *testing.T) {
-	config := ReadConfig("/home/jon/src/flamingzombies/example_config.toml")
-	config.Directory = "/home/jon/src/flamingzombies/libexec"
+	config := ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	config.Directory = fmt.Sprintf("%s/libexec", workDir)
 
 	wantLogFile := "-"
 	wantLogLevel := "info"
@@ -41,8 +51,8 @@ func TestConfig(t *testing.T) {
 }
 
 func TestConfigDefaults(t *testing.T) {
-	config := ReadConfig("/home/jon/src/flamingzombies/example_config.toml")
-	config.Directory = "/home/jon/src/flamingzombies/libexec"
+	config := ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	config.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := ConfigDefaults{
 		Retries:            5,
 		TimeoutSeconds:     1,
@@ -87,8 +97,8 @@ func TestConfigDefaults(t *testing.T) {
 }
 
 func TestConfigTaskFlappy(t *testing.T) {
-	config := ReadConfig("/home/jon/src/flamingzombies/example_config.toml")
-	config.Directory = "/home/jon/src/flamingzombies/libexec"
+	config := ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	config.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := Task{
 		Name:             "flappy",
 		Command:          "task/flappy",
@@ -132,8 +142,8 @@ func TestConfigTaskFlappy(t *testing.T) {
 }
 
 func TestConfigNotifierLogger(t *testing.T) {
-	config := ReadConfig("/home/jon/src/flamingzombies/example_config.toml")
-	config.Directory = "/home/jon/src/flamingzombies/libexec"
+	config := ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	config.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := Notifier{
 		Name:           "logger",
 		Command:        "notifier/null",
