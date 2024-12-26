@@ -1,9 +1,32 @@
 package fz
 
 import (
+	"errors"
 	"sync"
 	"time"
 )
+
+///////////////////////////////////////////////////////////////////////////////
+// Constants
+
+const DEFAULT_RETRIES = 5
+const DEFAULT_TIMEOUT_SECONDS = 5
+const DEFAULT_FREQUENCY_SECONDS = 300
+const DEFAULT_PRIORITY = 5
+const GRACE_TIME = time.Duration(500) * time.Millisecond
+
+///////////////////////////////////////////////////////////////////////////////
+// Errors
+
+var ErrCommandNotExist = errors.New("command does not exist")
+var ErrInvalidName = errors.New("charactors must be alphanumeric or underscore")
+var ErrNotExist = errors.New("does not exist")
+var ErrLessThan1 = errors.New("cannot be less than 1")
+var ErrTimeoutSlowerThanRetry = errors.New("timeout must not be longer than the retry interval")
+var ErrGreaterThan99 = errors.New("cannot be greater than 99")
+
+///////////////////////////////////////////////////////////////////////////////
+// Structs
 
 type Config struct {
 	Defaults       ConfigDefaults `toml:"defaults"`

@@ -11,8 +11,6 @@ import (
 	"time"
 )
 
-const GRACE_TIME = time.Duration(500) * time.Millisecond
-
 func (t Task) Hash() uint32 {
 	// To help with testing, return hash of zero when there isn't a command or
 	// any arguments.

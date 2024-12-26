@@ -11,11 +11,6 @@ import (
 	"github.com/pelletier/go-toml"
 )
 
-const DEFAULT_RETRIES = 5
-const DEFAULT_TIMEOUT_SECONDS = 5
-const DEFAULT_FREQUENCY_SECONDS = 300
-const DEFAULT_PRIORITY = 5
-
 var DAEMON_START_TIME = time.Now()
 
 var config Config
@@ -112,6 +107,7 @@ func ReadConfig(f string) Config {
 	return config
 }
 
+// Validate the configuration
 func (c Config) Validate() error {
 	if err := c.validateNotifiersExist(); err != nil {
 		return err
@@ -144,7 +140,7 @@ func (c Config) Validate() error {
 	return nil
 }
 
-// Find and return a notifier by its name.
+// Find and return a Notifier by its name.
 func (c Config) GetNotifierByName(name string) *Notifier {
 	for i, n := range c.Notifiers {
 		if n.Name == name {
@@ -155,6 +151,7 @@ func (c Config) GetNotifierByName(name string) *Notifier {
 	return nil
 }
 
+// Find and return a Gate by its name.
 func (c Config) GetGateByName(name string) *Gate {
 	for i, g := range c.Gates {
 		if g.Name == name {
@@ -186,6 +183,9 @@ func (c Config) ErrorNotification() {
 	//}
 
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Private Methods
 
 func (c Config) validateNotifiersExist() error {
 	for _, n := range c.Defaults.NotifierNames {
