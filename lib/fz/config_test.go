@@ -51,6 +51,23 @@ func TestConfig(t *testing.T) {
 		t.Errorf("got %d, want %d", len(got.Gates), 5)
 	}
 
+	gotGateSetsLogger := got.GetNotifierGateSets("logger")
+	if len(gotGateSetsLogger) != 2 {
+		t.Errorf("got %d, want %d", len(gotGateSetsLogger), 2)
+	}
+	if len(gotGateSetsLogger[0]) != 2 {
+		t.Errorf("got %d, want %d", len(gotGateSetsLogger[0]), 2)
+	}
+	if len(gotGateSetsLogger[1]) != 2 {
+		t.Errorf("got %d, want %d", len(gotGateSetsLogger[1]), 2)
+	}
+	if gotGateSetsLogger[0][0].Name != "to_failed" {
+		t.Errorf("got %s, want %s", gotGateSetsLogger[0][0].Name, "to_failed")
+	}
+	if gotGateSetsLogger[0][1].Name != "defer" {
+		t.Errorf("got %s, want %s", gotGateSetsLogger[0][0].Name, "defer")
+	}
+
 	if err := cfg.Validate(); err != nil {
 		t.Errorf("got %v, want %v", err, nil)
 	}

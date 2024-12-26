@@ -1,5 +1,5 @@
 DIST_GO = dist/bin/fz
-DIST_LIBEXEC = $(subst libexec/,dist/libexec/flamingzombies/,$(wildcard libexec/helpers.inc libexec/README.md libexec/task/* libexec/gate/* libexec/notifier/*))
+DIST_LIBEXEC = $(subst libexec/,dist/libexec/flamingzombies/,$(wildcard libexec/README.md libexec/task/* libexec/gate/* libexec/notifier/*))
 DIST_MAN = $(addprefix dist/,$(wildcard man/man1/*.1) $(wildcard man/man5/*.5) $(wildcard man/man7/*.7))
 DIST_SCRIPTS = $(addprefix dist/,$(wildcard scripts/*))
 DIST_MAKEFILE = dist/makefile

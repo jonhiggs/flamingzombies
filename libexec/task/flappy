@@ -1,7 +1,6 @@
 #!/bin/sh
 # spend 20 seconds up, and 20 seconds down.
 
-. "$(dirname "$0")/../helpers.inc"
 
 if [ $(( $(date +%s) % 40 )) -le 20 ]; then
   metric_gauge flappy 1

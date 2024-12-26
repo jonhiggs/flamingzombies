@@ -174,14 +174,15 @@ func (c Config) GetGateByName(name string) *Gate {
 
 // Return the GateSets attached to a notifier
 func (c Config) GetNotifierGateSets(notifierName string) [][]*Gate {
-	var r = [][]*Gate{}
+	r := [][]*Gate{}
 
 	n := c.GetNotifierByName(notifierName)
-	for igs, gateSet := range n.GateSets {
-		for ig, gateName := range gateSet {
-			g := cfg.GetGateByName(gateName)
-			r[igs][ig] = g
+	for _, gateSet := range n.GateSets {
+		gs := []*Gate{}
+		for _, gateName := range gateSet {
+			gs = append(gs, cfg.GetGateByName(gateName))
 		}
+		r = append(r, gs)
 	}
 
 	return r

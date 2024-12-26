@@ -11,5 +11,5 @@ gotest:
 
 shellcheck:
 	shellcheck -e SC1091 -x -s sh \
-		 libexec/helpers.inc libexec/{task,notifier,gate}/*
+		 libexec/{task,notifier,gate}/*
 	#[[ $$(find libexec/ ! -executable ! -name README.md ! -name \*.inc) = "" ]]
