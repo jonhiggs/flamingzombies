@@ -61,18 +61,7 @@ func (t *Task) Run() bool {
 	defer cancel()
 	cmd := exec.CommandContext(ctx, t.Command, t.Args...)
 	cmd.Dir = config.Directory
-
-	cmd.Env = []string{
-		fmt.Sprintf("TIMEOUT=%d", t.TimeoutSeconds),
-	}
-
-	for _, v := range config.Defaults.Envs {
-		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", v[0], v[1]))
-	}
-
-	for _, v := range t.Envs {
-		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", v[0], v[1]))
-	}
+	cmd.Env = t.environment()
 
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
@@ -252,4 +241,15 @@ func (t Task) notifiers() []*Notifier {
 	}
 
 	return ns
+}
+
+// return a list of envs that are placed into the environment when task is ran
+func (t Task) environment() []string {
+	r := []string{fmt.Sprintf("TIMEOUT=%d", t.TimeoutSeconds)}
+
+	for _, e := range t.Envs {
+		r = append(r, e)
+	}
+
+	return r
 }

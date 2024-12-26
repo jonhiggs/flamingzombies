@@ -217,3 +217,46 @@ func TestRecordStatus(t *testing.T) {
 		})
 	}
 }
+
+func TestTaskEnvironment(t *testing.T) {
+	tests := []struct {
+		name string
+		ta   Task
+		want []string
+	}{
+		{
+			"nothing",
+			Task{
+				Envs:           []string{},
+				TimeoutSeconds: 10,
+			},
+			[]string{
+				"TIMEOUT=10",
+			},
+		},
+		{
+			"with snmp vars",
+			Task{
+				Envs: []string{
+					"SNMP_COMMUNITY=public",
+					"SNMP_VERSION=2c",
+				},
+				TimeoutSeconds: 10,
+			},
+			[]string{
+				"TIMEOUT=10",
+				"SNMP_COMMUNITY=public",
+				"SNMP_VERSION=2c",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.ta.environment()
+			if fmt.Sprintf("%v", got) != fmt.Sprintf("%v", tt.want) {
+				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -39,14 +39,14 @@ type Config struct {
 }
 
 type ConfigDefaults struct {
-	FrequencySeconds      int        `toml:"frequency"`
-	NotifierNames         []string   `toml:"notifiers"`
-	ErrorNotifierNames    []string   `toml:"error_notifiers"`
-	Priority              int        `toml:"priority"`
-	Retries               int        `toml:"retries"`
-	RetryFrequencySeconds int        `toml:"retry_frequency"`
-	Envs                  [][]string `toml:"envs`
-	TimeoutSeconds        int        `toml:"timeout"` // better to put the timeout into the command
+	FrequencySeconds      int      `toml:"frequency"`
+	NotifierNames         []string `toml:"notifiers"`
+	ErrorNotifierNames    []string `toml:"error_notifiers"`
+	Priority              int      `toml:"priority"`
+	Retries               int      `toml:"retries"`
+	RetryFrequencySeconds int      `toml:"retry_frequency"`
+	Envs                  []string `toml:"envs`
+	TimeoutSeconds        int      `toml:"timeout"` // better to put the timeout into the command
 }
 
 // A Notifier script is capable of emitting an event to an external service.
@@ -56,7 +56,7 @@ type Notifier struct {
 	Args           []string   `toml:"args"`
 	Command        string     `toml:"command"`
 	Name           string     `toml:"name"`
-	Envs           [][]string `toml:"envs`
+	Envs           []string   `toml:"envs`
 }
 
 // A Task is a command that is executed on a schedule. The struct contains the
@@ -64,19 +64,19 @@ type Notifier struct {
 // and it's metadata and history which are generated over the course of the
 // daemons lifecycle.
 type Task struct {
-	Name                  string     `toml:"name"`            // friendly name
-	Command               string     `toml:"command"`         // command
-	Args                  []string   `toml:"args"`            // command arguments
-	FrequencySeconds      int        `toml:"frequency"`       // how often to run
-	RetryFrequencySeconds int        `toml:"retry_frequency"` // how quickly to retry when state unknown
-	TimeoutSeconds        int        `toml:"timeout"`         // how long an execution may run
-	Retries               int        `toml:"retries"`         // number of retries before changing the state
-	NotifierNames         []string   `toml:"notifiers"`       // notifiers to trigger upon state change
-	ErrorNotifierNames    []string   `toml:"error_notifiers"` // notifiers to trigger upon state change
-	Priority              int        `toml:"priority"`        // the priority of the notifications
-	Envs                  [][]string `toml:"envs`             // environment variables supplied to task
-	ErrorBody             string     `toml:"error_body"`      // the body of the notification when entering an error state
-	RecoverBody           string     `toml:"recover_body"`    // the body of the notification when recovering from an error state
+	Name                  string   `toml:"name"`            // friendly name
+	Command               string   `toml:"command"`         // command
+	Args                  []string `toml:"args"`            // command arguments
+	FrequencySeconds      int      `toml:"frequency"`       // how often to run
+	RetryFrequencySeconds int      `toml:"retry_frequency"` // how quickly to retry when state unknown
+	TimeoutSeconds        int      `toml:"timeout"`         // how long an execution may run
+	Retries               int      `toml:"retries"`         // number of retries before changing the state
+	NotifierNames         []string `toml:"notifiers"`       // notifiers to trigger upon state change
+	ErrorNotifierNames    []string `toml:"error_notifiers"` // notifiers to trigger upon state change
+	Priority              int      `toml:"priority"`        // the priority of the notifications
+	Envs                  []string `toml:"envs`             // environment variables supplied to task
+	ErrorBody             string   `toml:"error_body"`      // the body of the notification when entering an error state
+	RecoverBody           string   `toml:"recover_body"`    // the body of the notification when recovering from an error state
 
 	// public, but not configurable
 	History          uint32    // represented in binary. Successes are high
@@ -91,10 +91,10 @@ type Task struct {
 
 // The gate is the control mechanism to governs whether a Notifier executes.
 type Gate struct {
-	Args    []string   `toml:"args"`    // command arguments
-	Command string     `toml:"command"` // command
-	Envs    [][]string `toml:"envs`     // environment variables
-	Name    string     `toml:"name"`    // friendly name
+	Args    []string `toml:"args"`    // command arguments
+	Command string   `toml:"command"` // command
+	Envs    []string `toml:"envs`     // environment variables
+	Name    string   `toml:"name"`    // friendly name
 }
 
 // A notification is generated upon the successful completion of any task.

@@ -66,9 +66,9 @@ func TestConfigDefaults(t *testing.T) {
 		ErrorNotifierNames: []string{"error_emailer"},
 		Priority:           3,
 		FrequencySeconds:   300,
-		Envs: [][]string{
-			[]string{"SNMP_COMMUNITY", "default"},
-			[]string{"SNMP_VERSION", "2c"},
+		Envs: []string{
+			"SNMP_COMMUNITY=default",
+			"SNMP_VERSION=2c",
 		},
 	}
 	got := config.Defaults
@@ -111,9 +111,9 @@ func TestConfigTaskFlappy(t *testing.T) {
 		FrequencySeconds: 1,
 		ErrorBody:        "flappy has entered an error state\n",
 		RecoverBody:      "flappy has recovered\n",
-		Envs: [][]string{
-			[]string{"SNMP_COMMUNITY", "default"},
-			[]string{"SNMP_VERSION", "2c"},
+		Envs: []string{
+			"SNMP_COMMUNITY=default",
+			"SNMP_VERSION=2c",
 		},
 	}
 	got := config.Tasks[0]
@@ -158,9 +158,9 @@ func TestConfigNotifierLogger(t *testing.T) {
 			[]string{"to_failed", "defer"},
 			[]string{"is_failed", "renotify"},
 		},
-		Envs: [][]string{
-			[]string{"SNMP_COMMUNITY", "default"},
-			[]string{"SNMP_VERSION", "2c"},
+		Envs: []string{
+			"SNMP_COMMUNITY=default",
+			"SNMP_VERSION=2c",
 		},
 	}
 	got := config.Notifiers[0]
@@ -194,12 +194,12 @@ func TestConfigNotifierErrorEmailer(t *testing.T) {
 		Command:        "notifier/email",
 		TimeoutSeconds: 3,
 		GateSets:       [][]string{},
-		Envs: [][]string{
-			[]string{"EMAIL_ADDRESS", "jon@altos.au"},
-			[]string{"EMAIL_FROM", "fz@altos.au"},
-			[]string{"EMAIL_SUBJECT", "fz experienced a critical error"},
-			[]string{"SNMP_COMMUNITY", "default"},
-			[]string{"SNMP_VERSION", "2c"},
+		Envs: []string{
+			"EMAIL_ADDRESS=jon@altos.au",
+			"EMAIL_FROM=fz@altos.au",
+			"EMAIL_SUBJECT='fz experienced a critical error'",
+			"SNMP_COMMUNITY=default",
+			"SNMP_VERSION=2c",
 		},
 	}
 	got := config.Notifiers[1]
@@ -232,9 +232,9 @@ func TestConfigGateToFailed(t *testing.T) {
 		Name:    "to_failed",
 		Command: "gate/to_state",
 		Args:    []string{"fail"},
-		Envs: [][]string{
-			[]string{"SNMP_COMMUNITY", "default"},
-			[]string{"SNMP_VERSION", "2c"},
+		Envs: []string{
+			"SNMP_COMMUNITY=default",
+			"SNMP_VERSION=2c",
 		},
 	}
 	got := config.Gates[0]
