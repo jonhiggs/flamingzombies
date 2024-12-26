@@ -59,7 +59,7 @@ func (t *Task) Run() bool {
 
 	ctx, cancel := context.WithTimeout(context.Background(), t.timeout())
 	defer cancel()
-	cmd := exec.CommandContext(ctx, t.Command, t.ExpandArgs()...)
+	cmd := exec.CommandContext(ctx, t.Command, t.Args...)
 	cmd.Dir = config.Directory
 
 	cmd.Env = []string{
@@ -256,18 +256,6 @@ func (t Task) notifiers() []*Notifier {
 	}
 
 	return ns
-}
-
-// return the arguments after interpolating the values
-func (t Task) ExpandArgs() []string {
-	var newArgs []string
-
-	for _, a := range t.Args {
-		a = strings.ReplaceAll(a, "%{TIMEOUT_SECONDS}", fmt.Sprintf("%d", t.TimeoutSeconds))
-		newArgs = append(newArgs, a)
-	}
-
-	return newArgs
 }
 
 func (t Task) NotifierIndex(name string) (int, error) {
