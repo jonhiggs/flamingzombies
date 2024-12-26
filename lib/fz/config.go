@@ -12,10 +12,10 @@ import (
 )
 
 var DAEMON_START_TIME = time.Now()
+var cfg Config
 
-var config Config
-
-func ReadConfig(f string) Config {
+// Make configuration available in fz.Configuration
+func ReadConfig(f string) *Config {
 	file, err := os.Open(f)
 	if err != nil {
 		Fatal(fmt.Sprintf("Error opening the configuration file '%s'\n", f), fmt.Sprint(err))
@@ -27,88 +27,88 @@ func ReadConfig(f string) Config {
 		Fatal(fmt.Sprintf("Error reading the configuration file '%s'\n", f), fmt.Sprint(err))
 	}
 
-	err = toml.Unmarshal(b, &config)
+	err = toml.Unmarshal(b, &cfg)
 	if err != nil {
 		Fatal(fmt.Sprintf("Error parsing the configuration file '%s'\n", f), fmt.Sprint(err))
 	}
 
-	if config.Defaults.Retries == 0 {
-		config.Defaults.Retries = DEFAULT_RETRIES
+	if cfg.Defaults.Retries == 0 {
+		cfg.Defaults.Retries = DEFAULT_RETRIES
 	}
 
-	if config.Defaults.FrequencySeconds == 0 {
-		config.Defaults.FrequencySeconds = DEFAULT_FREQUENCY_SECONDS
+	if cfg.Defaults.FrequencySeconds == 0 {
+		cfg.Defaults.FrequencySeconds = DEFAULT_FREQUENCY_SECONDS
 	}
 
-	if config.Defaults.RetryFrequencySeconds == 0 {
-		config.Defaults.RetryFrequencySeconds = config.Defaults.FrequencySeconds
+	if cfg.Defaults.RetryFrequencySeconds == 0 {
+		cfg.Defaults.RetryFrequencySeconds = cfg.Defaults.FrequencySeconds
 	}
 
-	if config.Defaults.TimeoutSeconds == 0 {
-		config.Defaults.TimeoutSeconds = DEFAULT_TIMEOUT_SECONDS
+	if cfg.Defaults.TimeoutSeconds == 0 {
+		cfg.Defaults.TimeoutSeconds = DEFAULT_TIMEOUT_SECONDS
 	}
 
-	if config.Defaults.Priority == 0 {
-		config.Defaults.Priority = DEFAULT_PRIORITY
+	if cfg.Defaults.Priority == 0 {
+		cfg.Defaults.Priority = DEFAULT_PRIORITY
 	}
 
-	for i, t := range config.Tasks {
+	for i, t := range cfg.Tasks {
 		if t.Retries == 0 {
-			config.Tasks[i].Retries = config.Defaults.Retries
+			cfg.Tasks[i].Retries = cfg.Defaults.Retries
 		}
 
 		if t.TimeoutSeconds == 0 {
-			config.Tasks[i].TimeoutSeconds = config.Defaults.TimeoutSeconds
+			cfg.Tasks[i].TimeoutSeconds = cfg.Defaults.TimeoutSeconds
 		}
 
 		if t.FrequencySeconds == 0 {
-			config.Tasks[i].FrequencySeconds = config.Defaults.FrequencySeconds
+			cfg.Tasks[i].FrequencySeconds = cfg.Defaults.FrequencySeconds
 		}
 
 		if t.RetryFrequencySeconds == 0 {
-			config.Tasks[i].RetryFrequencySeconds = config.Defaults.RetryFrequencySeconds
+			cfg.Tasks[i].RetryFrequencySeconds = cfg.Defaults.RetryFrequencySeconds
 		}
 
 		if t.Priority == 0 {
-			config.Tasks[i].Priority = config.Defaults.Priority
+			cfg.Tasks[i].Priority = cfg.Defaults.Priority
 		}
 
-		for _, e := range config.Defaults.Envs {
-			config.Tasks[i].Envs = append(config.Tasks[i].Envs, e)
+		for _, e := range cfg.Defaults.Envs {
+			cfg.Tasks[i].Envs = append(cfg.Tasks[i].Envs, e)
 		}
 
 		if len(t.ErrorBody) == 0 {
-			config.Tasks[i].ErrorBody = "The task has entered an error state"
+			cfg.Tasks[i].ErrorBody = "The task has entered an error state"
 		}
 		if len(t.RecoverBody) == 0 {
-			config.Tasks[i].RecoverBody = "The task has recovered from an error state"
+			cfg.Tasks[i].RecoverBody = "The task has recovered from an error state"
 		}
 
 		if len(t.NotifierNames) == 0 {
-			config.Tasks[i].NotifierNames = config.Defaults.NotifierNames
+			cfg.Tasks[i].NotifierNames = cfg.Defaults.NotifierNames
 		}
 
 		if len(t.ErrorNotifierNames) == 0 {
-			config.Tasks[i].ErrorNotifierNames = config.Defaults.ErrorNotifierNames
+			cfg.Tasks[i].ErrorNotifierNames = cfg.Defaults.ErrorNotifierNames
 		}
 
 		// start the history in an unknown state
-		config.Tasks[i].History = 0b10
+		cfg.Tasks[i].History = 0b10
 	}
 
-	for i, _ := range config.Notifiers {
-		for _, e := range config.Defaults.Envs {
-			config.Notifiers[i].Envs = append(config.Notifiers[i].Envs, e)
+	for i, _ := range cfg.Notifiers {
+		for _, e := range cfg.Defaults.Envs {
+			cfg.Notifiers[i].Envs = append(cfg.Notifiers[i].Envs, e)
 		}
 	}
 
-	for i, _ := range config.Gates {
-		for _, e := range config.Defaults.Envs {
-			config.Gates[i].Envs = append(config.Gates[i].Envs, e)
+	for i, _ := range cfg.Gates {
+		for _, e := range cfg.Defaults.Envs {
+			cfg.Gates[i].Envs = append(cfg.Gates[i].Envs, e)
 		}
 	}
 
-	return config
+	return &cfg
 }
 
 // Validate the configuration
@@ -141,7 +141,7 @@ func (c Config) Validate() error {
 		return err
 	}
 
-	for i, t := range config.Tasks {
+	for i, t := range cfg.Tasks {
 		if err := t.Validate(); err != nil {
 			return fmt.Errorf("task [%d]: %w", i, err)
 		}
@@ -179,7 +179,7 @@ func (c Config) GetNotifierGateSets(notifierName string) [][]*Gate {
 	n := c.GetNotifierByName(notifierName)
 	for igs, gateSet := range n.GateSets {
 		for ig, gateName := range gateSet {
-			g := config.GetGateByName(gateName)
+			g := cfg.GetGateByName(gateName)
 			r[igs][ig] = g
 		}
 	}
@@ -235,7 +235,7 @@ func (c Config) validateGatesExist() error {
 }
 
 func (c Config) validateCommandsExist() error {
-	for i, t := range config.Tasks {
+	for i, t := range cfg.Tasks {
 		cmd := filepath.Join(c.Directory, t.Command)
 		Logger.Debug("checking command", "cmd", cmd)
 
@@ -244,7 +244,7 @@ func (c Config) validateCommandsExist() error {
 		}
 	}
 
-	for i, n := range config.Notifiers {
+	for i, n := range cfg.Notifiers {
 		cmd := filepath.Join(c.Directory, n.Command)
 		Logger.Debug("checking command", "cmd", cmd)
 
@@ -253,7 +253,7 @@ func (c Config) validateCommandsExist() error {
 		}
 	}
 
-	for i, g := range config.Gates {
+	for i, g := range cfg.Gates {
 		cmd := filepath.Join(c.Directory, g.Command)
 		Logger.Debug("checking command", "cmd", cmd)
 
@@ -268,13 +268,13 @@ func (c Config) validateCommandsExist() error {
 func (c Config) validateName() error {
 	re := regexp.MustCompile(`^[a-z0-9_]+$`)
 
-	for i, n := range config.Notifiers {
+	for i, n := range cfg.Notifiers {
 		if !re.Match([]byte(n.Name)) {
 			return fmt.Errorf("notifier [%d]: name '%s': %w", i, n.Name, ErrInvalidName)
 		}
 	}
 
-	for i, g := range config.Gates {
+	for i, g := range cfg.Gates {
 		if !re.Match([]byte(g.Name)) {
 			return fmt.Errorf("notifier [%d]: name '%s': %w", i, g.Name, ErrInvalidName)
 		}

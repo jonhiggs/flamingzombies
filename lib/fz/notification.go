@@ -29,7 +29,7 @@ func ProcessNotifications() {
 					Logger.Error(fmt.Sprint(err), "notifier", n.Notifier.Name)
 				}
 
-				cmd.Dir = config.Directory
+				cmd.Dir = cfg.Directory
 
 				//io.WriteString(stdin, n.body())
 				stdin.Close()
@@ -85,7 +85,7 @@ func ProcessNotifications() {
 					Logger.Error(fmt.Sprint(err), "notifier", n.Notifier.Name)
 				}
 
-				cmd.Dir = config.Directory
+				cmd.Dir = cfg.Directory
 				cmd.Env = []string{
 					fmt.Sprintf("LAST_STATE=%s", n.Task.LastState()),
 					fmt.Sprintf("NAME=%s", n.Task.Name),
@@ -136,7 +136,7 @@ func ProcessNotifications() {
 func (n Notification) gateState() ([]*Gate, bool) {
 	openGates := []*Gate{}
 X:
-	for gsi, gs := range config.GetNotifierGateSets(n.Notifier.Name) {
+	for gsi, gs := range cfg.GetNotifierGateSets(n.Notifier.Name) {
 		openGates = []*Gate{} // ignore the gates from prior gateset
 
 		for _, g := range gs {

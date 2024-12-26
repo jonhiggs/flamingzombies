@@ -48,7 +48,7 @@ func (t Task) Ready(ts time.Time) bool {
 	return (uint32(ts.Unix())+t.Hash())%uint32(t.FrequencySeconds) == 0
 }
 
-func (t *Task) Run(config Config) {
+func (t *Task) Run() {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
@@ -57,7 +57,7 @@ func (t *Task) Run(config Config) {
 	ctx, cancel := context.WithTimeout(context.Background(), t.timeout())
 	defer cancel()
 	cmd := exec.CommandContext(ctx, t.Command, t.Args...)
-	cmd.Dir = config.Directory
+	cmd.Dir = cfg.Directory
 	cmd.Env = t.Environment()
 
 	stderr, _ := cmd.StderrPipe()
@@ -297,9 +297,9 @@ func (t Task) timeout() time.Duration {
 func (t Task) notifiers() []*Notifier {
 	var ns []*Notifier
 	for _, nName := range t.NotifierNames {
-		for i, _ := range config.Notifiers {
-			if nName == config.Notifiers[i].Name {
-				n := &config.Notifiers[i]
+		for i, _ := range cfg.Notifiers {
+			if nName == cfg.Notifiers[i].Name {
+				n := &cfg.Notifiers[i]
 				ns = append(ns, n)
 			}
 		}

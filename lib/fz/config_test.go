@@ -20,12 +20,12 @@ func init() {
 }
 
 func TestConfig(t *testing.T) {
-	config = ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
-	config.Directory = fmt.Sprintf("%s/libexec", workDir)
+	ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	cfg.Directory = fmt.Sprintf("%s/libexec", workDir)
 
 	wantLogFile := "-"
 	wantLogLevel := "info"
-	got := config
+	got := cfg
 
 	if !strings.HasSuffix(got.Directory, "/libexec") {
 		t.Errorf("expected '%s' to have '/libexec' suffix", got.Directory)
@@ -51,14 +51,14 @@ func TestConfig(t *testing.T) {
 		t.Errorf("got %d, want %d", len(got.Gates), 5)
 	}
 
-	if err := config.Validate(); err != nil {
+	if err := cfg.Validate(); err != nil {
 		t.Errorf("got %v, want %v", err, nil)
 	}
 }
 
 func TestConfigDefaults(t *testing.T) {
-	config = ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
-	config.Directory = fmt.Sprintf("%s/libexec", workDir)
+	ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	cfg.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := ConfigDefaults{
 		Retries:            5,
 		TimeoutSeconds:     1,
@@ -71,7 +71,7 @@ func TestConfigDefaults(t *testing.T) {
 			"SNMP_VERSION=2c",
 		},
 	}
-	got := config.Defaults
+	got := cfg.Defaults
 
 	if got.Retries != want.Retries {
 		t.Errorf("got %d, want %d", got.Retries, want.Retries)
@@ -103,8 +103,8 @@ func TestConfigDefaults(t *testing.T) {
 }
 
 func TestConfigTaskFlappy(t *testing.T) {
-	config = ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
-	config.Directory = fmt.Sprintf("%s/libexec", workDir)
+	ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	cfg.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := Task{
 		Name:             "flappy",
 		Command:          "task/flappy",
@@ -116,7 +116,7 @@ func TestConfigTaskFlappy(t *testing.T) {
 			"SNMP_VERSION=2c",
 		},
 	}
-	got := config.Tasks[0]
+	got := cfg.Tasks[0]
 
 	if got.Name != want.Name {
 		t.Errorf("got %s, want %s", got.Name, want.Name)
@@ -148,8 +148,8 @@ func TestConfigTaskFlappy(t *testing.T) {
 }
 
 func TestConfigNotifierLogger(t *testing.T) {
-	config = ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
-	config.Directory = fmt.Sprintf("%s/libexec", workDir)
+	ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	cfg.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := Notifier{
 		Name:           "logger",
 		Command:        "notifier/null",
@@ -163,7 +163,7 @@ func TestConfigNotifierLogger(t *testing.T) {
 			"SNMP_VERSION=2c",
 		},
 	}
-	got := config.Notifiers[0]
+	got := cfg.Notifiers[0]
 
 	if got.Name != want.Name {
 		t.Errorf("got %s, want %s", got.Name, want.Name)
@@ -187,8 +187,8 @@ func TestConfigNotifierLogger(t *testing.T) {
 }
 
 func TestConfigNotifierErrorEmailer(t *testing.T) {
-	config = ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
-	config.Directory = fmt.Sprintf("%s/libexec", workDir)
+	ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	cfg.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := Notifier{
 		Name:           "error_emailer",
 		Command:        "notifier/email",
@@ -202,7 +202,7 @@ func TestConfigNotifierErrorEmailer(t *testing.T) {
 			"SNMP_VERSION=2c",
 		},
 	}
-	got := config.Notifiers[1]
+	got := cfg.Notifiers[1]
 
 	if got.Name != want.Name {
 		t.Errorf("got %s, want %s", got.Name, want.Name)
@@ -226,8 +226,8 @@ func TestConfigNotifierErrorEmailer(t *testing.T) {
 }
 
 func TestConfigGateToFailed(t *testing.T) {
-	config = ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
-	config.Directory = fmt.Sprintf("%s/libexec", workDir)
+	ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	cfg.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := Gate{
 		Name:    "to_failed",
 		Command: "gate/to_state",
@@ -237,7 +237,7 @@ func TestConfigGateToFailed(t *testing.T) {
 			"SNMP_VERSION=2c",
 		},
 	}
-	got := config.Gates[0]
+	got := cfg.Gates[0]
 
 	if got.Name != want.Name {
 		t.Errorf("got %s, want %s", got.Name, want.Name)
@@ -260,117 +260,117 @@ func TestConfigGateToFailed(t *testing.T) {
 // VALIDATOR CHECKS
 
 func TestConfigValidateNotifiersExistDefault(t *testing.T) {
-	config = Config{
+	cfg = Config{
 		Defaults: ConfigDefaults{
 			NotifierNames: []string{"dont_exist"},
 		},
 	}
 
 	want := ErrNotExist
-	got := errors.Unwrap(config.validateNotifiersExist())
+	got := errors.Unwrap(cfg.validateNotifiersExist())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
 
 func TestConfigValidateNotifiersExistForTask(t *testing.T) {
-	config = Config{
+	cfg = Config{
 		Tasks: []Task{
 			Task{NotifierNames: []string{"dont_exist"}},
 		},
 	}
 
 	want := ErrNotExist
-	got := errors.Unwrap(config.validateNotifiersExist())
+	got := errors.Unwrap(cfg.validateNotifiersExist())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
 
 func TestConfigValidateGatesExistForNotifier(t *testing.T) {
-	config = Config{
+	cfg = Config{
 		Notifiers: []Notifier{
 			Notifier{GateSets: [][]string{[]string{"dont_exist"}}},
 		},
 	}
 
 	want := ErrNotExist
-	got := errors.Unwrap(config.validateGatesExist())
+	got := errors.Unwrap(cfg.validateGatesExist())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
 
 func TestConfigValidateCommandsExistsForTask(t *testing.T) {
-	config = Config{
+	cfg = Config{
 		Tasks: []Task{
 			Task{Command: "dont_exist"},
 		},
 	}
 
 	want := ErrCommandNotExist
-	got := errors.Unwrap(config.validateCommandsExist())
+	got := errors.Unwrap(cfg.validateCommandsExist())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
 
 func TestConfigValidateCommandsExistsForNotifier(t *testing.T) {
-	config = Config{
+	cfg = Config{
 		Notifiers: []Notifier{
 			Notifier{Command: "dont_exist"},
 		},
 	}
 
 	want := ErrCommandNotExist
-	got := errors.Unwrap(config.validateCommandsExist())
+	got := errors.Unwrap(cfg.validateCommandsExist())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
 
 func TestConfigValidateCommandsExistsForGate(t *testing.T) {
-	config = Config{
+	cfg = Config{
 		Gates: []Gate{
 			Gate{Command: "dont_exist"},
 		},
 	}
 
 	want := ErrCommandNotExist
-	got := errors.Unwrap(config.validateCommandsExist())
+	got := errors.Unwrap(cfg.validateCommandsExist())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
 
 func TestConfigValidateNameForNotifier(t *testing.T) {
-	config = Config{
+	cfg = Config{
 		Notifiers: []Notifier{
 			Notifier{Name: "with spaces"},
 		},
 	}
 
 	want := ErrInvalidName
-	got := errors.Unwrap(config.validateName())
+	got := errors.Unwrap(cfg.validateName())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
 
 func TestConfigValidateFrequencySecondsDefault(t *testing.T) {
-	config = Config{
+	cfg = Config{
 		Defaults: ConfigDefaults{},
 	}
 
 	want := ErrLessThan1
-	got := errors.Unwrap(config.validateFrequencySeconds())
+	got := errors.Unwrap(cfg.validateFrequencySeconds())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
 
 func TestConfigValidateTimeoutSecondsTask(t *testing.T) {
-	config = Config{
+	cfg = Config{
 		Defaults: ConfigDefaults{
 			FrequencySeconds:      5,
 			RetryFrequencySeconds: 5,
@@ -379,26 +379,26 @@ func TestConfigValidateTimeoutSecondsTask(t *testing.T) {
 	}
 
 	want := ErrTimeoutSlowerThanRetry
-	got := errors.Unwrap(config.validateTimeoutSeconds())
+	got := errors.Unwrap(cfg.validateTimeoutSeconds())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
 
 func TestConfigValidatePriorityHigh(t *testing.T) {
-	config = Config{
+	cfg = Config{
 		Defaults: ConfigDefaults{Priority: 100},
 	}
 
 	want := ErrGreaterThan99
-	got := errors.Unwrap(config.validatePriority())
+	got := errors.Unwrap(cfg.validatePriority())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
 
 func TestConfigValidatePriorityLow(t *testing.T) {
-	config = Config{
+	cfg = Config{
 		Defaults: ConfigDefaults{Priority: 0},
 		Tasks: []Task{
 			Task{},
@@ -406,7 +406,7 @@ func TestConfigValidatePriorityLow(t *testing.T) {
 	}
 
 	want := ErrLessThan1
-	got := errors.Unwrap(config.validatePriority())
+	got := errors.Unwrap(cfg.validatePriority())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}

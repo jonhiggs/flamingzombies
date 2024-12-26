@@ -12,11 +12,11 @@ import (
 
 const VERSION = "v0.0.21"
 
-var config fz.Config
 var configTest = false
 var configFile = "/etc/flamingzombies.toml"
 var dir = "/usr/libexec/flamingzombies"
 var logLevel = "info"
+var cfg *fz.Config
 
 func init() {
 	options := []optparse.Option{
@@ -65,25 +65,25 @@ func init() {
 		configFile = os.Getenv("FZ_CONFIG_FILE")
 	}
 
-	config = fz.ReadConfig(configFile)
+	cfg = fz.ReadConfig(configFile)
 
 	// working directory
 	if os.Getenv("FZ_DIRECTORY") == "" {
-		config.Directory = dir
+		cfg.Directory = dir
 	} else {
-		config.Directory = os.Getenv("FZ_DIRECTORY")
+		cfg.Directory = os.Getenv("FZ_DIRECTORY")
 	}
 
 	// logging
 	if os.Getenv("FZ_LOG_LEVEL") == "" {
-		config.LogLevel = logLevel
+		cfg.LogLevel = logLevel
 	} else {
-		config.LogLevel = os.Getenv("FZ_LOG_LEVEL")
+		cfg.LogLevel = os.Getenv("FZ_LOG_LEVEL")
 	}
-	fz.StartLogger(config.LogLevel)
+	fz.StartLogger(cfg.LogLevel)
 
 	// validation
-	if err = config.Validate(); err != nil {
+	if err = cfg.Validate(); err != nil {
 		log.Fatal(err)
 	}
 	if configTest {
@@ -102,9 +102,9 @@ func main() {
 	for {
 		select {
 		case ts := <-ticker.C:
-			for i, t := range config.Tasks {
+			for i, t := range cfg.Tasks {
 				if t.Ready(ts) {
-					go config.Tasks[i].Run(config)
+					go cfg.Tasks[i].Run()
 				}
 			}
 		}

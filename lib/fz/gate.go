@@ -13,7 +13,7 @@ func (g Gate) IsOpen(t *Task, n *Notifier) bool {
 	defer cancel()
 	cmd := exec.CommandContext(ctx, g.Command, g.Args...)
 
-	cmd.Dir = config.Directory
+	cmd.Dir = cfg.Directory
 	cmd.Env = t.Environment()
 
 	//startTime := time.Now()
