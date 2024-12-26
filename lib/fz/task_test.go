@@ -18,13 +18,15 @@ func TestTaskValidate(t *testing.T) {
 	}{
 		{
 			Task{
-				Name: "name with spaces",
+				Name:    "name with spaces",
+				Command: "true",
 			},
 			ErrInvalidName,
 		},
 		{
 			Task{
 				Name:                  "fast_retry",
+				Command:               "true",
 				FrequencySeconds:      5,
 				RetryFrequencySeconds: 0,
 			},
@@ -33,6 +35,7 @@ func TestTaskValidate(t *testing.T) {
 		{
 			Task{
 				Name:                  "too_frequent",
+				Command:               "true",
 				FrequencySeconds:      0,
 				RetryFrequencySeconds: 5,
 			},
@@ -263,6 +266,7 @@ func TestTaskEnvironment(t *testing.T) {
 	}{
 		{
 			Task{
+				Command:               "true",
 				Envs:                  []string{},
 				FrequencySeconds:      300,
 				History:               0b10,
@@ -282,12 +286,13 @@ func TestTaskEnvironment(t *testing.T) {
 				"PRIORITY=3",
 				"STATE=unknown",
 				"STATE_CHANGED=false",
-				"TASK_COMMAND=",
+				"TASK_COMMAND=true",
 				"TIMEOUT=10",
 			},
 		},
 		{
 			Task{
+				Command: "true",
 				Envs: []string{
 					"SNMP_COMMUNITY=public",
 					"SNMP_VERSION=2c",
@@ -310,7 +315,7 @@ func TestTaskEnvironment(t *testing.T) {
 				"PRIORITY=3",
 				"STATE=unknown",
 				"STATE_CHANGED=false",
-				"TASK_COMMAND=",
+				"TASK_COMMAND=true",
 				"TIMEOUT=10",
 				"SNMP_COMMUNITY=public",
 				"SNMP_VERSION=2c",

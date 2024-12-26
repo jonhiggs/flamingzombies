@@ -219,6 +219,12 @@ func (t Task) Validate() error {
 		return fmt.Errorf("name '%s': %w", t.Name, ErrInvalidName)
 	}
 
+	// The command string cannot be blank. When loading the configuration, a
+	// better test is performed to make sure that the file actually exists.
+	if len(t.Command) < 1 {
+		return fmt.Errorf("command '%s': %w", t.Command, ErrCommandNotExist)
+	}
+
 	if t.FrequencySeconds < 1 {
 		return fmt.Errorf("freqency '%d': %w", t.FrequencySeconds, ErrLessThan1)
 	}
