@@ -239,3 +239,45 @@ func (c Config) ErrorNotification() {
 	//}
 
 }
+
+func (c Config) validateNotifiersExist() error {
+	for _, n := range c.Defaults.NotifierNames {
+		if c.GetNotifierByName(n) == nil {
+			return fmt.Errorf("notifier %s: %w", n, ErrNotExist)
+		}
+	}
+
+	for _, t := range c.Tasks {
+		for _, n := range t.NotifierNames {
+			if c.GetNotifierByName(n) == nil {
+				return fmt.Errorf("notifier %s: %w", n, ErrNotExist)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (c Config) validateGatesExist() error {
+	for _, n := range c.Notifiers {
+		for _, gs := range n.GateSets {
+			for _, g := range gs {
+				if c.GetGateByName(g) == nil {
+					return fmt.Errorf("gate %s: %w", g, ErrNotExist)
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func (c Config) validateCommandsExist() error {
+	for _, t := range config.Tasks {
+		if _, err := os.Stat(t.Command); os.IsNotExist(err) {
+			return fmt.Errorf("command %s: %w", t.Command, ErrCommandNotExist)
+		}
+	}
+
+	return nil
+}

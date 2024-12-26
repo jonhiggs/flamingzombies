@@ -1,6 +1,7 @@
 package fz
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -32,6 +33,10 @@ func TestConfig(t *testing.T) {
 
 	if len(got.Gates) != 5 {
 		t.Errorf("got %d, want %d", len(got.Gates), 5)
+	}
+
+	if err := config.validateNotifiersExist(); err != nil {
+		t.Errorf("validateNotifiersExist: got %v, want %v", err, nil)
 	}
 }
 
@@ -232,6 +237,65 @@ func TestConfigGateToFailed(t *testing.T) {
 
 	if fmt.Sprintf("%v", got.Envs) != fmt.Sprintf("%s", want.Envs) {
 		t.Errorf("got %v, want %v", got.Envs, want.Envs)
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// VALIDATOR CHECKS
+
+func TestConfigValidateNotifiersExistDefault(t *testing.T) {
+	config := Config{
+		Defaults: ConfigDefaults{
+			NotifierNames: []string{"dont_exist"},
+		},
+	}
+
+	want := ErrNotExist
+	got := errors.Unwrap(config.validateNotifiersExist())
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestConfigValidateNotifiersExistForTask(t *testing.T) {
+	config := Config{
+		Tasks: []Task{
+			Task{NotifierNames: []string{"dont_exist"}},
+		},
+	}
+
+	want := ErrNotExist
+	got := errors.Unwrap(config.validateNotifiersExist())
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestConfigValidateGatesExistForNotifier(t *testing.T) {
+	config := Config{
+		Notifiers: []Notifier{
+			Notifier{GateSets: [][]string{[]string{"dont_exist"}}},
+		},
+	}
+
+	want := ErrNotExist
+	got := errors.Unwrap(config.validateGatesExist())
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestConfigValidateCommandsExistsForTask(t *testing.T) {
+	config := Config{
+		Tasks: []Task{
+			Task{Command: "dont_exist"},
+		},
+	}
+
+	want := ErrCommandNotExist
+	got := errors.Unwrap(config.validateCommandsExist())
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
 	}
 }
 

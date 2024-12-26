@@ -53,7 +53,7 @@ func init() {
 		case "loglevel":
 			logLevel = result.Optarg
 		case "directory":
-			fzDirectory = result.Optarg
+			dir = result.Optarg
 		case "pidfile":
 			err := os.WriteFile(result.Optarg, []byte(fmt.Sprintf("%d\n", os.Getpid())), 0644)
 			if err != nil {
