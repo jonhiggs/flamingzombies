@@ -373,7 +373,7 @@ func TestConfigValidateFrequencySecondsDefault(t *testing.T) {
 		Defaults: ConfigDefaults{},
 	}
 
-	want := ErrTooFrequent
+	want := ErrLessThan1
 	got := errors.Unwrap(config.validateFrequencySeconds())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
@@ -382,48 +382,85 @@ func TestConfigValidateFrequencySecondsDefault(t *testing.T) {
 
 func TestConfigValidateFrequencySecondsTask(t *testing.T) {
 	config = Config{
-		Defaults: ConfigDefaults{FrequencySeconds: 5},
+		Defaults: ConfigDefaults{
+			FrequencySeconds:      5,
+			RetryFrequencySeconds: 5,
+		},
 		Tasks: []Task{
-			Task{FrequencySeconds: 0},
+			Task{
+				FrequencySeconds:      0,
+				RetryFrequencySeconds: 5,
+			},
 		},
 	}
 
-	want := ErrTooFrequent
+	want := ErrLessThan1
 	got := errors.Unwrap(config.validateFrequencySeconds())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
 
-//func TestGetNotifierByName(t *testing.T) {
-//	want := "zero"
-//	got := config.GetNotifierByName("zero")
-//
-//	if got == nil {
-//		t.Errorf("unexpected nil notifier")
-//	}
-//
-//	if got.Name != want {
-//		t.Errorf("got %s, want %s", got.Name, want)
-//	}
-//
-//	want = "non-existent"
-//	got = NotifierByName("non-existent")
-//	if got != nil {
-//		t.Errorf("expected nil notifier")
-//	}
-//}
-//
+func TestConfigValidateRetryFrequencySecondsTask(t *testing.T) {
+	config = Config{
+		Defaults: ConfigDefaults{
+			FrequencySeconds:      5,
+			RetryFrequencySeconds: 5,
+		},
+		Tasks: []Task{
+			Task{
+				FrequencySeconds:      5,
+				RetryFrequencySeconds: 0,
+			},
+		},
+	}
 
-//func TestGetNotifierGates(t *testing.T) {
-//	got := config.Notifiers[0].Gates()
-//
-//	if len(got) != 1 {
-//		t.Errorf("length: got %d, want 1", len(got))
-//	}
-//
-//	if len(got[0]) != 1 {
-//		t.Errorf("length 0: got %d, want 1", len(got[0]))
-//	}
-//}
-//
+	want := ErrLessThan1
+	got := errors.Unwrap(config.validateFrequencySeconds())
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestConfigValidateTimeoutSecondsTask(t *testing.T) {
+	config = Config{
+		Defaults: ConfigDefaults{
+			FrequencySeconds:      5,
+			RetryFrequencySeconds: 5,
+			TimeoutSeconds:        10,
+		},
+	}
+
+	want := ErrTimeoutSlowerThanRetry
+	got := errors.Unwrap(config.validateTimeoutSeconds())
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestConfigValidatePriorityHigh(t *testing.T) {
+	config = Config{
+		Defaults: ConfigDefaults{Priority: 100},
+	}
+
+	want := ErrGreaterThan99
+	got := errors.Unwrap(config.validatePriority())
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestConfigValidatePriorityLow(t *testing.T) {
+	config = Config{
+		Defaults: ConfigDefaults{Priority: 0},
+		Tasks: []Task{
+			Task{},
+		},
+	}
+
+	want := ErrLessThan1
+	got := errors.Unwrap(config.validatePriority())
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}

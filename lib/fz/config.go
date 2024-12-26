@@ -313,12 +313,62 @@ func (c Config) validateName() error {
 
 func (c Config) validateFrequencySeconds() error {
 	if c.Defaults.FrequencySeconds < 1 {
-		return fmt.Errorf("default: frequency '%d': %w", c.Defaults.FrequencySeconds, ErrTooFrequent)
+		return fmt.Errorf("default: frequency '%d': %w", c.Defaults.FrequencySeconds, ErrLessThan1)
+	}
+
+	if c.Defaults.RetryFrequencySeconds < 1 {
+		return fmt.Errorf("default: retry_frequency '%d': %w", c.Defaults.RetryFrequencySeconds, ErrLessThan1)
 	}
 
 	for i, t := range config.Tasks {
 		if t.FrequencySeconds < 1 {
-			return fmt.Errorf("task [%d]: freqency '%d': %w", i, t.FrequencySeconds, ErrTooFrequent)
+			return fmt.Errorf("task [%d]: freqency '%d': %w", i, t.FrequencySeconds, ErrLessThan1)
+		}
+
+		if t.RetryFrequencySeconds < 1 {
+			return fmt.Errorf("task [%d]: retry_freqency '%d': %w", i, t.RetryFrequencySeconds, ErrLessThan1)
+		}
+	}
+
+	return nil
+}
+
+func (c Config) validateTimeoutSeconds() error {
+	if c.Defaults.TimeoutSeconds < 1 {
+		return fmt.Errorf("default: timeout_seconds '%d': %w", c.Defaults.TimeoutSeconds, ErrLessThan1)
+	}
+
+	if c.Defaults.TimeoutSeconds > c.Defaults.RetryFrequencySeconds {
+		return fmt.Errorf("default: timeout_seconds '%d': %w", c.Defaults.TimeoutSeconds, ErrTimeoutSlowerThanRetry)
+	}
+
+	for i, t := range config.Tasks {
+		if t.TimeoutSeconds < 1 {
+			return fmt.Errorf("task [%d]: timeout_seconds '%d': %w", i, t.TimeoutSeconds, ErrLessThan1)
+		}
+
+		if t.TimeoutSeconds > t.RetryFrequencySeconds {
+			return fmt.Errorf("task [%d]: timeout_seconds '%d': %w", i, t.RetryFrequencySeconds, ErrTimeoutSlowerThanRetry)
+		}
+	}
+
+	return nil
+}
+
+func (c Config) validatePriority() error {
+	if c.Defaults.Priority < 1 {
+		return fmt.Errorf("default: priority '%d': %w", c.Defaults.Priority, ErrLessThan1)
+	}
+	if c.Defaults.Priority > 99 {
+		return fmt.Errorf("default: priority '%d': %w", c.Defaults.Priority, ErrGreaterThan99)
+	}
+
+	for i, t := range config.Tasks {
+		if t.Priority < 1 {
+			return fmt.Errorf("task [%d]: priority '%d': %w", i, t.Priority, ErrLessThan1)
+		}
+		if t.Priority > 99 {
+			return fmt.Errorf("task [%d]: priority '%d': %w", i, t.Priority, ErrGreaterThan99)
 		}
 	}
 
