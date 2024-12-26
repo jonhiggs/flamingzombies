@@ -276,17 +276,41 @@ func (c Config) validateGatesExist() error {
 func (c Config) validateCommandsExist() error {
 	for i, t := range config.Tasks {
 		if _, err := os.Stat(t.Command); os.IsNotExist(err) {
-			return fmt.Errorf("command [%d]: %w", i, ErrCommandNotExist)
+			return fmt.Errorf("task [%d]: command '%s': %w", i, t.Command, ErrCommandNotExist)
+		}
+	}
+
+	for i, n := range config.Notifiers {
+		if _, err := os.Stat(n.Command); os.IsNotExist(err) {
+			return fmt.Errorf("notifier [%d]: command '%s': %w", i, n.Command, ErrCommandNotExist)
+		}
+	}
+
+	for i, g := range config.Gates {
+		if _, err := os.Stat(g.Command); os.IsNotExist(err) {
+			return fmt.Errorf("gate [%d]: command '%s': %w", i, g.Command, ErrCommandNotExist)
 		}
 	}
 
 	return nil
 }
 
-func (c Config) validateNames() error {
+func (c Config) validateName() error {
 	for i, t := range config.Tasks {
 		if strings.ContainsRune(t.Name, ' ') {
-			return fmt.Errorf("task [%d] name: %w", i, ErrNoSpaces)
+			return fmt.Errorf("task [%d]: name '%s': %w", i, t.Name, ErrHasSpaces)
+		}
+	}
+
+	for i, n := range config.Notifiers {
+		if strings.ContainsRune(n.Name, ' ') {
+			return fmt.Errorf("notifier [%d]: name '%s': %w", i, n.Name, ErrHasSpaces)
+		}
+	}
+
+	for i, g := range config.Gates {
+		if strings.ContainsRune(g.Name, ' ') {
+			return fmt.Errorf("gate [%d]: name '%s': %w", i, g.Name, ErrHasSpaces)
 		}
 	}
 

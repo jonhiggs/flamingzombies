@@ -20,7 +20,7 @@ func init() {
 }
 
 func TestConfig(t *testing.T) {
-	config := ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	config = ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
 	config.Directory = fmt.Sprintf("%s/libexec", workDir)
 
 	wantLogFile := "-"
@@ -53,7 +53,7 @@ func TestConfig(t *testing.T) {
 }
 
 func TestConfigDefaults(t *testing.T) {
-	config := ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	config = ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
 	config.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := ConfigDefaults{
 		Retries:            5,
@@ -99,7 +99,7 @@ func TestConfigDefaults(t *testing.T) {
 }
 
 func TestConfigTaskFlappy(t *testing.T) {
-	config := ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	config = ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
 	config.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := Task{
 		Name:             "flappy",
@@ -144,7 +144,7 @@ func TestConfigTaskFlappy(t *testing.T) {
 }
 
 func TestConfigNotifierLogger(t *testing.T) {
-	config := ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	config = ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
 	config.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := Notifier{
 		Name:           "logger",
@@ -183,7 +183,7 @@ func TestConfigNotifierLogger(t *testing.T) {
 }
 
 func TestConfigNotifierErrorEmailer(t *testing.T) {
-	config := ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	config = ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
 	config.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := Notifier{
 		Name:           "error_emailer",
@@ -222,7 +222,7 @@ func TestConfigNotifierErrorEmailer(t *testing.T) {
 }
 
 func TestConfigGateToFailed(t *testing.T) {
-	config := ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
+	config = ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
 	config.Directory = fmt.Sprintf("%s/libexec", workDir)
 	want := Gate{
 		Name:    "to_failed",
@@ -256,7 +256,7 @@ func TestConfigGateToFailed(t *testing.T) {
 // VALIDATOR CHECKS
 
 func TestConfigValidateNotifiersExistDefault(t *testing.T) {
-	config := Config{
+	config = Config{
 		Defaults: ConfigDefaults{
 			NotifierNames: []string{"dont_exist"},
 		},
@@ -270,7 +270,7 @@ func TestConfigValidateNotifiersExistDefault(t *testing.T) {
 }
 
 func TestConfigValidateNotifiersExistForTask(t *testing.T) {
-	config := Config{
+	config = Config{
 		Tasks: []Task{
 			Task{NotifierNames: []string{"dont_exist"}},
 		},
@@ -284,7 +284,7 @@ func TestConfigValidateNotifiersExistForTask(t *testing.T) {
 }
 
 func TestConfigValidateGatesExistForNotifier(t *testing.T) {
-	config := Config{
+	config = Config{
 		Notifiers: []Notifier{
 			Notifier{GateSets: [][]string{[]string{"dont_exist"}}},
 		},
@@ -298,7 +298,7 @@ func TestConfigValidateGatesExistForNotifier(t *testing.T) {
 }
 
 func TestConfigValidateCommandsExistsForTask(t *testing.T) {
-	config := Config{
+	config = Config{
 		Tasks: []Task{
 			Task{Command: "dont_exist"},
 		},
@@ -306,6 +306,64 @@ func TestConfigValidateCommandsExistsForTask(t *testing.T) {
 
 	want := ErrCommandNotExist
 	got := errors.Unwrap(config.validateCommandsExist())
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestConfigValidateCommandsExistsForNotifier(t *testing.T) {
+	config = Config{
+		Notifiers: []Notifier{
+			Notifier{Command: "dont_exist"},
+		},
+	}
+
+	want := ErrCommandNotExist
+	got := errors.Unwrap(config.validateCommandsExist())
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestConfigValidateCommandsExistsForGate(t *testing.T) {
+	config = Config{
+		Gates: []Gate{
+			Gate{Command: "dont_exist"},
+		},
+	}
+
+	want := ErrCommandNotExist
+	got := errors.Unwrap(config.validateCommandsExist())
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestConfigValidateNameForTask(t *testing.T) {
+	config = Config{
+		Directory: fmt.Sprintf("%s/libexec", workDir),
+		Tasks: []Task{
+			Task{Name: "with spaces"},
+		},
+	}
+
+	want := ErrHasSpaces
+	got := errors.Unwrap(config.validateName())
+	if got != want {
+		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestConfigValidateNameForNotifier(t *testing.T) {
+	config = Config{
+		Directory: fmt.Sprintf("%s/libexec", workDir),
+		Notifiers: []Notifier{
+			Notifier{Name: "with spaces"},
+		},
+	}
+
+	want := ErrHasSpaces
+	got := errors.Unwrap(config.validateName())
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
 	}
