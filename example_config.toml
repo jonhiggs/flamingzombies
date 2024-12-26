@@ -20,6 +20,7 @@ envs = [
 name = "flappy"
 command = "task/flappy"
 frequency = 1
+retry_frequency = 1
 error_body = """
 flappy has entered an error state
 """

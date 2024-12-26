@@ -241,6 +241,10 @@ func (t Task) Validate() error {
 		return fmt.Errorf("timeout_seconds '%d': %w", t.RetryFrequencySeconds, ErrTimeoutSlowerThanRetry)
 	}
 
+	if t.RetryFrequencySeconds > t.FrequencySeconds {
+		return fmt.Errorf("retry_requency '%d': %w", t.RetryFrequencySeconds, ErrRetriesSlowerThanFrequency)
+	}
+
 	if t.Priority < 1 {
 		return fmt.Errorf("priority '%d': %w", t.Priority, ErrLessThan1)
 	}

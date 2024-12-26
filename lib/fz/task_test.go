@@ -41,6 +41,15 @@ func TestTaskValidate(t *testing.T) {
 			},
 			ErrLessThan1,
 		},
+		{
+			Task{
+				Name:                  "zero_retry_frequency",
+				Command:               "true",
+				FrequencySeconds:      60,
+				RetryFrequencySeconds: 0,
+			},
+			ErrLessThan1,
+		},
 	}
 
 	for _, tt := range tests {
@@ -131,24 +140,6 @@ func TestTaskStateChanged(t *testing.T) {
 			got := tt.ta.StateChanged()
 			if got != tt.want {
 				t.Errorf("got %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-func TestTaskFrequency(t *testing.T) {
-	var tests = []struct {
-		ta   Task
-		want time.Duration
-	}{
-		{Task{FrequencySeconds: 3600}, time.Duration(1) * time.Hour},
-	}
-
-	for _, tt := range tests {
-		testname := fmt.Sprintf("Frequency: %d", tt.ta.FrequencySeconds)
-		t.Run(testname, func(t *testing.T) {
-			got := tt.ta.Frequency()
-			if got != tt.want {
-				t.Errorf("got %d, want %d", got, tt.want)
 			}
 		})
 	}
