@@ -62,9 +62,6 @@ func (t *Task) Run() bool {
 	cmd.Dir = config.Directory
 
 	cmd.Env = []string{
-		fmt.Sprintf("STATSD_HOST=%s", config.StatsdHost),
-		fmt.Sprintf("STATSD_PREFIX=%s", config.StatsdPrefix),
-		fmt.Sprintf("STATSD_TAGS=#host:%s,name:%s", Hostname, t.Name),
 		fmt.Sprintf("TIMEOUT=%d", t.TimeoutSeconds),
 	}
 

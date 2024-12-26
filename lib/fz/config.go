@@ -18,13 +18,9 @@ const DEFAULT_PRIORITY = 5
 
 var DAEMON_START_TIME = time.Now()
 
-var Hostname string
-
 var config Config
 
 func ReadConfig(f string) Config {
-	Hostname, _ = os.Hostname()
-
 	file, err := os.Open(f)
 	if err != nil {
 		Fatal(fmt.Sprintf("Error opening the configuration file '%s'\n", f), fmt.Sprint(err))
@@ -99,9 +95,6 @@ func ReadConfig(f string) Config {
 
 		// start the history in an unknown state
 		config.Tasks[i].History = 0b10
-
-		// hit the notifiers() method to check that all specified notifiers exist
-		config.Tasks[i].notifiers()
 	}
 
 	for i, _ := range config.Notifiers {
