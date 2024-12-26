@@ -29,16 +29,13 @@ var ErrGreaterThan99 = errors.New("cannot be greater than 99")
 // Structs
 
 type Config struct {
-	Defaults       ConfigDefaults `toml:"defaults"`
-	Directory      string         `toml:"directory"`
-	ErrorNotifiers []Notifier     `toml:"error_notifier"`
-	Gates          []Gate         `toml:"gate"`
-	LogFile        string         `toml:"log_file"`
-	LogLevel       string         `toml:"log_level"`
-	Notifiers      []Notifier     `toml:"notifier"`
-	StatsdHost     string         `toml:"statsd_host"`
-	StatsdPrefix   string         `toml:"statsd_prefix"`
-	Tasks          []Task         `toml:"task"`
+	Defaults  ConfigDefaults `toml:"defaults"`
+	Directory string         `toml:"directory"`
+	Gates     []Gate         `toml:"gate"`
+	LogFile   string         `toml:"log_file"`
+	LogLevel  string         `toml:"log_level"`
+	Notifiers []Notifier     `toml:"notifier"`
+	Tasks     []Task         `toml:"task"`
 }
 
 type ConfigDefaults struct {
@@ -75,6 +72,7 @@ type Task struct {
 	TimeoutSeconds        int        `toml:"timeout"`         // how long an execution may run
 	Retries               int        `toml:"retries"`         // number of retries before changing the state
 	NotifierNames         []string   `toml:"notifiers"`       // notifiers to trigger upon state change
+	ErrorNotifierNames    []string   `toml:"error_notifiers"` // notifiers to trigger upon state change
 	Priority              int        `toml:"priority"`        // the priority of the notifications
 	Envs                  [][]string `toml:"envs`             // environment variables supplied to task
 	ErrorBody             string     `toml:"error_body"`      // the body of the notification when entering an error state

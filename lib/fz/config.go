@@ -88,6 +88,10 @@ func ReadConfig(f string) Config {
 			config.Tasks[i].NotifierNames = config.Defaults.NotifierNames
 		}
 
+		if len(t.ErrorNotifierNames) == 0 {
+			config.Tasks[i].ErrorNotifierNames = config.Defaults.ErrorNotifierNames
+		}
+
 		// start the history in an unknown state
 		config.Tasks[i].History = 0b10
 	}
@@ -190,14 +194,20 @@ func (c Config) ErrorNotification() {
 func (c Config) validateNotifiersExist() error {
 	for _, n := range c.Defaults.NotifierNames {
 		if c.GetNotifierByName(n) == nil {
-			return fmt.Errorf("notifier %s: %w", n, ErrNotExist)
+			return fmt.Errorf("default: notifier %s: %w", n, ErrNotExist)
+		}
+	}
+
+	for _, n := range c.Defaults.ErrorNotifierNames {
+		if c.GetNotifierByName(n) == nil {
+			return fmt.Errorf("default: error_notifier %s: %w", n, ErrNotExist)
 		}
 	}
 
 	for _, t := range c.Tasks {
-		for _, n := range t.NotifierNames {
+		for i, n := range t.NotifierNames {
 			if c.GetNotifierByName(n) == nil {
-				return fmt.Errorf("notifier %s: %w", n, ErrNotExist)
+				return fmt.Errorf("task [%d]: notifier '%s': %w", i, n, ErrNotExist)
 			}
 		}
 	}
