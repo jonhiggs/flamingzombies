@@ -17,8 +17,7 @@ func ProcessNotifications() {
 		C:
 			select {
 			case n := <-ErrorNotifyCh:
-				Logger.Info("sending notification", "notifier", n.Notifier.Name)
-				//n.Task.SetLastNotification(n.Notifier.Name, time.Now())
+				Logger.Info("sending error notification", "notifier", n.Notifier.Name)
 
 				ctx, cancel := context.WithTimeout(context.Background(), n.Notifier.Timeout())
 				defer cancel()

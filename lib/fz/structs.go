@@ -98,14 +98,16 @@ type Gate struct {
 	Name    string   `toml:"name"`    // friendly name
 }
 
-// A notification is generated upon the successful completion of any task.
+// A notification is generated upon the successful completion of any task. It
+// extracts data from the task to provide to the notifier.
 type Notification struct {
 	Notifier *Notifier
 	Task     *Task
 }
 
 // An ErrorNotification are generated on error events. This are never expected
-// and generally not gated.
+// and generally not gated. They're similar to a regular Notification, except
+// their payload is an error type rather than a Task.
 type ErrorNotification struct {
 	Notifier *Notifier
 	Error    error
