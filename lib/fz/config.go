@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/pelletier/go-toml"
@@ -273,11 +274,19 @@ func (c Config) validateGatesExist() error {
 }
 
 func (c Config) validateCommandsExist() error {
-	for _, t := range config.Tasks {
+	for i, t := range config.Tasks {
 		if _, err := os.Stat(t.Command); os.IsNotExist(err) {
 			return fmt.Errorf("command %s: %w", t.Command, ErrCommandNotExist)
 		}
 	}
 
 	return nil
+}
+
+func (c Config) validateNames() error {
+	for i, t := range config.Tasks {
+		if strings.ContainsRune(t.Name, ' ') {
+			return fmt.Errorf("task [%d] name: %w", i, ErrNoSpaces)
+		}
+	}
 }
