@@ -52,13 +52,7 @@ type ConfigDefaults struct {
 	TimeoutSeconds        int        `toml:"timeout"` // better to put the timeout into the command
 }
 
-type NotifierKind int
-
-const (
-	TaskNotifierKind NotifierKind = iota
-	ErrorNotifierKind
-)
-
+// A Notifier script is capable of emitting an event to an external service.
 type Notifier struct {
 	GateSets       [][]string `toml:"gates"`
 	TimeoutSeconds int        `toml:"timeout"`
@@ -66,10 +60,12 @@ type Notifier struct {
 	Command        string     `toml:"command"`
 	Name           string     `toml:"name"`
 	Envs           [][]string `toml:"envs`
-
-	kind NotifierKind
 }
 
+// A Task is a command that is executed on a schedule. The struct contains the
+// static configuration of the task which is read from the configuration file,
+// and it's metadata and history which are generated over the course of the
+// daemons lifecycle.
 type Task struct {
 	Name                  string     `toml:"name"`            // friendly name
 	Command               string     `toml:"command"`         // command
@@ -100,6 +96,7 @@ type Task struct {
 	lastNotifications []time.Time // times that each notifier was last executed
 }
 
+// The gate is the control mechanism to governs whether a Notifier executes.
 type Gate struct {
 	Args    []string   `toml:"args"`    // command arguments
 	Command string     `toml:"command"` // command
@@ -107,11 +104,14 @@ type Gate struct {
 	Name    string     `toml:"name"`    // friendly name
 }
 
+// A notification is generated upon the successful completion of any task.
 type Notification struct {
 	Notifier *Notifier
 	Task     *Task
 }
 
+// An ErrorNotification are generated on error events. This are never expected
+// and generally not gated.
 type ErrorNotification struct {
 	Notifier *Notifier
 	Error    error

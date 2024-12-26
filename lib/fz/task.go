@@ -11,6 +11,9 @@ import (
 	"time"
 )
 
+// Create a checksum of a tasks configuration. The hash is used for a
+// consistent execution offset. Offsetting the execution prevents the time that
+// tasks are executed from clustering around each other.
 func (t Task) Hash() uint32 {
 	// To help with testing, return hash of zero when there isn't a command or
 	// any arguments.
@@ -252,7 +255,6 @@ func (t Task) notifiers() []*Notifier {
 		for i, _ := range config.Notifiers {
 			if nName == config.Notifiers[i].Name {
 				n := &config.Notifiers[i]
-				n.kind = TaskNotifierKind
 				ns = append(ns, n)
 			}
 		}
