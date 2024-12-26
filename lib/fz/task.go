@@ -48,7 +48,7 @@ func (t Task) Ready(ts time.Time) bool {
 	return (uint32(ts.Unix())+t.Hash())%uint32(t.FrequencySeconds) == 0
 }
 
-func (t *Task) Run() bool {
+func (t *Task) Run(config Config) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
 
@@ -66,7 +66,9 @@ func (t *Task) Run() bool {
 	//startTime := time.Now()
 	err := cmd.Start()
 	if err != nil {
-		panic(err)
+		Logger.Error(fmt.Sprintf("%s", err))
+		// TODO: emit an ErrorNotification
+		return
 	}
 
 	t.LastRun = time.Now()
@@ -82,7 +84,7 @@ func (t *Task) Run() bool {
 		Logger.Error("time out exceeded while executing command", "task", t.Name)
 		//t.IncMetric("timeout")
 
-		return false
+		return
 	}
 
 	if err != nil {
@@ -90,7 +92,7 @@ func (t *Task) Run() bool {
 			Logger.Error(fmt.Sprint(err), "task", t.Name)
 			//t.IncMetric("error")
 
-			return false
+			return
 		}
 	}
 
@@ -107,10 +109,10 @@ func (t *Task) Run() bool {
 	switch exitCode {
 	case 3: // unknown status
 		//t.IncMetric("unknown")
-		return false
+		return
 	case 124: // unknown status due to timeout
 		//t.IncMetric("unknown")
-		return false
+		return
 	case 0:
 		//t.IncMetric("ok")
 		t.RecordStatus(true)
@@ -126,7 +128,7 @@ func (t *Task) Run() bool {
 			NotifyCh <- Notification{n, t}
 		}
 	}
-	return true
+	return
 }
 
 func (t *Task) RecordStatus(b bool) {

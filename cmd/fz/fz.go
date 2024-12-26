@@ -104,7 +104,7 @@ func main() {
 		case ts := <-ticker.C:
 			for i, t := range config.Tasks {
 				if t.Ready(ts) {
-					go config.Tasks[i].Run()
+					go config.Tasks[i].Run(config)
 				}
 			}
 		}
