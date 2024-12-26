@@ -34,10 +34,6 @@ func (t Task) Hash() uint32 {
 
 // how often to run
 func (t Task) Frequency() time.Duration {
-	if t.FrequencySeconds == 0 {
-		return time.Duration(DEFAULT_FREQUENCY_SECONDS) * time.Second
-	}
-
 	return time.Duration(t.FrequencySeconds) * time.Second
 }
 
@@ -251,7 +247,7 @@ func (t Task) Validate() error {
 
 // return a list of envs that are placed into the environment when task is ran
 func (t Task) Environment() []string {
-	r := []string{
+	v := []string{
 		fmt.Sprintf("FREQUENCY=%d", t.FrequencySeconds),
 		fmt.Sprintf("HISTORY=%d", t.History),
 		fmt.Sprintf("HISTORY_MASK=%d", t.HistoryMask),
@@ -266,10 +262,10 @@ func (t Task) Environment() []string {
 	}
 
 	for _, e := range t.Envs {
-		r = append(r, e)
+		v = append(v, e)
 	}
 
-	return r
+	return v
 }
 
 func (t Task) retryMask() uint32 {

@@ -11,6 +11,45 @@ func init() {
 	StartLogger("info")
 }
 
+func TestTaskValidate(t *testing.T) {
+	var tests = []struct {
+		task Task
+		want error
+	}{
+		{
+			Task{
+				Name: "name with spaces",
+			},
+			ErrInvalidName,
+		},
+		{
+			Task{
+				Name:                  "fast_retry",
+				FrequencySeconds:      5,
+				RetryFrequencySeconds: 0,
+			},
+			ErrLessThan1,
+		},
+		{
+			Task{
+				Name:                  "too_frequent",
+				FrequencySeconds:      0,
+				RetryFrequencySeconds: 5,
+			},
+			ErrLessThan1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.task.Name, func(t *testing.T) {
+			got := errors.Unwrap(tt.task.Validate())
+			if got != tt.want {
+				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestTaskState(t *testing.T) {
 	tests := []struct {
 		name string
@@ -98,8 +137,6 @@ func TestTaskFrequency(t *testing.T) {
 		ta   Task
 		want time.Duration
 	}{
-		{Task{FrequencySeconds: 0}, time.Duration(300) * time.Second}, // default
-		{Task{FrequencySeconds: 5}, time.Duration(5) * time.Second},
 		{Task{FrequencySeconds: 3600}, time.Duration(1) * time.Hour},
 	}
 
@@ -219,45 +256,6 @@ func TestRecordStatus(t *testing.T) {
 	}
 }
 
-func TestTaskValidate(t *testing.T) {
-	var tests = []struct {
-		task Task
-		want error
-	}{
-		{
-			Task{
-				Name: "name with spaces",
-			},
-			ErrInvalidName,
-		},
-		{
-			Task{
-				Name:                  "fast_retry",
-				FrequencySeconds:      5,
-				RetryFrequencySeconds: 0,
-			},
-			ErrLessThan1,
-		},
-		{
-			Task{
-				Name:                  "too_frequent",
-				FrequencySeconds:      0,
-				RetryFrequencySeconds: 5,
-			},
-			ErrLessThan1,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.task.Name, func(t *testing.T) {
-			got := errors.Unwrap(tt.task.Validate())
-			if got != tt.want {
-				t.Errorf("got %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestTaskEnvironment(t *testing.T) {
 	tests := []struct {
 		name string
@@ -268,10 +266,11 @@ func TestTaskEnvironment(t *testing.T) {
 			"nothing",
 			Task{
 				Envs:             []string{},
-				TimeoutSeconds:   10,
 				FrequencySeconds: 300,
 				History:          0b10,
+				Priority:         3,
 				Retries:          4,
+				TimeoutSeconds:   10,
 			},
 			[]string{
 				"FREQUENCY=300",
@@ -280,50 +279,42 @@ func TestTaskEnvironment(t *testing.T) {
 				"LAST_FAIL=0",
 				"LAST_OK=0",
 				"LAST_STATE=unknown",
-				"PRIORITY=0",
+				"PRIORITY=3",
 				"STATE=unknown",
 				"STATE_CHANGED=false",
 				"TASK_COMMAND=",
 				"TIMEOUT=10",
 			},
 		},
-		//{
-		//	"with snmp vars",
-		//	Task{
-		//		Envs: []string{
-		//			"FREQUENCY=0",
-		//			"HISTORY=0",
-		//			"HISTORY_MASK=0",
-		//			"LAST_FAIL=-62135596800",
-		//			"LAST_OK=-62135596800",
-		//			"LAST_STATE=ok",
-		//			"PRIORITY=0",
-		//			"STATE=fail",
-		//			"STATE_CHANGED=false",
-		//			"TASK_COMMAND=",
-		//			"TIMEOUT=10",
-		//			"FREQUENCY=0",
-		//			"HISTORY=0",
-		//			"HISTORY_MASK=0",
-		//			"LAST_FAIL=-62135596800",
-		//			"LAST_OK=-62135596800",
-		//			"LAST_STATE=ok",
-		//			"PRIORITY=0",
-		//			"STATE=fail",
-		//			"STATE_CHANGED=false",
-		//			"TASK_COMMAND=",
-		//			"TIMEOUT=10",
-		//			"SNMP_COMMUNITY=public",
-		//			"SNMP_VERSION=2c",
-		//		},
-		//		TimeoutSeconds: 10,
-		//	},
-		//	[]string{
-		//		"TIMEOUT=10",
-		//		"SNMP_COMMUNITY=public",
-		//		"SNMP_VERSION=2c",
-		//	},
-		//},
+		{
+			"with snmp vars",
+			Task{
+				Envs: []string{
+					"SNMP_COMMUNITY=public",
+					"SNMP_VERSION=2c",
+				},
+				FrequencySeconds: 300,
+				History:          0b10,
+				Priority:         3,
+				Retries:          4,
+				TimeoutSeconds:   10,
+			},
+			[]string{
+				"FREQUENCY=300",
+				"HISTORY=2",
+				"HISTORY_MASK=0",
+				"LAST_FAIL=0",
+				"LAST_OK=0",
+				"LAST_STATE=unknown",
+				"PRIORITY=3",
+				"STATE=unknown",
+				"STATE_CHANGED=false",
+				"TASK_COMMAND=",
+				"TIMEOUT=10",
+				"SNMP_COMMUNITY=public",
+				"SNMP_VERSION=2c",
+			},
+		},
 	}
 
 	for _, tt := range tests {
