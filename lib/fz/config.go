@@ -141,6 +141,12 @@ func (c Config) Validate() error {
 		return err
 	}
 
+	for i, t := range config.Tasks {
+		if err := t.Validate(); err != nil {
+			return fmt.Errorf("task [%d]: %w", i, err)
+		}
+	}
+
 	return nil
 }
 
@@ -253,12 +259,6 @@ func (c Config) validateCommandsExist() error {
 func (c Config) validateName() error {
 	re := regexp.MustCompile(`^[a-z0-9_]+$`)
 
-	for i, t := range config.Tasks {
-		if !re.Match([]byte(t.Name)) {
-			return fmt.Errorf("task [%d]: name '%s': %w", i, t.Name, ErrInvalidName)
-		}
-	}
-
 	for i, n := range config.Notifiers {
 		if !re.Match([]byte(n.Name)) {
 			return fmt.Errorf("notifier [%d]: name '%s': %w", i, n.Name, ErrInvalidName)
@@ -283,16 +283,6 @@ func (c Config) validateFrequencySeconds() error {
 		return fmt.Errorf("default: retry_frequency '%d': %w", c.Defaults.RetryFrequencySeconds, ErrLessThan1)
 	}
 
-	for i, t := range config.Tasks {
-		if t.FrequencySeconds < 1 {
-			return fmt.Errorf("task [%d]: freqency '%d': %w", i, t.FrequencySeconds, ErrLessThan1)
-		}
-
-		if t.RetryFrequencySeconds < 1 {
-			return fmt.Errorf("task [%d]: retry_freqency '%d': %w", i, t.RetryFrequencySeconds, ErrLessThan1)
-		}
-	}
-
 	return nil
 }
 
@@ -305,16 +295,6 @@ func (c Config) validateTimeoutSeconds() error {
 		return fmt.Errorf("default: timeout_seconds '%d': %w", c.Defaults.TimeoutSeconds, ErrTimeoutSlowerThanRetry)
 	}
 
-	for i, t := range config.Tasks {
-		if t.TimeoutSeconds < 1 {
-			return fmt.Errorf("task [%d]: timeout_seconds '%d': %w", i, t.TimeoutSeconds, ErrLessThan1)
-		}
-
-		if t.TimeoutSeconds > t.RetryFrequencySeconds {
-			return fmt.Errorf("task [%d]: timeout_seconds '%d': %w", i, t.RetryFrequencySeconds, ErrTimeoutSlowerThanRetry)
-		}
-	}
-
 	return nil
 }
 
@@ -324,15 +304,6 @@ func (c Config) validatePriority() error {
 	}
 	if c.Defaults.Priority > 99 {
 		return fmt.Errorf("default: priority '%d': %w", c.Defaults.Priority, ErrGreaterThan99)
-	}
-
-	for i, t := range config.Tasks {
-		if t.Priority < 1 {
-			return fmt.Errorf("task [%d]: priority '%d': %w", i, t.Priority, ErrLessThan1)
-		}
-		if t.Priority > 99 {
-			return fmt.Errorf("task [%d]: priority '%d': %w", i, t.Priority, ErrGreaterThan99)
-		}
 	}
 
 	return nil

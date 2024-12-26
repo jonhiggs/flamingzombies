@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -61,7 +62,7 @@ func (t *Task) Run() bool {
 	defer cancel()
 	cmd := exec.CommandContext(ctx, t.Command, t.Args...)
 	cmd.Dir = config.Directory
-	cmd.Env = t.environment()
+	cmd.Env = t.Environment()
 
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
@@ -215,6 +216,62 @@ func (t Task) StateChanged() bool {
 	return t.State() != t.LastState()
 }
 
+// Check that the task is in a valid state.
+func (t Task) Validate() error {
+	re := regexp.MustCompile(`^[a-z0-9_]+$`)
+	if !re.Match([]byte(t.Name)) {
+		return fmt.Errorf("name '%s': %w", t.Name, ErrInvalidName)
+	}
+
+	if t.FrequencySeconds < 1 {
+		return fmt.Errorf("freqency '%d': %w", t.FrequencySeconds, ErrLessThan1)
+	}
+
+	if t.RetryFrequencySeconds < 1 {
+		return fmt.Errorf("retry_freqency '%d': %w", t.RetryFrequencySeconds, ErrLessThan1)
+	}
+
+	if t.TimeoutSeconds < 1 {
+		return fmt.Errorf("timeout_seconds '%d': %w", t.TimeoutSeconds, ErrLessThan1)
+	}
+
+	if t.TimeoutSeconds > t.RetryFrequencySeconds {
+		return fmt.Errorf("timeout_seconds '%d': %w", t.RetryFrequencySeconds, ErrTimeoutSlowerThanRetry)
+	}
+
+	if t.Priority < 1 {
+		return fmt.Errorf("priority '%d': %w", t.Priority, ErrLessThan1)
+	}
+	if t.Priority > 99 {
+		return fmt.Errorf("priority '%d': %w", t.Priority, ErrGreaterThan99)
+	}
+
+	return nil
+}
+
+// return a list of envs that are placed into the environment when task is ran
+func (t Task) Environment() []string {
+	r := []string{
+		fmt.Sprintf("FREQUENCY=%d", t.FrequencySeconds),
+		fmt.Sprintf("HISTORY=%d", t.History),
+		fmt.Sprintf("HISTORY_MASK=%d", t.HistoryMask),
+		fmt.Sprintf("LAST_FAIL=%d", envEpoch(t.LastFail)),
+		fmt.Sprintf("LAST_OK=%d", envEpoch(t.LastOk)),
+		fmt.Sprintf("LAST_STATE=%s", t.LastState()),
+		fmt.Sprintf("PRIORITY=%d", t.Priority),
+		fmt.Sprintf("STATE=%s", t.State()),
+		fmt.Sprintf("STATE_CHANGED=%v", t.StateChanged()),
+		fmt.Sprintf("TASK_COMMAND=%s", t.Command),
+		fmt.Sprintf("TIMEOUT=%d", t.TimeoutSeconds),
+	}
+
+	for _, e := range t.Envs {
+		r = append(r, e)
+	}
+
+	return r
+}
+
 func (t Task) retryMask() uint32 {
 	var m uint32
 	for i := 0; i < t.Retries; i++ {
@@ -243,13 +300,13 @@ func (t Task) notifiers() []*Notifier {
 	return ns
 }
 
-// return a list of envs that are placed into the environment when task is ran
-func (t Task) environment() []string {
-	r := []string{fmt.Sprintf("TIMEOUT=%d", t.TimeoutSeconds)}
+// Return a UNIX epoch that's > 0
+func envEpoch(t time.Time) int {
+	e := t.Unix()
 
-	for _, e := range t.Envs {
-		r = append(r, e)
+	if e < 0 {
+		return 0
 	}
 
-	return r
+	return int(e)
 }

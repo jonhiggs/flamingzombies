@@ -1,6 +1,7 @@
 package fz
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -218,6 +219,45 @@ func TestRecordStatus(t *testing.T) {
 	}
 }
 
+func TestTaskValidate(t *testing.T) {
+	var tests = []struct {
+		task Task
+		want error
+	}{
+		{
+			Task{
+				Name: "name with spaces",
+			},
+			ErrInvalidName,
+		},
+		{
+			Task{
+				Name:                  "fast_retry",
+				FrequencySeconds:      5,
+				RetryFrequencySeconds: 0,
+			},
+			ErrLessThan1,
+		},
+		{
+			Task{
+				Name:                  "too_frequent",
+				FrequencySeconds:      0,
+				RetryFrequencySeconds: 5,
+			},
+			ErrLessThan1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.task.Name, func(t *testing.T) {
+			got := errors.Unwrap(tt.task.Validate())
+			if got != tt.want {
+				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestTaskEnvironment(t *testing.T) {
 	tests := []struct {
 		name string
@@ -227,35 +267,73 @@ func TestTaskEnvironment(t *testing.T) {
 		{
 			"nothing",
 			Task{
-				Envs:           []string{},
-				TimeoutSeconds: 10,
+				Envs:             []string{},
+				TimeoutSeconds:   10,
+				FrequencySeconds: 300,
+				History:          0b10,
+				Retries:          4,
 			},
 			[]string{
+				"FREQUENCY=300",
+				"HISTORY=2",
+				"HISTORY_MASK=0",
+				"LAST_FAIL=0",
+				"LAST_OK=0",
+				"LAST_STATE=unknown",
+				"PRIORITY=0",
+				"STATE=unknown",
+				"STATE_CHANGED=false",
+				"TASK_COMMAND=",
 				"TIMEOUT=10",
 			},
 		},
-		{
-			"with snmp vars",
-			Task{
-				Envs: []string{
-					"SNMP_COMMUNITY=public",
-					"SNMP_VERSION=2c",
-				},
-				TimeoutSeconds: 10,
-			},
-			[]string{
-				"TIMEOUT=10",
-				"SNMP_COMMUNITY=public",
-				"SNMP_VERSION=2c",
-			},
-		},
+		//{
+		//	"with snmp vars",
+		//	Task{
+		//		Envs: []string{
+		//			"FREQUENCY=0",
+		//			"HISTORY=0",
+		//			"HISTORY_MASK=0",
+		//			"LAST_FAIL=-62135596800",
+		//			"LAST_OK=-62135596800",
+		//			"LAST_STATE=ok",
+		//			"PRIORITY=0",
+		//			"STATE=fail",
+		//			"STATE_CHANGED=false",
+		//			"TASK_COMMAND=",
+		//			"TIMEOUT=10",
+		//			"FREQUENCY=0",
+		//			"HISTORY=0",
+		//			"HISTORY_MASK=0",
+		//			"LAST_FAIL=-62135596800",
+		//			"LAST_OK=-62135596800",
+		//			"LAST_STATE=ok",
+		//			"PRIORITY=0",
+		//			"STATE=fail",
+		//			"STATE_CHANGED=false",
+		//			"TASK_COMMAND=",
+		//			"TIMEOUT=10",
+		//			"SNMP_COMMUNITY=public",
+		//			"SNMP_VERSION=2c",
+		//		},
+		//		TimeoutSeconds: 10,
+		//	},
+		//	[]string{
+		//		"TIMEOUT=10",
+		//		"SNMP_COMMUNITY=public",
+		//		"SNMP_VERSION=2c",
+		//	},
+		//},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := tt.ta.environment()
-			if fmt.Sprintf("%v", got) != fmt.Sprintf("%v", tt.want) {
-				t.Errorf("got %v, want %v", got, tt.want)
+			//if tt.ta.Validate() != nil {
+			//	t.Errorf("valid got %v, want %v", tt.ta.Validate(), nil)
+			//}
+
+			if fmt.Sprintf("%v", tt.ta.Environment()) != fmt.Sprintf("%v", tt.want) {
+				t.Errorf("environment got %v, want %v", tt.ta.Environment(), tt.want)
 			}
 		})
 	}

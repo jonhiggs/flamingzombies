@@ -343,21 +343,6 @@ func TestConfigValidateCommandsExistsForGate(t *testing.T) {
 	}
 }
 
-func TestConfigValidateNameForTask(t *testing.T) {
-	config = Config{
-		Directory: fmt.Sprintf("%s/libexec", workDir),
-		Tasks: []Task{
-			Task{Name: "with spaces"},
-		},
-	}
-
-	want := ErrInvalidName
-	got := errors.Unwrap(config.validateName())
-	if got != want {
-		t.Errorf("got %v, want %v", got, want)
-	}
-}
-
 func TestConfigValidateNameForNotifier(t *testing.T) {
 	config = Config{
 		Notifiers: []Notifier{
@@ -375,48 +360,6 @@ func TestConfigValidateNameForNotifier(t *testing.T) {
 func TestConfigValidateFrequencySecondsDefault(t *testing.T) {
 	config = Config{
 		Defaults: ConfigDefaults{},
-	}
-
-	want := ErrLessThan1
-	got := errors.Unwrap(config.validateFrequencySeconds())
-	if got != want {
-		t.Errorf("got %v, want %v", got, want)
-	}
-}
-
-func TestConfigValidateFrequencySecondsTask(t *testing.T) {
-	config = Config{
-		Defaults: ConfigDefaults{
-			FrequencySeconds:      5,
-			RetryFrequencySeconds: 5,
-		},
-		Tasks: []Task{
-			Task{
-				FrequencySeconds:      0,
-				RetryFrequencySeconds: 5,
-			},
-		},
-	}
-
-	want := ErrLessThan1
-	got := errors.Unwrap(config.validateFrequencySeconds())
-	if got != want {
-		t.Errorf("got %v, want %v", got, want)
-	}
-}
-
-func TestConfigValidateRetryFrequencySecondsTask(t *testing.T) {
-	config = Config{
-		Defaults: ConfigDefaults{
-			FrequencySeconds:      5,
-			RetryFrequencySeconds: 5,
-		},
-		Tasks: []Task{
-			Task{
-				FrequencySeconds:      5,
-				RetryFrequencySeconds: 0,
-			},
-		},
 	}
 
 	want := ErrLessThan1

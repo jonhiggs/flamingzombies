@@ -9,23 +9,12 @@ import (
 )
 
 func (g Gate) IsOpen(t *Task, n *Notifier) bool {
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_GATE_TIMEOUT_SECONDS*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, g.Command, g.Args...)
 
 	cmd.Dir = config.Directory
-	cmd.Env = []string{
-		fmt.Sprintf("FREQUENCY=%d", t.FrequencySeconds),
-		fmt.Sprintf("HISTORY=%d", t.History),
-		fmt.Sprintf("HISTORY_MASK=%d", t.HistoryMask),
-		fmt.Sprintf("LAST_FAIL=%d", t.LastFail.Unix()),
-		fmt.Sprintf("LAST_OK=%d", t.LastOk.Unix()),
-		fmt.Sprintf("LAST_STATE=%s", t.LastState()),
-		fmt.Sprintf("PRIORITY=%d", t.Priority),
-		fmt.Sprintf("STATE=%s", t.State()),
-		fmt.Sprintf("STATE_CHANGED=%v", t.StateChanged()),
-		fmt.Sprintf("TASK_COMMAND=%s", t.Command),
-	}
+	cmd.Env = t.Environment()
 
 	//startTime := time.Now()
 	err := cmd.Run()
@@ -48,36 +37,4 @@ func (g Gate) IsOpen(t *Task, n *Notifier) bool {
 	}
 	//g.IncMetric("open")
 	return true
-}
-
-//func (g Gate) IncMetric(x string) {
-//	StatsdClient.Inc(
-//		fmt.Sprintf("gate.%s", x), 1, 1.0,
-//		statsd.Tag{"host", Hostname},
-//		statsd.Tag{"name", g.Name},
-//	)
-//}
-//
-//func (g *Gate) DurationMetric(d time.Duration) {
-//	StatsdClient.TimingDuration(
-//		"gate.duration", d, 1.0,
-//		statsd.Tag{"host", Hostname},
-//		statsd.Tag{"name", g.Name},
-//	)
-//
-//	StatsdClient.Gauge(
-//		"gate.timeoutquota.percent", int64(float64(d)/float64(time.Duration(1)*time.Second)*100), 1.0,
-//		statsd.Tag{"host", Hostname},
-//		statsd.Tag{"name", g.Name},
-//	)
-//}
-
-func GateByName(name string) (*Gate, error) {
-	for i, g := range config.Gates {
-		if g.Name == name {
-			return &config.Gates[i], nil
-		}
-	}
-
-	return nil, fmt.Errorf("gate '%s' is not known", name)
 }
