@@ -138,6 +138,7 @@ func ProcessNotifications() {
 // check the state of all configured gates.
 func (n Notification) gateState() ([]*Gate, bool) {
 	openGates := []*Gate{}
+	closedGates := []*Gate{}
 X:
 	for gsi, gs := range cfg.GetNotifierGateSets(n.Notifier.Name) {
 		openGates = []*Gate{} // ignore the gates from prior gateset
@@ -145,6 +146,7 @@ X:
 		for _, g := range gs {
 			if g.IsOpen(n.Task, n.Notifier) == false {
 				Logger.Debug("gate is closed", "gate", g.Name)
+				closedGates = append(closedGates, g)
 				continue X
 			}
 
@@ -158,7 +160,7 @@ X:
 		return openGates, true
 	}
 
-	return openGates, false
+	return openGates, (len(closedGates) == 0)
 }
 
 func (n Notification) subject() string {
