@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"time"
 )
@@ -24,16 +25,14 @@ func (n Notifier) Execute(env []string) {
 	err := cmd.Run()
 
 	if err != nil {
+		if os.IsPermission(err) {
+			Error(fmt.Errorf("notifier %s: %w", n.Name, ErrInvalidPermissions))
+			return
+		}
+
 		if ctx.Err() == context.DeadlineExceeded {
-			Logger.Error(fmt.Sprintf("timeout exceeded while executing notifier"), "notifier", n.Name)
-			for _, errN := range cfg.Defaults.ErrorNotifierNames {
-				ErrorNotifyCh <- ErrorNotification{
-					Notifier: cfg.GetNotifierByName(errN),
-					Error:    err,
-				}
-			}
-		} else {
-			// TODO
+			// XXX: This risks loops if an ErrorNotifier times out.
+			Error(fmt.Errorf("notifier %s: %w", n.Name, ErrTimeout))
 		}
 	}
 

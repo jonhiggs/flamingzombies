@@ -20,21 +20,16 @@ func (g Gate) IsOpen(t *Task, n *Notifier) bool {
 	err := cmd.Run()
 	//g.DurationMetric(time.Now().Sub(startTime))
 	if ctx.Err() == context.DeadlineExceeded {
-		Logger.Error(fmt.Sprintf("time out exceeded while executing gate"), "gate", g.Name)
-		//g.IncMetric("timeout")
-
+		Error(fmt.Errorf("gate %s: %w", g.Name, ErrTimeout))
 		return false
 	}
 
 	if err != nil {
 		if os.IsPermission(err) {
-			Logger.Error(fmt.Sprint(err), "gate", g.Name)
-			//g.IncMetric("error")
+			Error(fmt.Errorf("task %s: %w", g.Name, ErrInvalidPermissions))
 		}
-
-		//g.IncMetric("closed")
 		return false
 	}
-	//g.IncMetric("open")
+
 	return true
 }

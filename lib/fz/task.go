@@ -63,8 +63,7 @@ func (t *Task) Run() {
 	startTime := time.Now()
 	err := cmd.Start()
 	if err != nil {
-		Logger.Error(fmt.Sprintf("%s", err))
-		// TODO: emit an ErrorNotification
+		Error(err)
 		return
 	}
 
@@ -78,23 +77,13 @@ func (t *Task) Run() {
 	duration := time.Now().Sub(startTime)
 
 	if ctx.Err() == context.DeadlineExceeded {
-		err = fmt.Errorf("task %s: %w", t.Name, ErrTimeout)
-		Logger.Error(fmt.Sprint(err))
-		for _, n := range t.errorNotifiers() {
-			ErrorNotifyCh <- ErrorNotification{n, err}
-		}
-
+		Error(fmt.Errorf("task %s: %w", t.Name, ErrTimeout))
 		return
 	}
 
 	if err != nil {
 		if os.IsPermission(err) {
-			err = fmt.Errorf("task %s: %w", t.Name, ErrInvalidPermissions)
-			Logger.Error(fmt.Sprint(err))
-			for _, n := range t.errorNotifiers() {
-				ErrorNotifyCh <- ErrorNotification{n, err}
-			}
-
+			Error(fmt.Errorf("task %s: %w", t.Name, ErrInvalidPermissions))
 			return
 		}
 	}

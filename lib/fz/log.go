@@ -27,6 +27,17 @@ func StartLogger(l string) {
 	}
 }
 
+// Log an error and trigger the error_notifiers
+func Error(err error) {
+	Logger.Error(fmt.Sprintf("%s", err))
+	for _, errN := range cfg.Defaults.ErrorNotifierNames {
+		ErrorNotifyCh <- ErrorNotification{
+			Notifier: cfg.GetNotifierByName(errN),
+			Error:    err,
+		}
+	}
+}
+
 func Fatal(ss ...string) {
 	for _, s := range ss {
 		fmt.Fprintln(os.Stderr, s)
