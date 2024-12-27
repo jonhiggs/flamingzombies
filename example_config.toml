@@ -54,7 +54,7 @@ name = "statsd"
 command = "notifier/statsd"
 envs = [
     "STATSD_HOST=127.0.0.1",
-    "STATSD_PORT=8126",
+    "STATSD_PORT=8125",
     "STATSD_PREFIX=fz",
 ]
 timeout = 1
