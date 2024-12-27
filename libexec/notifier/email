@@ -4,8 +4,6 @@ set -eu
 MAIL_ADDRESS=${1:-${EMAIL_ADDRESS}}
 EMAIL_SUBJECT=${EMAIL_SUBJECT:-${NAME}: state ${STATE}}
 
-date >> /tmp/out
-
 cat <<EOF | mail -s "${MAIL_SUBJECT}" "$@"
 ${RESULT_OUTPUT}
 ---

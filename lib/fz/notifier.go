@@ -26,9 +26,14 @@ func (n Notifier) Execute(env []string) {
 	if err != nil {
 		if ctx.Err() == context.DeadlineExceeded {
 			Logger.Error(fmt.Sprintf("timeout exceeded while executing notifier"), "notifier", n.Name)
+			for _, errN := range cfg.Defaults.ErrorNotifierNames {
+				ErrorNotifyCh <- ErrorNotification{
+					Notifier: cfg.GetNotifierByName(errN),
+					Error:    err,
+				}
+			}
 		} else {
-			// TODO: handle this error
-			panic(err)
+			// TODO
 		}
 	}
 
