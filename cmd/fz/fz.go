@@ -22,7 +22,7 @@ func init() {
 	logFile := fz.DEFAULT_LOG_FILE
 
 	options := []optparse.Option{
-		{"config", 'c', optparse.KindRequired},
+		{"config", 'f', optparse.KindRequired},
 		{"configtest", 'n', optparse.KindNone},
 		{"directory", 'C', optparse.KindRequired},
 		{"help", 'h', optparse.KindNone},
@@ -118,11 +118,11 @@ func usage() {
 	fmt.Println("  fz [OPTIONS]")
 	fmt.Println("")
 	fmt.Println("Options:")
-	fmt.Println("  -c, --config <file>            Configuration file")
-	fmt.Println("  -n, --configtest               Test validity of the configuration")
 	fmt.Println("  -C, --directory <path>         Change to directory")
+	fmt.Println("  -f, --config <file>            Configuration file")
 	fmt.Println("  -h, --help                     This help")
 	fmt.Println("  -l, --loglevel <level>         Override the log level")
+	fmt.Println("  -n, --configtest               Test validity of the configuration")
 	fmt.Println("  -p, --pidfile                  The pidfile to write")
 	fmt.Println("  -V, --version                  Version")
 	os.Exit(0)
