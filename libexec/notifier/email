@@ -1,12 +1,12 @@
 #!/bin/sh
-if [ $# -ne 1 ]; then
-  echo "you must provide at least one email recepient" >&2
-  exit 1
-fi
+set -eu
 
-SUBJECT="${NAME}: state ${STATE}"
+MAIL_ADDRESS=${1:-${EMAIL_ADDRESS}}
+EMAIL_SUBJECT=${EMAIL_SUBJECT:-${NAME}: state ${STATE}}
 
-cat <<EOF | mail -s "${SUBJECT}" "$@"
+date >> /tmp/out
+
+cat <<EOF | mail -s "${MAIL_SUBJECT}" "$@"
 ${RESULT_OUTPUT}
 ---
 $(timeout 0.2 cat)
