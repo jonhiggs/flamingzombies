@@ -79,7 +79,7 @@ func (t *Task) Run() {
 
 	if ctx.Err() == context.DeadlineExceeded {
 		err = fmt.Errorf("task %s: %w", t.Name, ErrTimeout)
-		Logger.Error(fmt.Sprintf("%s", err))
+		Logger.Error(fmt.Sprint(err))
 		for _, n := range t.errorNotifiers() {
 			ErrorNotifyCh <- ErrorNotification{n, err}
 		}
@@ -89,8 +89,11 @@ func (t *Task) Run() {
 
 	if err != nil {
 		if os.IsPermission(err) {
-			Logger.Error(fmt.Sprint(err), "task", t.Name)
-			//t.IncMetric("error")
+			err = fmt.Errorf("task %s: %w", t.Name, ErrInvalidPermissions)
+			Logger.Error(fmt.Sprint(err))
+			for _, n := range t.errorNotifiers() {
+				ErrorNotifyCh <- ErrorNotification{n, err}
+			}
 
 			return
 		}
@@ -107,27 +110,29 @@ func (t *Task) Run() {
 	Logger.Debug(fmt.Sprintf("command returned stderr: %s", errorMessage), "task", t.Name)
 
 	switch exitCode {
+	case 0:
+		//t.IncMetric("ok")
+		t.RecordStatus(true)
+	case 1: // warn or error
+		t.RecordStatus(false)
+	case 2: // warn or error
+		t.RecordStatus(false)
 	case 3: // unknown status
 		//t.IncMetric("unknown")
 		return
 	case 124: // unknown status due to timeout
 		//t.IncMetric("unknown")
 		return
-	case 0:
-		//t.IncMetric("ok")
-		t.RecordStatus(true)
 	default:
 		//t.IncMetric("fail")
 		t.RecordStatus(false)
 	}
 
-	// raising notifications
-	if t.State() != STATE_UNKNOWN {
-		for _, n := range t.notifiers() {
-			Logger.Debug("raising notification", "task", t.Name, "last_state", t.LastState(), "new_state", t.State())
-			NotifyCh <- Notification{n, t}
-		}
+	for _, n := range t.notifiers() {
+		Logger.Debug("raising notification", "task", t.Name, "last_state", t.LastState(), "new_state", t.State())
+		NotifyCh <- Notification{n, t}
 	}
+
 	return
 }
 

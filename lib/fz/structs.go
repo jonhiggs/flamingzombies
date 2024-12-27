@@ -21,13 +21,14 @@ const DEFAULT_GATE_TIMEOUT_SECONDS = 1
 // Errors
 
 var ErrCommandNotExist = errors.New("command does not exist")
-var ErrInvalidName = errors.New("characters must be alphanumeric or underscore")
-var ErrNotExist = errors.New("does not exist")
-var ErrLessThan1 = errors.New("cannot be less than 1")
-var ErrTimeoutSlowerThanRetry = errors.New("timeout must not be longer than the retry interval")
 var ErrGreaterThan99 = errors.New("cannot be greater than 99")
+var ErrInvalidName = errors.New("characters must be alphanumeric or underscore")
+var ErrInvalidPermissions = errors.New("invalid permissions")
+var ErrLessThan1 = errors.New("cannot be less than 1")
+var ErrNotExist = errors.New("does not exist")
 var ErrRetriesSlowerThanFrequency = errors.New("retry_frequency must be less than frequency")
 var ErrTimeout = errors.New("timeout exceeded")
+var ErrTimeoutSlowerThanRetry = errors.New("timeout must not be longer than the retry interval")
 
 ///////////////////////////////////////////////////////////////////////////////
 // Structs
