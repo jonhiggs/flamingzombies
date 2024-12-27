@@ -64,7 +64,10 @@ func ProcessNotifications() {
 			case n := <-NotifyCh:
 				openGates, ok := n.gateState()
 				if !ok {
-					Logger.Debug("notification canceled due to a closed gate", "notifier", n.Notifier.Name)
+					Logger.Debug("notification cancelled due to a closed gate",
+						"notifier", n.Notifier.Name,
+						"task", n.Task.Name,
+					)
 					break C
 				}
 
