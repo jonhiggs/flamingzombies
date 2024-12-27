@@ -8,17 +8,15 @@ import (
 	"time"
 )
 
-func (g Gate) IsOpen(t *Task, n *Notifier) bool {
+func (g Gate) Execute(env []string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_GATE_TIMEOUT_SECONDS*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, g.Command, g.Args...)
 
 	cmd.Dir = cfg.Directory
-	cmd.Env = t.Environment()
+	cmd.Env = env
 
-	//startTime := time.Now()
 	err := cmd.Run()
-	//g.DurationMetric(time.Now().Sub(startTime))
 	if ctx.Err() == context.DeadlineExceeded {
 		Error(fmt.Errorf("gate %s: %w", g.Name, ErrTimeout))
 		return false
