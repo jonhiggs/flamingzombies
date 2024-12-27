@@ -47,29 +47,29 @@ func TestConfig(t *testing.T) {
 		t.Errorf("got %d, want %d", len(got.Tasks), 1)
 	}
 
-	if len(got.Notifiers) != 2 {
-		t.Errorf("got %d, want %d", len(got.Notifiers), 2)
+	if len(got.Notifiers) != 3 {
+		t.Errorf("got %d, want %d", len(got.Notifiers), 3)
 	}
 
-	if len(got.Gates) != 5 {
-		t.Errorf("got %d, want %d", len(got.Gates), 5)
+	if len(got.Gates) != 6 {
+		t.Errorf("got %d, want %d", len(got.Gates), 6)
 	}
 
 	gotGateSetsLogger := got.GetNotifierGateSets("logger")
 	if len(gotGateSetsLogger) != 2 {
 		t.Errorf("got %d, want %d", len(gotGateSetsLogger), 2)
 	}
-	if len(gotGateSetsLogger[0]) != 2 {
-		t.Errorf("got %d, want %d", len(gotGateSetsLogger[0]), 2)
+	if len(gotGateSetsLogger[0]) != 3 {
+		t.Errorf("got %d, want %d", len(gotGateSetsLogger[0]), 3)
 	}
-	if len(gotGateSetsLogger[1]) != 2 {
-		t.Errorf("got %d, want %d", len(gotGateSetsLogger[1]), 2)
+	if len(gotGateSetsLogger[1]) != 3 {
+		t.Errorf("got %d, want %d", len(gotGateSetsLogger[1]), 3)
 	}
-	if gotGateSetsLogger[0][0].Name != "to_failed" {
-		t.Errorf("got %s, want %s", gotGateSetsLogger[0][0].Name, "to_failed")
+	if gotGateSetsLogger[0][0].Name != "is_not_unknown" {
+		t.Errorf("got %s, want %s", gotGateSetsLogger[0][0].Name, "is_not_unknown")
 	}
-	if gotGateSetsLogger[0][1].Name != "defer" {
-		t.Errorf("got %s, want %s", gotGateSetsLogger[0][0].Name, "defer")
+	if gotGateSetsLogger[0][1].Name != "to_failed" {
+		t.Errorf("got %s, want %s", gotGateSetsLogger[0][1].Name, "to_failed")
 	}
 
 	if err := cfg.Validate(); err != nil {
@@ -88,7 +88,7 @@ func TestConfigDefaults(t *testing.T) {
 	want := ConfigDefaults{
 		Retries:            5,
 		TimeoutSeconds:     1,
-		NotifierNames:      []string{"logger"},
+		NotifierNames:      []string{"logger", "statsd"},
 		ErrorNotifierNames: []string{"error_emailer"},
 		Priority:           3,
 		FrequencySeconds:   300,
@@ -191,8 +191,8 @@ func TestConfigNotifierLogger(t *testing.T) {
 		Command:        "notifier/null",
 		TimeoutSeconds: 5,
 		GateSets: [][]string{
-			[]string{"to_failed", "defer"},
-			[]string{"is_failed", "renotify"},
+			[]string{"is_not_unknown", "to_failed", "defer"},
+			[]string{"is_not_unknown", "is_failed", "renotify"},
 		},
 		Envs: []string{
 			"SNMP_COMMUNITY=default",

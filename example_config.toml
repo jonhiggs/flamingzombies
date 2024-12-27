@@ -6,6 +6,7 @@ retries = 5
 timeout = 1
 notifiers = [
     "logger",
+    "statsd",
 ]
 error_notifiers = [
     "error_emailer",
@@ -46,6 +47,17 @@ envs = [
     "EMAIL_SUBJECT='fz experienced a critical error'",
 ]
 timeout = 3
+gates = []
+
+[[notifier]]
+name = "statsd"
+command = "notifier/statsd"
+envs = [
+    "STATSD_HOST=127.0.0.1",
+    "STATSD_PORT=8126",
+    "STATSD_PREFIX=fz",
+]
+timeout = 1
 gates = []
 
 [[gate]]

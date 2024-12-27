@@ -149,7 +149,10 @@ X:
 			}
 
 			openGates = append(openGates, g)
-			Logger.Debug("gate is open", "gate", g.Name)
+			Logger.Debug("gate is open",
+				"name", g.Name,
+				"task", n.Task.Name,
+			)
 		}
 		Logger.Debug("gateset is open", "gateset", gsi)
 		return openGates, true
