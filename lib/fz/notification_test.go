@@ -1,6 +1,9 @@
 package fz
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 var testTask = Task{
 	Name:        "flappy",
@@ -11,7 +14,12 @@ var testTask = Task{
 var testNotifier = Notifier{Name: "testing"}
 
 func TestNotificationSubject(t *testing.T) {
-	n := Notification{&testNotifier, &testTask}
+	n := Notification{
+		Notifier:  &testNotifier,
+		Task:      &testTask,
+		Duration:  time.Second * 1,
+		Timestamp: time.Now(),
+	}
 
 	t.Run("when_ok", func(t *testing.T) {
 		testTask.History = 0b111

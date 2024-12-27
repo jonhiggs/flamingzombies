@@ -103,8 +103,10 @@ type Gate struct {
 // A notification is generated upon the successful completion of any task. It
 // extracts data from the task to provide to the notifier.
 type Notification struct {
-	Notifier *Notifier
-	Task     *Task
+	Duration  time.Duration
+	Notifier  *Notifier
+	Task      *Task
+	Timestamp time.Time
 }
 
 // An ErrorNotification are generated on error events. This are never expected

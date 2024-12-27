@@ -60,7 +60,7 @@ func (t *Task) Run() {
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
 
-	//startTime := time.Now()
+	startTime := time.Now()
 	err := cmd.Start()
 	if err != nil {
 		Logger.Error(fmt.Sprintf("%s", err))
@@ -75,7 +75,7 @@ func (t *Task) Run() {
 	t.LastResultOutput = strings.TrimSuffix(string(stdoutBytes), "\n")
 
 	err = cmd.Wait()
-	//t.DurationMetric(time.Now().Sub(startTime))
+	duration := time.Now().Sub(startTime)
 
 	if ctx.Err() == context.DeadlineExceeded {
 		err = fmt.Errorf("task %s: %w", t.Name, ErrTimeout)
@@ -133,7 +133,12 @@ func (t *Task) Run() {
 			"last_state", t.LastState(),
 			"new_state", t.State(),
 		)
-		NotifyCh <- Notification{n, t}
+		NotifyCh <- Notification{
+			Duration:  duration,
+			Notifier:  n,
+			Task:      t,
+			Timestamp: time.Now(),
+		}
 	}
 
 	return
