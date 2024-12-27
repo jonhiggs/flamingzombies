@@ -119,17 +119,20 @@ func (t *Task) Run() {
 		t.RecordStatus(false)
 	case 3: // unknown status
 		//t.IncMetric("unknown")
-		return
 	case 124: // unknown status due to timeout
 		//t.IncMetric("unknown")
-		return
 	default:
 		//t.IncMetric("fail")
 		t.RecordStatus(false)
 	}
 
 	for _, n := range t.notifiers() {
-		Logger.Debug("raising notification", "task", t.Name, "last_state", t.LastState(), "new_state", t.State())
+		Logger.Debug("raising notification",
+			"task", t.Name,
+			"notifier", n.Name,
+			"last_state", t.LastState(),
+			"new_state", t.State(),
+		)
 		NotifyCh <- Notification{n, t}
 	}
 
