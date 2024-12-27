@@ -18,7 +18,8 @@ var dir = "/usr/libexec/flamingzombies"
 var cfg *fz.Config
 
 func init() {
-	logLevel := DEFAULT_LOG_LEVEL
+	logLevel := fz.DEFAULT_LOG_LEVEL
+	logFile := fz.DEFAULT_LOG_FILE
 
 	options := []optparse.Option{
 		{"config", 'c', optparse.KindRequired},
@@ -77,6 +78,7 @@ func init() {
 	cfg = fz.ReadConfig(
 		configFile,
 		dir,
+		logFile,
 		logLevel,
 	)
 
