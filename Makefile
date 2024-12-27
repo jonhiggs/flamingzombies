@@ -5,9 +5,12 @@ build clean fz.tar.bz2:
 
 test: gotest shellcheck
 
-gotest: dirs = $(shell find . -name \*_test.go | xargs -I{} dirname {})
+gotest govet: dirs = $(shell find . -name \*_test.go | xargs -I{} dirname {})
 gotest:
 	go test $(dirs)
+
+govet:
+	go vet $(dirs)
 
 shellcheck:
 	shellcheck -e SC1091 -x -s sh \

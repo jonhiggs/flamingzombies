@@ -81,8 +81,11 @@ func (t *Task) Run() {
 	//t.DurationMetric(time.Now().Sub(startTime))
 
 	if ctx.Err() == context.DeadlineExceeded {
-		Logger.Error("time out exceeded while executing command", "task", t.Name)
-		//t.IncMetric("timeout")
+		err = fmt.Errorf("task %s: %w", t.Name, ErrTimeout)
+		Logger.Error(fmt.Sprintf("%s", err))
+		for _, n := range t.errorNotifiers() {
+			ErrorNotifyCh <- ErrorNotification{n, err}
+		}
 
 		return
 	}
@@ -297,6 +300,20 @@ func (t Task) timeout() time.Duration {
 func (t Task) notifiers() []*Notifier {
 	var ns []*Notifier
 	for _, nName := range t.NotifierNames {
+		for i, _ := range cfg.Notifiers {
+			if nName == cfg.Notifiers[i].Name {
+				n := &cfg.Notifiers[i]
+				ns = append(ns, n)
+			}
+		}
+	}
+
+	return ns
+}
+
+func (t Task) errorNotifiers() []*Notifier {
+	var ns []*Notifier
+	for _, nName := range t.ErrorNotifierNames {
 		for i, _ := range cfg.Notifiers {
 			if nName == cfg.Notifiers[i].Name {
 				n := &cfg.Notifiers[i]
