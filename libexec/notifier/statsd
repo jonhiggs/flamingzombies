@@ -1,4 +1,7 @@
 #!/bin/sh
 
-echo "${STATSD_PREFIX}.task.duration:${DURATION_MS}|t#task_name:${NAME}" \
+echo "${STATSD_PREFIX}.task.duration:${DURATION_MS}|t#name:${NAME}" \
+  | nc -w 1 -u ${STATSD_HOST} ${STATSD_PORT}
+
+echo "${STATSD_PREFIX}.task.executions:1|c#name:${NAME},state:${STATE}" \
   | nc -w 1 -u ${STATSD_HOST} ${STATSD_PORT}
