@@ -15,7 +15,11 @@ var DAEMON_START_TIME = time.Now()
 var cfg Config
 
 // Make configuration available in fz.Configuration
-func ReadConfig(f string) *Config {
+func ReadConfig(f, dir, logFile, logLevel string) *Config {
+	cfg.Directory = dir
+	cfg.LogFile = logFile
+	cfg.LogLevel = logLevel
+
 	file, err := os.Open(f)
 	if err != nil {
 		Fatal(fmt.Sprintf("Error opening the configuration file '%s'\n", f), fmt.Sprint(err))

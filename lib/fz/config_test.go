@@ -20,8 +20,12 @@ func init() {
 }
 
 func TestConfig(t *testing.T) {
-	ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
-	cfg.Directory = fmt.Sprintf("%s/libexec", workDir)
+	ReadConfig(
+		fmt.Sprintf("%s/example_config.toml", workDir),
+		fmt.Sprintf("%s/libexec", workDir),
+		DEFAULT_LOG_FILE,
+		DEFAULT_LOG_LEVEL,
+	)
 
 	wantLogFile := "-"
 	wantLogLevel := "info"
@@ -74,8 +78,13 @@ func TestConfig(t *testing.T) {
 }
 
 func TestConfigDefaults(t *testing.T) {
-	ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
-	cfg.Directory = fmt.Sprintf("%s/libexec", workDir)
+	ReadConfig(
+		fmt.Sprintf("%s/example_config.toml", workDir),
+		fmt.Sprintf("%s/libexec", workDir),
+		DEFAULT_LOG_FILE,
+		DEFAULT_LOG_LEVEL,
+	)
+
 	want := ConfigDefaults{
 		Retries:            5,
 		TimeoutSeconds:     1,
@@ -120,8 +129,13 @@ func TestConfigDefaults(t *testing.T) {
 }
 
 func TestConfigTaskFlappy(t *testing.T) {
-	ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
-	cfg.Directory = fmt.Sprintf("%s/libexec", workDir)
+	ReadConfig(
+		fmt.Sprintf("%s/example_config.toml", workDir),
+		fmt.Sprintf("%s/libexec", workDir),
+		DEFAULT_LOG_FILE,
+		DEFAULT_LOG_LEVEL,
+	)
+
 	want := Task{
 		Name:             "flappy",
 		Command:          "task/flappy",
@@ -165,8 +179,13 @@ func TestConfigTaskFlappy(t *testing.T) {
 }
 
 func TestConfigNotifierLogger(t *testing.T) {
-	ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
-	cfg.Directory = fmt.Sprintf("%s/libexec", workDir)
+	ReadConfig(
+		fmt.Sprintf("%s/example_config.toml", workDir),
+		fmt.Sprintf("%s/libexec", workDir),
+		DEFAULT_LOG_FILE,
+		DEFAULT_LOG_LEVEL,
+	)
+
 	want := Notifier{
 		Name:           "logger",
 		Command:        "notifier/null",
@@ -204,8 +223,13 @@ func TestConfigNotifierLogger(t *testing.T) {
 }
 
 func TestConfigNotifierErrorEmailer(t *testing.T) {
-	ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
-	cfg.Directory = fmt.Sprintf("%s/libexec", workDir)
+	ReadConfig(
+		fmt.Sprintf("%s/example_config.toml", workDir),
+		fmt.Sprintf("%s/libexec", workDir),
+		DEFAULT_LOG_FILE,
+		DEFAULT_LOG_LEVEL,
+	)
+
 	want := Notifier{
 		Name:           "error_emailer",
 		Command:        "notifier/email",
@@ -243,8 +267,13 @@ func TestConfigNotifierErrorEmailer(t *testing.T) {
 }
 
 func TestConfigGateToFailed(t *testing.T) {
-	ReadConfig(fmt.Sprintf("%s/example_config.toml", workDir))
-	cfg.Directory = fmt.Sprintf("%s/libexec", workDir)
+	ReadConfig(
+		fmt.Sprintf("%s/example_config.toml", workDir),
+		fmt.Sprintf("%s/libexec", workDir),
+		DEFAULT_LOG_FILE,
+		DEFAULT_LOG_LEVEL,
+	)
+
 	want := Gate{
 		Name:    "to_failed",
 		Command: "gate/to_state",

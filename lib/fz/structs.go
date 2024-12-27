@@ -10,6 +10,8 @@ import (
 // Constants
 
 const DEFAULT_RETRIES = 5
+const DEFAULT_LOG_LEVEL = "info"
+const DEFAULT_LOG_FILE = "-"
 const DEFAULT_TIMEOUT_SECONDS = 5
 const DEFAULT_FREQUENCY_SECONDS = 300
 const DEFAULT_PRIORITY = 5

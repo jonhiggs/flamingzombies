@@ -15,10 +15,11 @@ const VERSION = "v0.0.21"
 var configTest = false
 var configFile = "/etc/flamingzombies.toml"
 var dir = "/usr/libexec/flamingzombies"
-var logLevel = "info"
 var cfg *fz.Config
 
 func init() {
+	logLevel := DEFAULT_LOG_LEVEL
+
 	options := []optparse.Option{
 		{"config", 'c', optparse.KindRequired},
 		{"configtest", 'n', optparse.KindNone},
@@ -65,21 +66,20 @@ func init() {
 		configFile = os.Getenv("FZ_CONFIG_FILE")
 	}
 
-	cfg = fz.ReadConfig(configFile)
-
-	// working directory
 	if os.Getenv("FZ_DIRECTORY") == "" {
-		cfg.Directory = dir
-	} else {
-		cfg.Directory = os.Getenv("FZ_DIRECTORY")
+		dir = os.Getenv("FZ_DIRECTORY")
 	}
 
-	// logging
 	if os.Getenv("FZ_LOG_LEVEL") == "" {
-		cfg.LogLevel = logLevel
-	} else {
-		cfg.LogLevel = os.Getenv("FZ_LOG_LEVEL")
+		logLevel = os.Getenv("FZ_LOG_LEVEL")
 	}
+
+	cfg = fz.ReadConfig(
+		configFile,
+		dir,
+		logLevel,
+	)
+
 	fz.StartLogger(cfg.LogLevel)
 
 	// validation
