@@ -2,7 +2,6 @@ package fz
 
 import (
 	"errors"
-	"sync"
 	"time"
 )
 
@@ -50,7 +49,7 @@ type ConfigDefaults struct {
 	Priority              int      `toml:"priority"`
 	Retries               int      `toml:"retries"`
 	RetryFrequencySeconds int      `toml:"retry_frequency"`
-	Envs                  []string `toml:"envs`
+	Envs                  []string `toml:"envs"`
 	TimeoutSeconds        int      `toml:"timeout"` // better to put the timeout into the command
 }
 
@@ -61,7 +60,7 @@ type Notifier struct {
 	Args           []string   `toml:"args"`
 	Command        string     `toml:"command"`
 	Name           string     `toml:"name"`
-	Envs           []string   `toml:"envs`
+	Envs           []string   `toml:"envs"`
 }
 
 // A Task is a command that is executed on a schedule. The struct contains the
@@ -79,7 +78,7 @@ type Task struct {
 	NotifierNames         []string `toml:"notifiers"`       // notifiers to trigger upon state change
 	ErrorNotifierNames    []string `toml:"error_notifiers"` // notifiers to trigger upon state change
 	Priority              int      `toml:"priority"`        // the priority of the notifications
-	Envs                  []string `toml:"envs`             // environment variables supplied to task
+	Envs                  []string `toml:"envs"`            // environment variables supplied to task
 	ErrorBody             string   `toml:"error_body"`      // the body of the notification when entering an error state
 	RecoverBody           string   `toml:"recover_body"`    // the body of the notification when recovering from an error state
 
@@ -90,15 +89,13 @@ type Task struct {
 	LastOk           time.Time // the time of the last successful execution
 	LastResultOutput string    // the result output of the last execution
 	LastRun          time.Time // the time of the last execution
-
-	mutex sync.Mutex // lock to ensure one task runs at a time
 }
 
 // The gate is the control mechanism to governs whether a Notifier executes.
 type Gate struct {
 	Args    []string `toml:"args"`    // command arguments
 	Command string   `toml:"command"` // command
-	Envs    []string `toml:"envs`     // environment variables
+	Envs    []string `toml:"envs"`    // environment variables
 	Name    string   `toml:"name"`    // friendly name
 }
 

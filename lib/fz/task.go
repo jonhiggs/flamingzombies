@@ -49,9 +49,6 @@ func (t Task) Ready(ts time.Time) bool {
 }
 
 func (t *Task) Run() {
-	t.mutex.Lock()
-	defer t.mutex.Unlock()
-
 	Logger.Info("executing task", "task", t.Name)
 
 	ctx, cancel := context.WithTimeout(context.Background(), t.timeout())
