@@ -61,9 +61,9 @@ func ProcessNotifications() {
 				}
 
 			case n := <-NotifyCh:
-				_, ok := n.gateState()
+				_, ok := n.gateEvaluate()
 				if !ok {
-					Logger.Debug("notification cancelled due to a closed gate",
+					Logger.Debug("notification cancelled. all gates are closed.",
 						"notifier", n.Notifier.Name,
 						"task", n.Task.Name,
 					)
@@ -122,8 +122,8 @@ func ProcessNotifications() {
 	}()
 }
 
-// check the state of all configured gates.
-func (n Notification) gateState() ([]*Gate, bool) {
+// evaluate the state of the gatesets, and return true if the gates are open.
+func (n Notification) gateEvaluate() ([]*Gate, bool) {
 	openGates := []*Gate{}
 	closedGates := []*Gate{}
 X:
