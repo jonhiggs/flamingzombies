@@ -67,11 +67,11 @@ func init() {
 		configFile = os.Getenv("FZ_CONFIG_FILE")
 	}
 
-	if os.Getenv("FZ_DIRECTORY") == "" {
+	if os.Getenv("FZ_DIRECTORY") != "" {
 		dir = os.Getenv("FZ_DIRECTORY")
 	}
 
-	if os.Getenv("FZ_LOG_LEVEL") == "" {
+	if os.Getenv("FZ_LOG_LEVEL") != "" {
 		logLevel = os.Getenv("FZ_LOG_LEVEL")
 	}
 
