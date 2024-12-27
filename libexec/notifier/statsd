@@ -1,3 +1,4 @@
 #!/bin/sh
 
-env > /tmp/out
+echo "${STATSD_PREFIX}.task.duration:${DURATION_MS}|t#task_name:${NAME}" \
+  | nc -w 1 -u ${STATSD_HOST} ${STATSD_PORT}

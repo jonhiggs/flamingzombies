@@ -171,16 +171,22 @@ func (n Notification) body() string {
 
 // The environment variables provided to the notifier
 func (n Notification) environment() []string {
-	return []string{
+	v := []string{
 		fmt.Sprintf("DURATION_MS=%d", n.Duration.Milliseconds()),
 		fmt.Sprintf("EPOCH=%d", n.Timestamp.Unix()),
+		fmt.Sprintf("PRIORITY=%d", n.Task.Priority),
 		fmt.Sprintf("LAST_STATE=%s", n.Task.LastState()),
 		fmt.Sprintf("NAME=%s", n.Task.Name),
-		fmt.Sprintf("PRIORITY=%d", n.Task.Priority),
-		fmt.Sprintf("RESULT_OUTPUT=%s", n.Task.LastResultOutput),
+		fmt.Sprintf("OUTPUT=%s", n.Task.LastResultOutput),
 		fmt.Sprintf("STATE=%s", n.Task.State()),
 		fmt.Sprintf("TIMEOUT_MS=%d", n.Task.TimeoutSeconds*1000),
 	}
+
+	for _, e := range n.Notifier.Envs {
+		v = append(v, e)
+	}
+
+	return v
 }
 
 // TODO: Provide the data to the notifier so it can publish the metrics to statsd or elsewhere.
