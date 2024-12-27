@@ -16,9 +16,6 @@ var cfg Config
 
 // Make configuration available in fz.Configuration
 func ReadConfig(f, dir, logFile, logLevel string) *Config {
-	cfg.Directory = dir
-	cfg.LogFile = logFile
-	cfg.LogLevel = logLevel
 
 	file, err := os.Open(f)
 	if err != nil {
@@ -35,6 +32,11 @@ func ReadConfig(f, dir, logFile, logLevel string) *Config {
 	if err != nil {
 		Fatal(fmt.Sprintf("Error parsing the configuration file '%s'\n", f), fmt.Sprint(err))
 	}
+
+	// Replace the values set by TOML.
+	cfg.Directory = dir
+	cfg.LogFile = logFile
+	cfg.LogLevel = logLevel
 
 	if cfg.Defaults.Retries == 0 {
 		cfg.Defaults.Retries = DEFAULT_RETRIES
