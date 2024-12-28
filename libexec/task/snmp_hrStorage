@@ -1,4 +1,14 @@
 #!/bin/sh
+#
+# Check for free space in a volume, swap or memory.
+#
+# Usage: snmp_hrStorage <VOL> <THRESHOLD_BYTES>
+#
+# You can get a list of available volumes with the command:
+#
+#   snmp walk -c <SNMP_COMMUNITY> -v <SNMP_VERSION> <SNMP_HOST> hrStorageDescr
+#
+
 set -e
 [ -n "${SNMP_HOST}" ] \
   || ( echo "SNMP_HOST is undefined" >&2 && exit 1 )
@@ -16,7 +26,7 @@ SNMP_COMMUNITY=${SNMP_COMMUNITY:-public}
 
 storageInt() {
   snmp walk -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" hrStorageDescr \
-    | awk -v vol="$1" '($NF==vol) { sub("hrStorageDescr\.","",$1); print $1 }'
+    | awk -F= -v vol="$1" '($2~vol) { sub("hrStorageDescr\.","",$1); print $1 }'
 }
 
 storageAllocationUnits() {
