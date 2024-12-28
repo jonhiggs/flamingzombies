@@ -38,9 +38,9 @@ ifSpeed() {
     -c "${SNMP_COMMUNITY}" \
     "${SNMP_HOST}"         \
     "ifSpeed.$1"           \
-    | awk '{ print $NF }'
+    | awk '{ print int($NF) }'
 }
 
 speed=$(ifSpeed "$1")
 echo "${speed}"
-[ "${speed}" -ne "$2" ]
+[ "${speed}" -eq "$2" ]
