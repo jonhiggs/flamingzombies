@@ -265,13 +265,8 @@ func (t Task) Validate() error {
 func (t Task) Environment() []string {
 	var v []string
 
-	for _, e := range cfg.Defaults.Envs {
-		t.Envs = append(v, e)
-	}
-
-	for _, e := range t.Envs {
-		v = append(v, e)
-	}
+	v = append(v, cfg.Defaults.Envs...)
+	v = append(v, t.Envs...)
 
 	v = append(v, fmt.Sprintf("TASK_COMMAND=%s", t.Command))
 	v = append(v, fmt.Sprintf("TASK_FREQUENCY=%d", t.FrequencySeconds))

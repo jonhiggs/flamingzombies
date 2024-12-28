@@ -150,7 +150,7 @@ func TestConfigTaskFlappy(t *testing.T) {
 	}
 
 	wantEnvironment := []string{
-		//"SNMP_COMMUNITY=default", // TODO: work out why this isn't there.
+		"SNMP_COMMUNITY=default",
 		"SNMP_VERSION=2c",
 		"TASK_COMMAND=task/flappy",
 		"TASK_FREQUENCY=20",
