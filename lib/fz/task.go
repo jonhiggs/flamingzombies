@@ -72,6 +72,11 @@ func (t *Task) Run() {
 	errorMessage, _ := io.ReadAll(stderr)
 	stdoutBytes, _ := io.ReadAll(stdout)
 	t.LastResultOutput = strings.TrimSuffix(string(stdoutBytes), "\n")
+	Logger.Debug("output",
+		"task", t.Name,
+		"stdout", t.LastResultOutput,
+		"stderr", strings.TrimSuffix(string(errorMessage), "\n"),
+	)
 
 	err = cmd.Wait()
 	duration := time.Now().Sub(startTime)
