@@ -33,10 +33,18 @@ func ReadConfig(f, dir, logFile, logLevel string) *Config {
 		Fatal(fmt.Sprintf("Error parsing the configuration file '%s'\n", f), fmt.Sprint(err))
 	}
 
-	// Replace the values set by TOML.
-	cfg.Directory = dir
-	cfg.LogFile = logFile
-	cfg.LogLevel = logLevel
+	// Replace the values set by TOML with those supplied to func.
+	if dir != "" {
+		cfg.Directory = dir
+	}
+
+	if logFile != "" {
+		cfg.LogFile = logFile
+	}
+
+	if logLevel != "" {
+		cfg.LogLevel = logLevel
+	}
 
 	if cfg.Defaults.Retries == 0 {
 		cfg.Defaults.Retries = DEFAULT_RETRIES

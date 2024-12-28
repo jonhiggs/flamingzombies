@@ -10,16 +10,12 @@ import (
 	"nullprogram.com/x/optparse"
 )
 
-const VERSION = "v0.0.21"
-
-var configTest = false
-var configFile = "/etc/flamingzombies.toml"
-var dir = "/usr/libexec/flamingzombies"
 var cfg *fz.Config
 
 func init() {
-	logLevel := fz.DEFAULT_LOG_LEVEL
-	logFile := fz.DEFAULT_LOG_FILE
+	var configFile = "/etc/flamingzombies.toml"
+	var configTest = false
+	var dir, logLevel, logFile string
 
 	options := []optparse.Option{
 		{"config", 'f', optparse.KindRequired},
@@ -58,7 +54,7 @@ func init() {
 			usage()
 			return
 		case "version":
-			fmt.Printf("fz %s\n", VERSION)
+			fmt.Printf("fz %s\n", fz.VERSION)
 			os.Exit(0)
 		}
 	}

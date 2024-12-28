@@ -8,6 +8,8 @@ import (
 ///////////////////////////////////////////////////////////////////////////////
 // Constants
 
+const VERSION = "v0.1.0"
+
 const DEFAULT_RETRIES = 5
 const DEFAULT_LOG_LEVEL = "info"
 const DEFAULT_LOG_FILE = "-"
