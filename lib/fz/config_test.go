@@ -100,6 +100,7 @@ func TestConfigDefaults(t *testing.T) {
 		Envs: []string{
 			"SNMP_COMMUNITY=default",
 			"SNMP_VERSION=2c",
+			"EMAIL_FROM=fz@example",
 		},
 	}
 	got := cfg.Defaults
@@ -150,8 +151,6 @@ func TestConfigTaskFlappy(t *testing.T) {
 	}
 
 	wantEnvironment := []string{
-		"SNMP_COMMUNITY=default",
-		"SNMP_VERSION=2c",
 		"TASK_COMMAND=task/flappy",
 		"TASK_FREQUENCY=20",
 		"TASK_HISTORY=2",
@@ -164,6 +163,9 @@ func TestConfigTaskFlappy(t *testing.T) {
 		"TASK_STATE=unknown",
 		"TASK_STATE_CHANGED=false",
 		"TASK_TIMEOUT=1",
+		"SNMP_COMMUNITY=default",
+		"SNMP_VERSION=2c",
+		"EMAIL_FROM=fz@example",
 	}
 	got := cfg.Tasks[0]
 
@@ -260,11 +262,11 @@ func TestConfigNotifierErrorEmailer(t *testing.T) {
 	}
 
 	wantEnvironment := []string{
+		"EMAIL_ADDRESS=root@example",
+		"EMAIL_FROM=fz_errors@example",
+		"EMAIL_SUBJECT='fz experienced a critical error'",
 		"SNMP_COMMUNITY=default",
 		"SNMP_VERSION=2c",
-		"EMAIL_ADDRESS=jon@altos.au",
-		"EMAIL_FROM=fz@altos.au",
-		"EMAIL_SUBJECT='fz experienced a critical error'",
 	}
 
 	got := cfg.Notifiers[1]
@@ -311,6 +313,7 @@ func TestConfigGateToFailed(t *testing.T) {
 	wantEnvironment := []string{
 		"SNMP_COMMUNITY=default",
 		"SNMP_VERSION=2c",
+		"EMAIL_FROM=fz@example",
 	}
 
 	got := cfg.Gates[0]

@@ -274,21 +274,23 @@ func (t Task) Validate() error {
 func (t Task) Environment() []string {
 	var v []string
 
-	v = append(v, cfg.Defaults.Envs...)
-	v = append(v, t.Envs...)
+	v = MergeEnvVars(v, []string{
+		fmt.Sprintf("TASK_COMMAND=%s", t.Command),
+		fmt.Sprintf("TASK_FREQUENCY=%d", t.FrequencySeconds),
+		fmt.Sprintf("TASK_HISTORY=%d", t.History),
+		fmt.Sprintf("TASK_HISTORY_MASK=%d", t.HistoryMask),
+		fmt.Sprintf("TASK_LAST_FAIL=%d", envEpoch(t.LastFail)),
+		fmt.Sprintf("TASK_LAST_OK=%d", envEpoch(t.LastOk)),
+		fmt.Sprintf("TASK_LAST_STATE=%s", t.LastState()),
+		fmt.Sprintf("TASK_NAME=%s", t.Name),
+		fmt.Sprintf("TASK_PRIORITY=%d", t.Priority),
+		fmt.Sprintf("TASK_STATE=%s", t.State()),
+		fmt.Sprintf("TASK_STATE_CHANGED=%v", t.StateChanged()),
+		fmt.Sprintf("TASK_TIMEOUT=%d", t.TimeoutSeconds),
+	})
 
-	v = append(v, fmt.Sprintf("TASK_COMMAND=%s", t.Command))
-	v = append(v, fmt.Sprintf("TASK_FREQUENCY=%d", t.FrequencySeconds))
-	v = append(v, fmt.Sprintf("TASK_HISTORY=%d", t.History))
-	v = append(v, fmt.Sprintf("TASK_HISTORY_MASK=%d", t.HistoryMask))
-	v = append(v, fmt.Sprintf("TASK_LAST_FAIL=%d", envEpoch(t.LastFail)))
-	v = append(v, fmt.Sprintf("TASK_LAST_OK=%d", envEpoch(t.LastOk)))
-	v = append(v, fmt.Sprintf("TASK_LAST_STATE=%s", t.LastState()))
-	v = append(v, fmt.Sprintf("TASK_NAME=%s", t.Name))
-	v = append(v, fmt.Sprintf("TASK_PRIORITY=%d", t.Priority))
-	v = append(v, fmt.Sprintf("TASK_STATE=%s", t.State()))
-	v = append(v, fmt.Sprintf("TASK_STATE_CHANGED=%v", t.StateChanged()))
-	v = append(v, fmt.Sprintf("TASK_TIMEOUT=%d", t.TimeoutSeconds))
+	v = MergeEnvVars(v, t.Envs)
+	v = MergeEnvVars(v, cfg.Defaults.Envs)
 
 	return v
 }

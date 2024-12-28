@@ -35,13 +35,8 @@ func (g Gate) Execute(t *Task) bool {
 func (g Gate) Environment() []string {
 	var v []string
 
-	for _, e := range cfg.Defaults.Envs {
-		v = append(v, e)
-	}
-
-	for _, e := range g.Envs {
-		v = append(v, e)
-	}
+	v = MergeEnvVars(v, g.Envs)
+	v = MergeEnvVars(v, cfg.Defaults.Envs)
 
 	return v
 }

@@ -15,6 +15,7 @@ priority = 3
 envs = [
     "SNMP_COMMUNITY=default",
     "SNMP_VERSION=2c",
+    "EMAIL_FROM=fz@example",
 ]
 
 [[task]]
@@ -42,8 +43,8 @@ gates = [
 name = "error_emailer"
 command = "notifier/email"
 envs = [
-    "EMAIL_ADDRESS=jon@altos.au",
-    "EMAIL_FROM=fz@altos.au",
+    "EMAIL_ADDRESS=root@example",
+    "EMAIL_FROM=fz_errors@example",
     "EMAIL_SUBJECT='fz experienced a critical error'",
 ]
 timeout = 3
