@@ -298,6 +298,8 @@ func TestTaskEnvironment(t *testing.T) {
 				TimeoutSeconds:        10,
 			},
 			[]string{
+				"SNMP_COMMUNITY=public",
+				"SNMP_VERSION=2c",
 				"TASK_COMMAND=true",
 				"TASK_FREQUENCY=300",
 				"TASK_HISTORY=2",
@@ -310,8 +312,6 @@ func TestTaskEnvironment(t *testing.T) {
 				"TASK_STATE=unknown",
 				"TASK_STATE_CHANGED=false",
 				"TASK_TIMEOUT=10",
-				"SNMP_COMMUNITY=public",
-				"SNMP_VERSION=2c",
 			},
 		},
 	}
@@ -320,11 +320,11 @@ func TestTaskEnvironment(t *testing.T) {
 		t.Run(tt.task.Name, func(t *testing.T) {
 			// we only need to check data that's valid
 			if tt.task.Validate() != nil {
-				t.Errorf("valid got %v, want %v", tt.task.Validate(), nil)
+				t.Errorf("%s: valid got %v, want %v", tt.task.Name, tt.task.Validate(), nil)
 			}
 
 			if fmt.Sprintf("%v", tt.task.Environment()) != fmt.Sprintf("%v", tt.want) {
-				t.Errorf("environment got %v, want %v", tt.task.Environment(), tt.want)
+				t.Errorf("%s: environment got %v, want %v", tt.task.Name, tt.task.Environment(), tt.want)
 			}
 		})
 	}
