@@ -12,6 +12,8 @@ else
 endif
 
 build: $(DIST_GO) $(DIST_LIBEXEC) $(DIST_MAN) $(DIST_SCRIPTS) $(DIST_CONF) $(DIST_MAKEFILE)
+install: build
+	$(MAKE) -C dist -f makefile install
 
 $(DIST_GO): src = ./cmd/$(subst dist/,,$@)
 $(DIST_GO): .FORCE | dist/bin

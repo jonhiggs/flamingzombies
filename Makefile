@@ -1,6 +1,6 @@
 SHELL := /usr/bin/env bash
 
-build clean fz.tar.bz2:
+build clean fz.tar.bz2 install:
 	$(MAKE) -f dist.mk $@
 
 test: gotest shellcheck
