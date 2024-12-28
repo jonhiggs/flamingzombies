@@ -44,7 +44,7 @@ storageAllocationUnits() {
 
 storageSizeBytes() {
   ${SNMP_GET} -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" "hrStorageSize.$1" \
-    | awk -F= -v n=1 '{ sub(".*: ","",$NF); sub("\ Bytes$","",$NF); print $NF }'
+    | awk -F= -v n="$2" '{ sub(".*: ","",$NF); sub("\ Bytes$","",$NF); print $NF }'
 }
 
 storageUsedBytes() {
