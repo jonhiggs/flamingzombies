@@ -1,10 +1,12 @@
 #!/bin/sh
+[ -e "${EMAIL_ADDRESS}" ] \
+  || ( echo "EMAIL_ADDRESS is undefined" >&2 && exit 1 )
+
 set -eu
 
-MAIL_ADDRESS=${1:-${EMAIL_ADDRESS}}
-EMAIL_SUBJECT=${EMAIL_SUBJECT:-${NAME}: state ${STATE}}
+EMAIL_SUBJECT=${EMAIL_SUBJECT:-${TASK_NAME}: state ${TASK_STATE}}
 
-cat <<EOF | mail -s "${MAIL_SUBJECT}" "$@"
+cat <<EOF | mail -s "${EMAIL_SUBJECT}" "${EMAIL_ADDRESS}"
 ${RESULT_OUTPUT}
 ---
 $(timeout 0.2 cat)

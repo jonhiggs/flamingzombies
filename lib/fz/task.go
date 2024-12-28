@@ -263,23 +263,28 @@ func (t Task) Validate() error {
 
 // return a list of envs that are placed into the environment when task is ran
 func (t Task) Environment() []string {
-	v := []string{
-		fmt.Sprintf("FREQUENCY=%d", t.FrequencySeconds),
-		fmt.Sprintf("HISTORY=%d", t.History),
-		fmt.Sprintf("HISTORY_MASK=%d", t.HistoryMask),
-		fmt.Sprintf("LAST_FAIL=%d", envEpoch(t.LastFail)),
-		fmt.Sprintf("LAST_OK=%d", envEpoch(t.LastOk)),
-		fmt.Sprintf("LAST_STATE=%s", t.LastState()),
-		fmt.Sprintf("PRIORITY=%d", t.Priority),
-		fmt.Sprintf("STATE=%s", t.State()),
-		fmt.Sprintf("STATE_CHANGED=%v", t.StateChanged()),
-		fmt.Sprintf("TASK_COMMAND=%s", t.Command),
-		fmt.Sprintf("TIMEOUT=%d", t.TimeoutSeconds),
+	var v []string
+
+	for _, e := range cfg.Defaults.Envs {
+		t.Envs = append(v, e)
 	}
 
 	for _, e := range t.Envs {
 		v = append(v, e)
 	}
+
+	v = append(v, fmt.Sprintf("TASK_COMMAND=%s", t.Command))
+	v = append(v, fmt.Sprintf("TASK_FREQUENCY=%d", t.FrequencySeconds))
+	v = append(v, fmt.Sprintf("TASK_HISTORY=%d", t.History))
+	v = append(v, fmt.Sprintf("TASK_HISTORY_MASK=%d", t.HistoryMask))
+	v = append(v, fmt.Sprintf("TASK_LAST_FAIL=%d", envEpoch(t.LastFail)))
+	v = append(v, fmt.Sprintf("TASK_LAST_OK=%d", envEpoch(t.LastOk)))
+	v = append(v, fmt.Sprintf("TASK_LAST_STATE=%s", t.LastState()))
+	v = append(v, fmt.Sprintf("TASK_NAME=%s", t.Name))
+	v = append(v, fmt.Sprintf("TASK_PRIORITY=%d", t.Priority))
+	v = append(v, fmt.Sprintf("TASK_STATE=%s", t.State()))
+	v = append(v, fmt.Sprintf("TASK_STATE_CHANGED=%v", t.StateChanged()))
+	v = append(v, fmt.Sprintf("TASK_TIMEOUT=%d", t.TimeoutSeconds))
 
 	return v
 }

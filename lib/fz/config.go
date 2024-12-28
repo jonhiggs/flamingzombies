@@ -87,10 +87,6 @@ func ReadConfig(f, dir, logFile, logLevel string) *Config {
 			cfg.Tasks[i].Priority = cfg.Defaults.Priority
 		}
 
-		for _, e := range cfg.Defaults.Envs {
-			cfg.Tasks[i].Envs = append(cfg.Tasks[i].Envs, e)
-		}
-
 		if len(t.ErrorBody) == 0 {
 			cfg.Tasks[i].ErrorBody = "The task has entered an error state"
 		}

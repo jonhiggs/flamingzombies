@@ -32,7 +32,7 @@ flappy has recovered
 [[notifier]]
 name = "logger"
 command = "notifier/null"
-timeout = 5
+timeout = 1
 gates = [
     ["is_not_unknown", "to_failed", "defer"],
     ["is_not_unknown", "is_failed", "renotify"],

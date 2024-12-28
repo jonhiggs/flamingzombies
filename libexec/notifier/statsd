@@ -1,6 +1,8 @@
 #!/bin/sh
 set -eu
 
+sleep 5
+
 STATSD_HOST=${STATSD_HOST:-localhost}
 STATSD_PORT=${STATSD_PORT:-8125}
 

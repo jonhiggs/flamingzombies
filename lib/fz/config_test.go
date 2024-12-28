@@ -144,13 +144,38 @@ func TestConfigTaskFlappy(t *testing.T) {
 	want := Task{
 		Name:             "flappy",
 		Command:          "task/flappy",
-		FrequencySeconds: 1,
+		FrequencySeconds: 20,
 		ErrorBody:        "flappy has entered an error state\n",
 		RecoverBody:      "flappy has recovered\n",
-		Envs: []string{
-			"SNMP_COMMUNITY=default",
-			"SNMP_VERSION=2c",
-		},
+	}
+
+	wantEnvironment := []string{
+		"TASK_COMMAND=task/flappy",
+		"TASK_FREQUENCY=20",
+		"TASK_HISTORY=2",
+		"TASK_HISTORY_MASK=0",
+		"TASK_LAST_FAIL=0",
+		"TASK_LAST_OK=0",
+		"TASK_LAST_STATE=unknown",
+		"TASK_NAME=flappy",
+		"TASK_PRIORITY=3",
+		"TASK_STATE=unknown",
+		"TASK_STATE_CHANGED=false",
+		"TASK_TIMEOUT=1",
+		"TASK_COMMAND=task/flappy",
+		"TASK_FREQUENCY=20",
+		"TASK_HISTORY=2",
+		"TASK_HISTORY_MASK=0",
+		"TASK_LAST_FAIL=0",
+		"TASK_LAST_OK=0",
+		"TASK_LAST_STATE=unknown",
+		"TASK_NAME=flappy",
+		"TASK_PRIORITY=3",
+		"TASK_STATE=unknown",
+		"TASK_STATE_CHANGED=false",
+		"TASK_TIMEOUT=1",
+		//"SNMP_COMMUNITY=default",
+		"SNMP_VERSION=2c",
 	}
 	got := cfg.Tasks[0]
 
@@ -178,8 +203,8 @@ func TestConfigTaskFlappy(t *testing.T) {
 		t.Errorf("got %s, want %s", got.RecoverBody, want.RecoverBody)
 	}
 
-	if fmt.Sprintf("%v", got.Envs) != fmt.Sprintf("%s", want.Envs) {
-		t.Errorf("got %v, want %v", got.Envs, want.Envs)
+	if fmt.Sprintf("%v", got.Environment()) != fmt.Sprintf("%s", wantEnvironment) {
+		t.Errorf("got %v, want %v", got.Environment(), wantEnvironment)
 	}
 }
 
@@ -194,7 +219,7 @@ func TestConfigNotifierLogger(t *testing.T) {
 	want := Notifier{
 		Name:           "logger",
 		Command:        "notifier/null",
-		TimeoutSeconds: 5,
+		TimeoutSeconds: 1,
 		GateSets: [][]string{
 			[]string{"is_not_unknown", "to_failed", "defer"},
 			[]string{"is_not_unknown", "is_failed", "renotify"},
