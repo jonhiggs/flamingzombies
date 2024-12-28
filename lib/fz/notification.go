@@ -43,7 +43,9 @@ X:
 
 		for _, g := range gs {
 			if g.Execute(n.Task) == false {
-				Logger.Debug("gate is closed", "gate", g.Name)
+				Logger.Debug("gate is closed",
+					"gate", g.Name,
+				)
 				closedGates = append(closedGates, g)
 				continue X
 			}
@@ -54,7 +56,9 @@ X:
 				"task", n.Task.Name,
 			)
 		}
-		Logger.Debug("gateset is open", "gateset", gsi)
+		Logger.Debug("gateset is open",
+			"gateset", gsi,
+		)
 		return openGates, true
 	}
 
