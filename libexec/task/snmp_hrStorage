@@ -34,7 +34,7 @@ SNMP_COMMUNITY=${SNMP_COMMUNITY:-public}
 
 storageInt() {
   ${SNMP_WALK} -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" hrStorageDescr \
-    | awk -F= -v vol="$1" '($2~vol) { sub(".*hrStorageDescr\.","",$1); print int($1) }'
+    | awk -F= -v vol=" STRING: $1" '($2==vol) { sub(".*hrStorageDescr\.","",$1); print int($1) }'
 }
 
 storageAllocationUnits() {
