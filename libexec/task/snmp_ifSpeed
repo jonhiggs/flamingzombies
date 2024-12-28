@@ -1,18 +1,46 @@
 #!/bin/sh
-set -eu
+#
+# Check the speed of a network interface
+#
+# Usage: snmp_ifSpeed <PORT> <SPEED>
+#
+# Speeds:
+#   10Mb       10000000
+#   100Mb     100000000
+#   1Gb      1000000000
+#
+# You can get a list of available ports with:
+#
+#   snmp walk -c <SNMP_COMMUNITY> -v <SNMP_VERSION> <SNMP_HOST> ifSpeed
+#
 
-if [ $# -ne 2 ]; then
-  echo "usage: $0 <host> <interface>" >&2
-  exit 1
-fi
+set -e
+[ -n "${SNMP_HOST}" ] \
+  || ( echo "SNMP_HOST is undefined" >&2 && exit 1 )
 
-SNMP_HOST=$1
+[ $# -ne 2 ] \
+  && ( echo "command did not receive two arguments" >&2 && exit 1 )
+
+set -u
+
 SNMP_VERSION=${SNMP_VERSION:-2c}
 SNMP_COMMUNITY=${SNMP_COMMUNITY:-public}
 
-snmp get                 \
-  -v "${SNMP_VERSION}"   \
-  -c "${SNMP_COMMUNITY}" \
-  "${SNMP_HOST}"         \
-  "ifSpeed.$2"           \
-  | awk '{ print $NF }'
+if [ "$(uname -s)" = "OpenBSD" ]; then
+  SNMP_GET="snmp get"
+else
+  SNMP_GET="snmpget"
+fi
+
+ifSpeed() {
+  ${SNMP_GET}              \
+    -v "${SNMP_VERSION}"   \
+    -c "${SNMP_COMMUNITY}" \
+    "${SNMP_HOST}"         \
+    "ifSpeed.$1"           \
+    | awk '{ print $NF }'
+}
+
+speed=$(ifSpeed "$1")
+echo "${speed}"
+[ "${speed}" -ne "$2" ]

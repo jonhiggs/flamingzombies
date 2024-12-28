@@ -21,7 +21,7 @@ set -u
 VOL=$1
 THRESHOLD=$2
 
-if [ $(uname -s) = "OpenBSD" ]; then
+if [ "$(uname -s)" = "OpenBSD" ]; then
   SNMP_WALK="snmp walk"
   SNMP_GET="snmp get"
 else
@@ -61,6 +61,6 @@ storageFreeBytes() {
 i=$(storageInt "${VOL}")
 n=$(storageAllocationUnits "$i")
 f=$(storageFreeBytes "$1" "$n")
-echo $f
+echo "$f"
 
-[ $f -gt ${THRESHOLD} ]
+[ "$f" -gt "${THRESHOLD}" ]
