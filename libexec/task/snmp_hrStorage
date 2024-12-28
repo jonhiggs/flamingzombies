@@ -1,16 +1,15 @@
 #!/bin/sh
 set -e
-[ -e "${SNMP_HOST}" ] \
+[ -n "${SNMP_HOST}" ] \
   || ( echo "SNMP_HOST is undefined" >&2 && exit 1 )
 
 [ $# -ne 2 ] \
-  || ( echo "command did not receive two arguments" >&2 && exit 1 )
+  && ( echo "command did not receive two arguments" >&2 && exit 1 )
 
 set -u
 
 VOL=$1
 THRESHOLD=$2
-
 
 SNMP_VERSION=${SNMP_VERSION:-2c}
 SNMP_COMMUNITY=${SNMP_COMMUNITY:-public}
@@ -21,17 +20,17 @@ storageInt() {
 }
 
 storageAllocationUnits() {
-  snmp get -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" "hrStorageAllocationUnits.${VOL}" \
+  snmp get -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" "hrStorageAllocationUnits.$1" \
     | awk '{ print $NF }'
 }
 
 storageSize() {
-  snmp get -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" "hrStorageSize.${VOL}" \
+  snmp get -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" "hrStorageSize.$1" \
     | awk -v n="$2" '{ print $NF * n }'
 }
 
 storageUsed() {
-  snmp get -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" "hrStorageUsed.${VOL}" \
+  snmp get -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" "hrStorageUsed.$1" \
     | awk -v n="$2" '{ print $NF * n }'
 }
 
