@@ -150,7 +150,7 @@ func TestConfigTaskFlappy(t *testing.T) {
 	}
 
 	wantEnvironment := []string{
-		//"SNMP_COMMUNITY=default", // TODO: work out why this isn't there.
+		"SNMP_COMMUNITY=default",
 		"SNMP_VERSION=2c",
 		"TASK_COMMAND=task/flappy",
 		"TASK_FREQUENCY=20",
@@ -212,10 +212,7 @@ func TestConfigNotifierLogger(t *testing.T) {
 			[]string{"is_not_unknown", "to_failed", "defer"},
 			[]string{"is_not_unknown", "is_failed", "renotify"},
 		},
-		Envs: []string{
-			"SNMP_COMMUNITY=default",
-			"SNMP_VERSION=2c",
-		},
+		Envs: []string{},
 	}
 	got := cfg.Notifiers[0]
 
@@ -261,6 +258,15 @@ func TestConfigNotifierErrorEmailer(t *testing.T) {
 			"SNMP_VERSION=2c",
 		},
 	}
+
+	wantEnvironment := []string{
+		"SNMP_COMMUNITY=default",
+		"SNMP_VERSION=2c",
+		"EMAIL_ADDRESS=jon@altos.au",
+		"EMAIL_FROM=fz@altos.au",
+		"EMAIL_SUBJECT='fz experienced a critical error'",
+	}
+
 	got := cfg.Notifiers[1]
 
 	if got.Name != want.Name {
@@ -279,8 +285,8 @@ func TestConfigNotifierErrorEmailer(t *testing.T) {
 		t.Errorf("got %v, want %v", got.GateSets, want.GateSets)
 	}
 
-	if fmt.Sprintf("%v", got.Envs) != fmt.Sprintf("%s", want.Envs) {
-		t.Errorf("got %v, want %v", got.Envs, want.Envs)
+	if fmt.Sprintf("%v", got.Environment()) != fmt.Sprintf("%s", wantEnvironment) {
+		t.Errorf("got %v, want %v", got.Environment(), wantEnvironment)
 	}
 }
 
@@ -301,6 +307,12 @@ func TestConfigGateToFailed(t *testing.T) {
 			"SNMP_VERSION=2c",
 		},
 	}
+
+	wantEnvironment := []string{
+		"SNMP_COMMUNITY=default",
+		"SNMP_VERSION=2c",
+	}
+
 	got := cfg.Gates[0]
 
 	if got.Name != want.Name {
@@ -315,8 +327,8 @@ func TestConfigGateToFailed(t *testing.T) {
 		t.Errorf("got %v, want %v", got.Args, want.Args)
 	}
 
-	if fmt.Sprintf("%v", got.Envs) != fmt.Sprintf("%s", want.Envs) {
-		t.Errorf("got %v, want %v", got.Envs, want.Envs)
+	if fmt.Sprintf("%v", got.Environment()) != fmt.Sprintf("%s", wantEnvironment) {
+		t.Errorf("got %v, want %v", got.Environment(), wantEnvironment)
 	}
 }
 

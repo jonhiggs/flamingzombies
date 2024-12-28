@@ -14,7 +14,7 @@ func ProcessNotifications() {
 			select {
 			case n := <-ErrorNotifyCh:
 				Logger.Info("sending error notification", "notifier", n.Notifier.Name)
-				n.Notifier.Execute(n.environment())
+				n.Notifier.Execute(n.Environment())
 
 			case n := <-NotifyCh:
 				_, ok := n.gateEvaluate()
@@ -42,7 +42,7 @@ X:
 		openGates = []*Gate{} // ignore the gates from prior gateset
 
 		for _, g := range gs {
-			if g.Execute(n.Task.Environment()) == false {
+			if g.Execute(n.Task) == false {
 				Logger.Debug("gate is closed", "gate", g.Name)
 				closedGates = append(closedGates, g)
 				continue X
@@ -101,9 +101,10 @@ func (n Notification) environment() []string {
 }
 
 // The environment variables provided to the error_notifiers
-func (n ErrorNotification) environment() []string {
+func (n ErrorNotification) Environment() []string {
 	v := []string{}
-	for _, e := range n.Notifier.Envs {
+
+	for _, e := range n.Notifier.Environment() {
 		v = append(v, e)
 	}
 
