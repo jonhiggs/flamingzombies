@@ -101,9 +101,10 @@ func (t *Task) Run() {
 		exitCode = 0
 	}
 
-	if len(errorMessage) > 0 {
-		Logger.Debug(fmt.Sprintf("command returned stderr: %s", errorMessage), "task", t.Name)
-	}
+	Logger.Debug("exit code",
+		"task", t.Name,
+		"code", exitCode,
+	)
 
 	switch exitCode {
 	case 0:
