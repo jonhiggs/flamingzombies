@@ -136,7 +136,10 @@ func (t *Task) Run() {
 }
 
 func (t *Task) RecordStatus(b bool) {
-	Logger.Debug(fmt.Sprintf("recording measurement %v", b), "task", t.Name)
+	Logger.Debug("recording result",
+		"task", t.Name,
+		"state", t.State(),
+	)
 
 	t.History = t.History << 1
 	if b {
