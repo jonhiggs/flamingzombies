@@ -1,25 +1,46 @@
 #!/bin/sh
-set -eu
-
-if [ $# -ne 2 ]; then
-  echo "usage: $0 <host> <interface>" >&2
-  exit 1
-fi
-
-# Check the status of a network interface.
 #
-# returns:
-#   - 1 when up
-#   - 2 when down
-#   - 3 when testing
+# Check the state of a network interface
+#
+# Usage: snmp_ifOperStatus <PORT> <SPEED>
+#
+# Values:
+#   up        1
+#   down      2
+#   testing   3
+#
+# You can get a list of available ports with:
+#
+#   snmp walk -c <SNMP_COMMUNITY> -v <SNMP_VERSION> <SNMP_HOST> ifOperStatus
+#
 
-SNMP_HOST=$1
+set -e
+[ -n "${SNMP_HOST}" ] \
+  || ( echo "SNMP_HOST is undefined" >&2 && exit 1 )
+
+[ $# -ne 2 ] \
+  && ( echo "command did not receive two arguments" >&2 && exit 1 )
+
+set -u
+
 SNMP_VERSION=${SNMP_VERSION:-2c}
 SNMP_COMMUNITY=${SNMP_COMMUNITY:-public}
 
-snmp get                 \
-  -v "${SNMP_VERSION}"   \
-  -c "${SNMP_COMMUNITY}" \
-  "${SNMP_HOST}"         \
-  "ifOperStatus.$2"      \
-  | awk '{ print $NF }'
+if [ "$(uname -s)" = "OpenBSD" ]; then
+  SNMP_GET="snmp get"
+else
+  SNMP_GET="snmpget -Oe"
+fi
+
+ifOperStatus() {
+  ${SNMP_GET}              \
+    -v "${SNMP_VERSION}"   \
+    -c "${SNMP_COMMUNITY}" \
+    "${SNMP_HOST}"         \
+    "ifOperStatus.$1"      \
+    | awk '{ print int($NF) }'
+}
+
+status=$(ifOperStatus "$1")
+echo "${status}"
+[ "${status}" -eq "$2" ]
