@@ -41,3 +41,17 @@ func (n Notifier) Execute(env []string) {
 		Logger.Debug(fmt.Sprintf("notifier returned stderr: %s", errorMessage), "notifier", n.Name)
 	}
 }
+
+func (n Notifier) Environment() []string {
+	var v []string
+
+	for _, e := range cfg.Defaults.Envs {
+		v = append(v, e)
+	}
+
+	for _, e := range n.Envs {
+		v = append(v, e)
+	}
+
+	return v
+}

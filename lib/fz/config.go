@@ -106,18 +106,6 @@ func ReadConfig(f, dir, logFile, logLevel string) *Config {
 		cfg.Tasks[i].History = 0b10
 	}
 
-	for i, _ := range cfg.Notifiers {
-		for _, e := range cfg.Defaults.Envs {
-			cfg.Notifiers[i].Envs = append(cfg.Notifiers[i].Envs, e)
-		}
-	}
-
-	for i, _ := range cfg.Gates {
-		for _, e := range cfg.Defaults.Envs {
-			cfg.Gates[i].Envs = append(cfg.Gates[i].Envs, e)
-		}
-	}
-
 	return &cfg
 }
 
