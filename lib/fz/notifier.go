@@ -45,13 +45,8 @@ func (n Notifier) Execute(env []string) {
 func (n Notifier) Environment() []string {
 	var v []string
 
-	for _, e := range cfg.Defaults.Envs {
-		v = append(v, e)
-	}
-
-	for _, e := range n.Envs {
-		v = append(v, e)
-	}
+	v = MergeEnvVars(v, n.Envs)
+	v = MergeEnvVars(v, cfg.Defaults.Envs)
 
 	return v
 }

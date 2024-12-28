@@ -298,8 +298,6 @@ func TestTaskEnvironment(t *testing.T) {
 				TimeoutSeconds:        10,
 			},
 			[]string{
-				"SNMP_COMMUNITY=public",
-				"SNMP_VERSION=2c",
 				"TASK_COMMAND=true",
 				"TASK_FREQUENCY=300",
 				"TASK_HISTORY=2",
@@ -312,6 +310,8 @@ func TestTaskEnvironment(t *testing.T) {
 				"TASK_STATE=unknown",
 				"TASK_STATE_CHANGED=false",
 				"TASK_TIMEOUT=10",
+				"SNMP_COMMUNITY=public",
+				"SNMP_VERSION=2c",
 			},
 		},
 	}
