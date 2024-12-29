@@ -14,7 +14,7 @@ func (n Notifier) Timeout() time.Duration {
 	return time.Duration(n.TimeoutSeconds) * time.Second
 }
 
-func (n Notifier) Execute(env []string) {
+func (n Notifier) Execute(env []string, notifyErrors bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), n.Timeout())
 	defer cancel()
 
@@ -30,7 +30,7 @@ func (n Notifier) Execute(env []string) {
 	cmd.Wait()
 
 	if err != nil {
-		Error(fmt.Errorf("notifier %s: %w", n.Name, err))
+		Error(fmt.Errorf("notifier %s: %w", n.Name, err), notifyErrors)
 	}
 
 	Logger.Debug("output",
@@ -41,13 +41,11 @@ func (n Notifier) Execute(env []string) {
 
 	if err != nil {
 		if os.IsPermission(err) {
-			// XXX: This risks loops if an ErrorNotifier has invalid permissions.
-			Error(fmt.Errorf("notifier %s: %w", n.Name, ErrInvalidPermissions))
+			Error(fmt.Errorf("notifier %s: %w", n.Name, ErrInvalidPermissions), notifyErrors)
 		}
 
 		if ctx.Err() == context.DeadlineExceeded {
-			// XXX: This risks loops if an ErrorNotifier times out.
-			Error(fmt.Errorf("notifier %s: %w", n.Name, ErrTimeout))
+			Error(fmt.Errorf("notifier %s: %w", n.Name, ErrTimeout), notifyErrors)
 		}
 
 		return

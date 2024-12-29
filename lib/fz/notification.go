@@ -14,7 +14,7 @@ func ProcessNotifications() {
 			select {
 			case n := <-ErrorNotifyCh:
 				Logger.Info("sending error notification", "notifier", n.Notifier.Name)
-				n.Notifier.Execute(n.Environment())
+				n.Notifier.Execute(n.Environment(), false)
 
 			case n := <-NotifyCh:
 				_, ok := n.gateEvaluate()
@@ -27,7 +27,7 @@ func ProcessNotifications() {
 				}
 
 				Logger.Info("sending notification", "notifier", n.Notifier.Name)
-				n.Notifier.Execute(n.environment())
+				n.Notifier.Execute(n.environment(), true)
 			}
 		}
 	}()

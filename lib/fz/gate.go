@@ -18,13 +18,13 @@ func (g Gate) Execute(t *Task) bool {
 
 	err := cmd.Run()
 	if ctx.Err() == context.DeadlineExceeded {
-		Error(fmt.Errorf("gate %s: %w", g.Name, ErrTimeout))
+		Error(fmt.Errorf("gate %s: %w", g.Name, ErrTimeout), true)
 		return false
 	}
 
 	if err != nil {
 		if os.IsPermission(err) {
-			Error(fmt.Errorf("task %s: %w", g.Name, ErrInvalidPermissions))
+			Error(fmt.Errorf("task %s: %w", g.Name, ErrInvalidPermissions), true)
 		}
 		return false
 	}
