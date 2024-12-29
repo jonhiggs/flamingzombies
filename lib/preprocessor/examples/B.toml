@@ -1,0 +1,5 @@
+# B
+[[task]]
+name = "example_b"
+command = "task/example"
+frequency = 20

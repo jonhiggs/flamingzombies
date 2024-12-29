@@ -2,12 +2,13 @@ package fz
 
 import (
 	"fmt"
-	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
 	"time"
 
+	"github.com/jonhiggs/flamingzombies/lib/preprocessor"
 	"github.com/pelletier/go-toml"
 )
 
@@ -17,20 +18,25 @@ var cfg Config
 // Make configuration available in fz.Configuration
 func ReadConfig(f, dir, logFile, logLevel string) *Config {
 
-	file, err := os.Open(f)
+	fh, err := os.Open(f)
 	if err != nil {
-		Fatal(fmt.Sprintf("Error opening the configuration file '%s'\n", f), fmt.Sprint(err))
+		log.Fatal(fmt.Errorf("reading config: %w", err))
 	}
-	defer file.Close()
+	defer fh.Close()
 
-	b, err := io.ReadAll(file)
+	//b, err := io.ReadAll(file)
+	//if err != nil {
+	//	Fatal(fmt.Sprintf("Error reading the configuration file '%s'\n", f), fmt.Sprint(err))
+	//}
+
+	b, err := preprocessor.Run(fh, []*os.File{})
 	if err != nil {
-		Fatal(fmt.Sprintf("Error reading the configuration file '%s'\n", f), fmt.Sprint(err))
+		log.Fatal(fmt.Errorf("preprocessing config: %w", err))
 	}
 
 	err = toml.Unmarshal(b, &cfg)
 	if err != nil {
-		Fatal(fmt.Sprintf("Error parsing the configuration file '%s'\n", f), fmt.Sprint(err))
+		log.Fatal(fmt.Errorf("parsing config: %w", err))
 	}
 
 	// Replace the values set by TOML with those supplied to func.
