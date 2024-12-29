@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -21,24 +22,35 @@ func (n Notifier) Execute(env []string) {
 	cmd.Dir = cfg.Directory
 	cmd.Env = env
 	stderr, _ := cmd.StderrPipe()
+	stdout, _ := cmd.StdoutPipe()
 
-	err := cmd.Run()
+	err := cmd.Start()
+	stdoutBytes, _ := io.ReadAll(stdout)
+	stderrBytes, _ := io.ReadAll(stderr)
+	cmd.Wait()
+
+	if err != nil {
+		Error(fmt.Errorf("notifier %s: %w", n.Name, err))
+	}
+
+	Logger.Debug("output",
+		"notifier", n.Name,
+		"stdout", strings.TrimSuffix(string(stdoutBytes), "\n"),
+		"stderr", strings.TrimSuffix(string(stderrBytes), "\n"),
+	)
 
 	if err != nil {
 		if os.IsPermission(err) {
+			// XXX: This risks loops if an ErrorNotifier has invalid permissions.
 			Error(fmt.Errorf("notifier %s: %w", n.Name, ErrInvalidPermissions))
-			return
 		}
 
 		if ctx.Err() == context.DeadlineExceeded {
 			// XXX: This risks loops if an ErrorNotifier times out.
 			Error(fmt.Errorf("notifier %s: %w", n.Name, ErrTimeout))
 		}
-	}
 
-	errorMessage, _ := io.ReadAll(stderr)
-	if len(errorMessage) > 0 {
-		Logger.Debug(fmt.Sprintf("notifier returned stderr: %s", errorMessage), "notifier", n.Name)
+		return
 	}
 }
 
