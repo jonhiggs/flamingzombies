@@ -1,12 +1,15 @@
 #!/bin/sh
-[ -e "${EMAIL_ADDRESS}" ] \
-  || ( echo "EMAIL_ADDRESS is undefined" >&2 && exit 1 )
+[ -e "${MAIL_TO}" ] \
+  || ( echo "MAIL_TO is undefined" >&2 && exit 1 )
+
+[ -e "${MAIL_FROM}" ] \
+  || ( echo "MAIL_FROM is undefined" >&2 && exit 1 )
 
 set -eu
 
-EMAIL_SUBJECT=${EMAIL_SUBJECT:-${TASK_NAME}: state ${TASK_STATE}}
+MAIL_SUBJECT=${MAIL_SUBJECT:-${TASK_NAME}: state ${TASK_STATE}}
 
-cat <<EOF | mail -s "${EMAIL_SUBJECT}" "${EMAIL_ADDRESS}"
+cat <<EOF | mail -j "${MAIL_FROM}" -s "${MAIL_SUBJECT}" "${MAIL_ADDRESS}"
 ${RESULT_OUTPUT}
 ---
 $(timeout 0.2 cat)
