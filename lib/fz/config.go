@@ -271,7 +271,7 @@ func (c Config) validateCommandsExist() error {
 }
 
 func (c Config) validateName() error {
-	re := regexp.MustCompile(`^[a-z0-9_]+$`)
+	re := regexp.MustCompile(`^[a-z0-9_:]+$`)
 
 	for i, n := range cfg.Notifiers {
 		if !re.Match([]byte(n.Name)) {

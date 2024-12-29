@@ -229,7 +229,7 @@ func (t Task) StateChanged() bool {
 
 // Check that the task is in a valid state.
 func (t Task) Validate() error {
-	re := regexp.MustCompile(`^[a-z0-9_]+$`)
+	re := regexp.MustCompile(`^[a-z0-9_:]+$`)
 	if !re.Match([]byte(t.Name)) {
 		return fmt.Errorf("name '%s': %w", t.Name, ErrInvalidName)
 	}

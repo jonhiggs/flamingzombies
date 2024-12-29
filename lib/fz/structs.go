@@ -24,7 +24,7 @@ const DEFAULT_GATE_TIMEOUT_SECONDS = 1
 
 var ErrCommandNotExist = errors.New("command does not exist")
 var ErrGreaterThan99 = errors.New("cannot be greater than 99")
-var ErrInvalidName = errors.New("characters must be alphanumeric or underscore")
+var ErrInvalidName = errors.New("only alphanumeric, underscore and colon characters are allowed")
 var ErrInvalidPermissions = errors.New("invalid permissions")
 var ErrLessThan1 = errors.New("cannot be less than 1")
 var ErrNotExist = errors.New("does not exist")
