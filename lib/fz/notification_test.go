@@ -68,11 +68,11 @@ func TestNotificationEnvironment(t *testing.T) {
 	t.Run("env", func(t *testing.T) {
 
 		want := []string{
+			"MSG=",
 			"TASK_DURATION_MS=1000",
 			"TASK_EPOCH=1735517669",
 			"TASK_LAST_STATE=unknown",
 			"TASK_NAME=flappy",
-			"TASK_OUTPUT=",
 			"TASK_PRIORITY=0",
 			"TASK_STATE=unknown",
 			"TASK_TIMEOUT_MS=0",
@@ -99,6 +99,7 @@ func TestErrorNotificationEnvironment(t *testing.T) {
 	t.Run("env", func(t *testing.T) {
 
 		want := []string{
+			"MSG=this is an error",
 			"MAIL_NAME=test@example",
 		}
 		got := n.Environment()

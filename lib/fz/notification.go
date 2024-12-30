@@ -87,11 +87,11 @@ func (n Notification) body() string {
 // The environment variables provided to the notifiers
 func (n Notification) Environment(tasks ...*Task) []string {
 	v := []string{
+		fmt.Sprintf("MSG=%s", n.Task.LastResultOutput),
 		fmt.Sprintf("TASK_DURATION_MS=%d", n.Duration.Milliseconds()),
 		fmt.Sprintf("TASK_EPOCH=%d", n.Timestamp.Unix()),
 		fmt.Sprintf("TASK_LAST_STATE=%s", n.Task.LastState()),
 		fmt.Sprintf("TASK_NAME=%s", n.Task.Name),
-		fmt.Sprintf("TASK_OUTPUT=%s", n.Task.LastResultOutput),
 		fmt.Sprintf("TASK_PRIORITY=%d", n.Task.Priority),
 		fmt.Sprintf("TASK_STATE=%s", n.Task.State()),
 		fmt.Sprintf("TASK_TIMEOUT_MS=%d", n.Task.TimeoutSeconds*1000),
@@ -109,7 +109,9 @@ func (n Notification) Environment(tasks ...*Task) []string {
 
 // The environment variables provided to the error_notifiers
 func (n ErrorNotification) Environment() []string {
-	var v []string
+	v := []string{
+		fmt.Sprintf("MSG=%s", n.Error),
+	}
 
 	v = MergeEnvVars(v, n.Notifier.Envs)
 	v = MergeEnvVars(v, cfg.Defaults.Envs)
