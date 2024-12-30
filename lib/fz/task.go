@@ -10,6 +10,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/jonhiggs/flamingzombies/lib/trace"
 )
 
 // Create a checksum of a tasks configuration. The hash is used for a
@@ -50,6 +52,7 @@ func (t Task) Ready(ts time.Time) bool {
 
 func (t *Task) Run() {
 	Logger.Info("executing task", "task", t.Name)
+	t.TraceID = trace.ID()
 
 	ctx, cancel := context.WithTimeout(context.Background(), t.timeout())
 	defer cancel()
@@ -271,6 +274,7 @@ func (t Task) Environment() []string {
 	var v []string
 
 	v = MergeEnvVars(v, []string{
+		fmt.Sprintf("TASK_TRACE_ID=%s", t.TraceID),
 		fmt.Sprintf("TASK_COMMAND=%s", t.Command),
 		fmt.Sprintf("TASK_FREQUENCY=%d", t.FrequencySeconds),
 		fmt.Sprintf("TASK_HISTORY=%d", t.History),

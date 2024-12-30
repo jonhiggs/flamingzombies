@@ -11,6 +11,7 @@ func TestGateEnvironment(t *testing.T) {
 			Name: "zero",
 		}
 		task := Task{
+			TraceID:          "ABC",
 			Name:             "test",
 			Command:          "true",
 			FrequencySeconds: 60,
@@ -21,6 +22,7 @@ func TestGateEnvironment(t *testing.T) {
 		want := []string{
 			"GATE_NAME=zero",
 			"GATE_TIMEOUT=1",
+			"TASK_TRACE_ID=ABC",
 			"TASK_COMMAND=true",
 			"TASK_FREQUENCY=60",
 			"TASK_HISTORY=0",
@@ -46,6 +48,7 @@ func TestGateEnvironment(t *testing.T) {
 			Envs: []string{"GENV=from_gate"},
 		}
 		task := Task{
+			TraceID:          "ABC",
 			Name:             "test",
 			Command:          "true",
 			Envs:             []string{"TENV=from_task"},
@@ -58,6 +61,7 @@ func TestGateEnvironment(t *testing.T) {
 			"GATE_NAME=zero",
 			"GATE_TIMEOUT=1",
 			"GENV=from_gate",
+			"TASK_TRACE_ID=ABC",
 			"TASK_COMMAND=true",
 			"TASK_FREQUENCY=60",
 			"TASK_HISTORY=0",

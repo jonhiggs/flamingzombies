@@ -92,6 +92,7 @@ type Task struct {
 	LastOk           time.Time // the time of the last successful execution
 	LastResultOutput string    // the result output of the last execution
 	LastRun          time.Time // the time of the last execution
+	TraceID          string    // the ID of the task execution to help with tracing
 }
 
 // The gate is the control mechanism to governs whether a Notifier executes.

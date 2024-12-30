@@ -257,6 +257,7 @@ func TestTaskEnvironment(t *testing.T) {
 	}{
 		{
 			Task{
+				TraceID:               "ABC",
 				Command:               "true",
 				Envs:                  []string{},
 				FrequencySeconds:      300,
@@ -268,6 +269,7 @@ func TestTaskEnvironment(t *testing.T) {
 				TimeoutSeconds:        10,
 			},
 			[]string{
+				"TASK_TRACE_ID=ABC",
 				"TASK_COMMAND=true",
 				"TASK_FREQUENCY=300",
 				"TASK_HISTORY=2",
@@ -284,6 +286,7 @@ func TestTaskEnvironment(t *testing.T) {
 		},
 		{
 			Task{
+				TraceID: "ABC",
 				Command: "true",
 				Envs: []string{
 					"SNMP_COMMUNITY=public",
@@ -298,6 +301,7 @@ func TestTaskEnvironment(t *testing.T) {
 				TimeoutSeconds:        10,
 			},
 			[]string{
+				"TASK_TRACE_ID=ABC",
 				"TASK_COMMAND=true",
 				"TASK_FREQUENCY=300",
 				"TASK_HISTORY=2",

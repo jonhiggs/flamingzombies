@@ -151,6 +151,7 @@ func TestConfigTaskFlappy(t *testing.T) {
 	}
 
 	wantEnvironment := []string{
+		"TASK_TRACE_ID=",
 		"TASK_COMMAND=task/flappy",
 		"TASK_FREQUENCY=20",
 		"TASK_HISTORY=2",
