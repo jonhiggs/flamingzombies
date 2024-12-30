@@ -12,7 +12,7 @@ case $1 in
       && exit 0
     ;;
   *)
-    echo "$0 was not provided a valid argument" >&2
+    echo "received invalid argument" >&2
     ;;
 esac
 
