@@ -1,2 +1,2 @@
 #!/bin/sh
-[ "${PRIORITY}" -le "$1" ]
+[ "${TASK_PRIORITY}" -le "$1" ]

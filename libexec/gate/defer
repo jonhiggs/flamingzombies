@@ -1,11 +1,11 @@
 #!/bin/sh
 
-NOW="$(date +%s)"
-DEFER_SECONDS=${1:-0}
+now="$(date +%s)"
+defer_seconds=${1:-0}
 
-case "${STATE}" in
-  "fail") [ $((LAST_OK+DEFER_SECONDS))   -lt "${NOW}" ] && exit 0 ;;
-  "ok")   [ $((LAST_FAIL+DEFER_SECONDS)) -lt "${NOW}" ] && exit 0 ;;
+case "${TASK_STATE}" in
+  "fail") [ $((TASK_LAST_OK+defer_seconds))   -lt "${now}" ] && exit 0 ;;
+  "ok")   [ $((TASK_LAST_FAIL+defer_seconds)) -lt "${now}" ] && exit 0 ;;
 esac
 
 exit 1

@@ -1,15 +1,15 @@
 #!/bin/sh
 
-NOW="$(date +%s)"
-DELAY_SECONDS=${1:-0}
+now="$(date +%s)"
+delay_seconds=${1:-0}
 
 # exit 1 until the regular notification has been made
-case "${LAST_STATE}" in
-  "fail") [ "${LAST_NOTIFICATION}" -lt "${LAST_OK}" ] && exit 1 ;;
-  "ok")   [ "${LAST_NOTIFICATION}" -lt "${LAST_FAIL}" ] && exit 1 ;;
+case "${TASK_LAST_STATE}" in
+  "fail") [ "${TASK_LAST_NOTIFICATION}" -lt "${TASK_LAST_OK}" ] && exit 1 ;;
+  "ok")   [ "${TASK_LAST_NOTIFICATION}" -lt "${TASK_LAST_FAIL}" ] && exit 1 ;;
 esac
 
-if [ "${LAST_NOTIFICATION}" -le "$((NOW-DELAY_SECONDS))" ]; then
+if [ "${TASK_LAST_NOTIFICATION}" -le "$((now-delay_seconds))" ]; then
   exit 0
 else
   exit 1

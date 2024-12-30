@@ -2,13 +2,13 @@
 
 case $1 in
   "ok")
-    [ "${STATE}" = "ok" ]                              \
-      && [ "${LAST_NOTIFICATION}" -le "${LAST_FAIL}" ] \
+    [ "${TASK_STATE}" = "ok" ]                              \
+      && [ "${TASK_LAST_NOTIFICATION}" -le "${TASK_LAST_FAIL}" ] \
       && exit 0
     ;;
   "fail")
-    [ "${STATE}" = "fail" ]                          \
-      && [ "${LAST_NOTIFICATION}" -le "${LAST_OK}" ] \
+    [ "${TASK_STATE}" = "fail" ]                          \
+      && [ "${TASK_LAST_NOTIFICATION}" -le "${TASK_LAST_OK}" ] \
       && exit 0
     ;;
   *)

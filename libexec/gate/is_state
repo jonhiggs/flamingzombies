@@ -1,2 +1,2 @@
 #!/bin/sh
-[ "${STATE}" = "$1" ]
+[ "${TASK_STATE}" = "$1" ]

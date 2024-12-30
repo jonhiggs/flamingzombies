@@ -6,11 +6,11 @@ state_changes=0
 # shellcheck disable=SC2034
 for n in $(seq 1 "${window}"); do
   # ran out of measurements
-  if [ $((HISTORY_MASK & 3)) -ne 3 ]; then
+  if [ $((TASK_HISTORY_MASK & 3)) -ne 3 ]; then
     break
   fi
 
-  last_checks=$((HISTORY & 3))
+  last_checks=$((TASK_HISTORY & 3))
 
   # increment counter if it was a state change
   if [ "${last_checks}" -ne 0 ] && [ "${last_checks}" -ne 3 ]; then
@@ -18,8 +18,8 @@ for n in $(seq 1 "${window}"); do
   fi
 
   # shift the data before continuing
-  HISTORY=$((HISTORY>>1))
-  HISTORY_MASK=$((HISTORY_MASK>>1))
+  TASK_HISTORY=$((TASK_HISTORY>>1))
+  TASK_HISTORY_MASK=$((TASK_HISTORY_MASK>>1))
 done
 
 [ "${state_changes}" -lt "${threshold}" ]
