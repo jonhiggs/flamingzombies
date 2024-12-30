@@ -108,18 +108,14 @@ func (t *Task) Run() {
 
 	switch exitCode {
 	case 0:
-		//t.IncMetric("ok")
 		t.RecordStatus(true)
 	case 1: // warn or error
 		t.RecordStatus(false)
 	case 2: // warn or error
 		t.RecordStatus(false)
 	case 3: // unknown status
-		//t.IncMetric("unknown")
 	case 124: // unknown status due to timeout
-		//t.IncMetric("unknown")
 	default:
-		//t.IncMetric("fail")
 		t.RecordStatus(false)
 	}
 

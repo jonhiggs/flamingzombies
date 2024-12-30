@@ -104,26 +104,3 @@ func (n ErrorNotification) Environment() []string {
 
 	return v
 }
-
-// TODO: Provide the data to the notifier so it can publish the metrics to statsd or elsewhere.
-//func (n Notification) IncMetric(x string) {
-//	StatsdClient.Inc(
-//		fmt.Sprintf("notifier.%s", x), 1, 1.0,
-//		statsd.Tag{"host", Hostname},
-//		statsd.Tag{"name", n.Notifier.Name},
-//	)
-//}
-//
-//func (n Notification) DurationMetric(d time.Duration) {
-//	StatsdClient.TimingDuration(
-//		"notifier.duration", d, 1.0,
-//		statsd.Tag{"host", Hostname},
-//		statsd.Tag{"name", n.Notifier.Name},
-//	)
-//
-//	StatsdClient.Gauge(
-//		"notifier.timeoutquota.percent", int64(float64(d)/float64(n.Notifier.timeout())*100), 1.0,
-//		statsd.Tag{"host", Hostname},
-//		statsd.Tag{"name", n.Notifier.Name},
-//	)
-//}
