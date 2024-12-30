@@ -88,6 +88,7 @@ func (n Notification) body() string {
 func (n Notification) Environment(tasks ...*Task) []string {
 	v := []string{
 		fmt.Sprintf("MSG=%s", n.Task.LastResultOutput),
+		fmt.Sprintf("SUBJECT=%s: state is %s", n.Task.Name, n.Task.State()),
 		fmt.Sprintf("TASK_DURATION_MS=%d", n.Duration.Milliseconds()),
 		fmt.Sprintf("TASK_EPOCH=%d", n.Timestamp.Unix()),
 		fmt.Sprintf("TASK_LAST_STATE=%s", n.Task.LastState()),
@@ -111,6 +112,7 @@ func (n Notification) Environment(tasks ...*Task) []string {
 func (n ErrorNotification) Environment() []string {
 	v := []string{
 		fmt.Sprintf("MSG=%s", n.Error),
+		fmt.Sprintf("SUBJECT=%s", "fz experienced a critical error"),
 	}
 
 	v = MergeEnvVars(v, n.Notifier.Envs)

@@ -1,16 +1,16 @@
 #!/bin/sh
-[ -e "${MAIL_TO}" ] \
+[ -n "${MAIL_TO}" ] \
   || ( echo "MAIL_TO is undefined" >&2 && exit 1 )
 
-[ -e "${MAIL_FROM}" ] \
+[ -n "${MAIL_FROM}" ] \
   || ( echo "MAIL_FROM is undefined" >&2 && exit 1 )
 
 set -eu
 
-MAIL_SUBJECT=${MAIL_SUBJECT:-${TASK_NAME}: state ${TASK_STATE}}
+# allow the subject line to be overridden
+MAIL_SUBJECT=${MAIL_SUBJECT:-${SUBJECT}}
 
-cat <<EOF | mail -j "${MAIL_FROM}" -s "${MAIL_SUBJECT}" "${MAIL_ADDRESS}"
-${RESULT_OUTPUT}
+timeout 0.2 cat <<EOF | mail -r "${MAIL_FROM}" -s "${MAIL_SUBJECT}" "${MAIL_TO}"
+${MSG}
 ---
-$(timeout 0.2 cat)
 EOF
