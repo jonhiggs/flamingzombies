@@ -1,14 +1,40 @@
 #!/bin/sh
+#
+# Ensures that there are at least <MINIMUM> processes named <PROC>.
+#
+# Usage: snmp_hrSWRun <PROC> <MINIMUM>
+#
+# You can get a list of available volumes with the command:
+#
+#   snmp walk -c <SNMP_COMMUNITY> -v <SNMP_VERSION> <SNMP_HOST> hrSWRunName
+#
+
+set -e
+[ -n "${SNMP_HOST}" ] \
+  || ( echo "SNMP_HOST is undefined" >&2 && exit 1 )
+
+[ $# -ne 2 ] \
+  && ( echo "command did not receive two arguments" >&2 && exit 1 )
+
 set -eu
 
-if [ $# -ne 2 ]; then
-  echo "usage: $0 <host> <procName>" >&2
-  exit 1
-fi
-
-SNMP_HOST=$1
 SNMP_VERSION=${SNMP_VERSION:-2c}
 SNMP_COMMUNITY=${SNMP_COMMUNITY:-public}
 
-snmp walk -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" hrSWRunName \
-  | awk -v n="$2" '($NF==n) { sub("hrSWRunName\.","",$1); print $1}'
+if [ "$(uname -s)" = "OpenBSD" ]; then
+  SNMP_WALK="snmp walk"
+  SNMP_GET="snmp get"
+else
+  SNMP_WALK="snmpwalk"
+  SNMP_GET="snmpget"
+fi
+
+processCount() {
+  ${SNMP_WALK} -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" hrSWRunName \
+    | grep -c "STRING: $1$"
+}
+
+n=$(processCount $1)
+echo $n
+
+[ "$n" -ge "$2" ]
