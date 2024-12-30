@@ -32,10 +32,18 @@ func (g Gate) Execute(t *Task) bool {
 	return true
 }
 
-func (g Gate) Environment() []string {
+func (g Gate) Environment(tasks ...Task) []string {
 	var v []string
 
+	v = MergeEnvVars(v, []string{
+		fmt.Sprintf("GATE_NAME=%s", g.Name),
+		fmt.Sprintf("GATE_TIMEOUT=%d", DEFAULT_GATE_TIMEOUT_SECONDS),
+	})
+
 	v = MergeEnvVars(v, g.Envs)
+	for _, t := range tasks {
+		v = MergeEnvVars(v, t.Environment())
+	}
 	v = MergeEnvVars(v, cfg.Defaults.Envs)
 
 	return v

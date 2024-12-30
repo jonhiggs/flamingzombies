@@ -311,6 +311,8 @@ func TestConfigGateToFailed(t *testing.T) {
 	}
 
 	wantEnvironment := []string{
+		"GATE_NAME=to_failed",
+		"GATE_TIMEOUT=1",
 		"SNMP_COMMUNITY=default",
 		"SNMP_VERSION=2c",
 		"EMAIL_FROM=fz@example",
