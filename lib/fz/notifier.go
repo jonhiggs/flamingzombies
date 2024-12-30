@@ -29,10 +29,6 @@ func (n Notifier) Execute(env []string, notifyErrors bool) {
 	stderrBytes, _ := io.ReadAll(stderr)
 	cmd.Wait()
 
-	if err != nil {
-		Error(fmt.Errorf("notifier %s: %w", n.Name, err), notifyErrors)
-	}
-
 	Logger.Debug("output",
 		"notifier", n.Name,
 		"stdout", strings.TrimSuffix(string(stdoutBytes), "\n"),
@@ -42,13 +38,11 @@ func (n Notifier) Execute(env []string, notifyErrors bool) {
 	if err != nil {
 		if os.IsPermission(err) {
 			Error(fmt.Errorf("notifier %s: %w", n.Name, ErrInvalidPermissions), notifyErrors)
-		}
-
-		if ctx.Err() == context.DeadlineExceeded {
+		} else if ctx.Err() == context.DeadlineExceeded {
 			Error(fmt.Errorf("notifier %s: %w", n.Name, ErrTimeout), notifyErrors)
+		} else {
+			Error(fmt.Errorf("notifier %s: %w", n.Name, err), notifyErrors)
 		}
-
-		return
 	}
 }
 

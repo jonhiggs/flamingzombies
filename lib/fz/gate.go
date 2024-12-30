@@ -3,8 +3,10 @@ package fz
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -15,17 +17,30 @@ func (g Gate) Execute(t *Task) bool {
 
 	cmd.Dir = cfg.Directory
 	cmd.Env = append(g.Environment(), t.Environment()...)
+	stderr, _ := cmd.StderrPipe()
+	stdout, _ := cmd.StdoutPipe()
 
-	err := cmd.Run()
-	if ctx.Err() == context.DeadlineExceeded {
-		Error(fmt.Errorf("gate %s: %w", g.Name, ErrTimeout), true)
-		return false
-	}
+	err := cmd.Start()
+	stdoutBytes, _ := io.ReadAll(stdout)
+	stderrBytes, _ := io.ReadAll(stderr)
+	cmd.Wait()
+
+	Logger.Debug("output",
+		"gate", g.Name,
+		"task", t.Name,
+		"stdout", strings.TrimSuffix(string(stdoutBytes), "\n"),
+		"stderr", strings.TrimSuffix(string(stderrBytes), "\n"),
+	)
 
 	if err != nil {
 		if os.IsPermission(err) {
-			Error(fmt.Errorf("task %s: %w", g.Name, ErrInvalidPermissions), true)
+			Error(fmt.Errorf("gate %s: %w", g.Name, ErrInvalidPermissions), true)
+		} else if ctx.Err() == context.DeadlineExceeded {
+			Error(fmt.Errorf("gate %s: %w", g.Name, ErrTimeout), true)
+		} else {
+			Error(fmt.Errorf("gate %s: %w", g.Name, err), true)
 		}
+
 		return false
 	}
 
