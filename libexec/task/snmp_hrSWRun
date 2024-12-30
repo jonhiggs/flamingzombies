@@ -23,10 +23,8 @@ SNMP_COMMUNITY=${SNMP_COMMUNITY:-public}
 
 if [ "$(uname -s)" = "OpenBSD" ]; then
   SNMP_WALK="snmp walk"
-  SNMP_GET="snmp get"
 else
   SNMP_WALK="snmpwalk"
-  SNMP_GET="snmpget"
 fi
 
 processCount() {
@@ -34,7 +32,7 @@ processCount() {
     | grep -c "STRING: $1$"
 }
 
-n=$(processCount $1)
-echo $n
+n=$(processCount "$1")
+echo "$n"
 
 [ "$n" -ge "$2" ]
