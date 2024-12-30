@@ -44,7 +44,9 @@ X:
 		for _, g := range gs {
 			if g.Execute(n.Task) == false {
 				Logger.Debug("gate is closed",
-					"gate", g.Name,
+					"name", g.Name,
+					"notifier", n.Notifier.Name,
+					"task", n.Task.Name,
 				)
 				closedGates = append(closedGates, g)
 				continue X
@@ -53,6 +55,7 @@ X:
 			openGates = append(openGates, g)
 			Logger.Debug("gate is open",
 				"name", g.Name,
+				"notifier", n.Notifier.Name,
 				"task", n.Task.Name,
 			)
 		}
@@ -63,25 +66,6 @@ X:
 	}
 
 	return openGates, (len(closedGates) == 0)
-}
-
-func (n Notification) subject() string {
-	return fmt.Sprintf(
-		"task %s changed state from %s to %s",
-		n.Task.Name,
-		n.Task.LastState(),
-		n.Task.State(),
-	)
-}
-
-func (n Notification) body() string {
-	if n.Task.State() == STATE_OK {
-		return n.Task.RecoverBody
-	} else if n.Task.State() == STATE_FAIL {
-		return n.Task.ErrorBody
-	}
-
-	return fmt.Sprintf("The task %s is in an %s state", n.Task.Name, n.Task.State())
 }
 
 // The environment variables provided to the notifiers
