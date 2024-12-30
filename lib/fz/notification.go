@@ -27,7 +27,7 @@ func ProcessNotifications() {
 				}
 
 				Logger.Info("sending notification", "notifier", n.Notifier.Name)
-				n.Notifier.Execute(n.environment(), true)
+				n.Notifier.Execute(n.Environment(n.Task), true)
 			}
 		}
 	}()
@@ -85,32 +85,34 @@ func (n Notification) body() string {
 }
 
 // The environment variables provided to the notifiers
-func (n Notification) environment() []string {
+func (n Notification) Environment(tasks ...*Task) []string {
 	v := []string{
-		fmt.Sprintf("DURATION_MS=%d", n.Duration.Milliseconds()),
-		fmt.Sprintf("EPOCH=%d", n.Timestamp.Unix()),
-		fmt.Sprintf("PRIORITY=%d", n.Task.Priority),
-		fmt.Sprintf("LAST_STATE=%s", n.Task.LastState()),
-		fmt.Sprintf("NAME=%s", n.Task.Name),
-		fmt.Sprintf("OUTPUT=%s", n.Task.LastResultOutput),
-		fmt.Sprintf("STATE=%s", n.Task.State()),
-		fmt.Sprintf("TIMEOUT_MS=%d", n.Task.TimeoutSeconds*1000),
+		fmt.Sprintf("TASK_DURATION_MS=%d", n.Duration.Milliseconds()),
+		fmt.Sprintf("TASK_EPOCH=%d", n.Timestamp.Unix()),
+		fmt.Sprintf("TASK_LAST_STATE=%s", n.Task.LastState()),
+		fmt.Sprintf("TASK_NAME=%s", n.Task.Name),
+		fmt.Sprintf("TASK_OUTPUT=%s", n.Task.LastResultOutput),
+		fmt.Sprintf("TASK_PRIORITY=%d", n.Task.Priority),
+		fmt.Sprintf("TASK_STATE=%s", n.Task.State()),
+		fmt.Sprintf("TASK_TIMEOUT_MS=%d", n.Task.TimeoutSeconds*1000),
 	}
 
-	for _, e := range n.Notifier.Envs {
-		v = append(v, e)
+	for _, t := range tasks {
+		v = MergeEnvVars(v, t.Envs)
 	}
+
+	v = MergeEnvVars(v, n.Notifier.Envs)
+	v = MergeEnvVars(v, cfg.Defaults.Envs)
 
 	return v
 }
 
 // The environment variables provided to the error_notifiers
 func (n ErrorNotification) Environment() []string {
-	v := []string{}
+	var v []string
 
-	for _, e := range n.Notifier.Environment() {
-		v = append(v, e)
-	}
+	v = MergeEnvVars(v, n.Notifier.Envs)
+	v = MergeEnvVars(v, cfg.Defaults.Envs)
 
 	return v
 }
