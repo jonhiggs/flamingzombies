@@ -1,4 +1,18 @@
 #!/bin/sh
+set -e
+
+[ -n "${TASK_STATE}" ] \
+  || ( echo "TASK_STATE is undefined" >&2 && exit 1 )
+
+[ -n "${TASK_LAST_NOTIFICATION}" ] \
+  || ( echo "TASK_LAST_NOTIFICATION is undefined" >&2 && exit 1 )
+
+[ -n "${TASK_LAST_FAIL}" ] \
+  || ( echo "TASK_LAST_FAIL is undefined" >&2 && exit 1 )
+
+[ -n "${TASK_LAST_FAIL}" ] \
+  || ( echo "TASK_LAST_OK is undefined" >&2 && exit 1 )
+
 set -eu
 
 case $1 in
