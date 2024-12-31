@@ -69,7 +69,7 @@ func (t *Task) Run() {
 	startTime := time.Now()
 	err := cmd.Start()
 	if err != nil {
-		Error(fmt.Errorf("task %s: %w", t.Name, err), true)
+		Error(t.TraceID, fmt.Errorf("task %s: %w", t.Name, err), true)
 		return
 	}
 
@@ -89,13 +89,13 @@ func (t *Task) Run() {
 	duration := time.Now().Sub(startTime)
 
 	if ctx.Err() == context.DeadlineExceeded {
-		Error(fmt.Errorf("task %s: %w", t.Name, ErrTimeout), true)
+		Error(t.TraceID, fmt.Errorf("task %s: %w", t.Name, ErrTimeout), true)
 		return
 	}
 
 	if err != nil {
 		if os.IsPermission(err) {
-			Error(fmt.Errorf("task %s: %w", t.Name, ErrInvalidPermissions), true)
+			Error(t.TraceID, fmt.Errorf("task %s: %w", t.Name, ErrInvalidPermissions), true)
 			return
 		}
 	}

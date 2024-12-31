@@ -38,11 +38,11 @@ func (n Notifier) Execute(traceID string, env []string, notifyErrors bool) {
 
 	if err != nil {
 		if os.IsPermission(err) {
-			Error(fmt.Errorf("notifier %s: %w", n.Name, ErrInvalidPermissions), notifyErrors)
+			Error(traceID, fmt.Errorf("notifier %s: %w", n.Name, ErrInvalidPermissions), notifyErrors)
 		} else if ctx.Err() == context.DeadlineExceeded {
-			Error(fmt.Errorf("notifier %s: %w", n.Name, ErrTimeout), notifyErrors)
+			Error(traceID, fmt.Errorf("notifier %s: %w", n.Name, ErrTimeout), notifyErrors)
 		} else {
-			Error(fmt.Errorf("notifier %s: %w", n.Name, err), notifyErrors)
+			Error(traceID, fmt.Errorf("notifier %s: %w", n.Name, err), notifyErrors)
 		}
 	}
 }

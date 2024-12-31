@@ -28,13 +28,14 @@ func StartLogger(l string) {
 }
 
 // Log an error and trigger the error_notifiers
-func Error(err error, notifyErrors bool) {
+func Error(traceID string, err error, notifyErrors bool) {
 	Logger.Error(fmt.Sprintf("%s", err))
 	if notifyErrors {
 		for _, errN := range cfg.Defaults.ErrorNotifierNames {
 			ErrorNotifyCh <- ErrorNotification{
 				Notifier: cfg.GetNotifierByName(errN),
 				Error:    err,
+				TraceID:  traceID,
 			}
 		}
 	}

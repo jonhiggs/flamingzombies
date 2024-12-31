@@ -35,11 +35,11 @@ func (g Gate) Execute(t *Task) bool {
 
 	if err != nil {
 		if os.IsPermission(err) {
-			Error(fmt.Errorf("gate %s: %w", g.Name, ErrInvalidPermissions), true)
+			Error(t.TraceID, fmt.Errorf("gate %s: %w", g.Name, ErrInvalidPermissions), true)
 		} else if ctx.Err() == context.DeadlineExceeded {
-			Error(fmt.Errorf("gate %s: %w", g.Name, ErrTimeout), true)
+			Error(t.TraceID, fmt.Errorf("gate %s: %w", g.Name, ErrTimeout), true)
 		} else {
-			Error(fmt.Errorf("gate %s: %w", g.Name, err), true)
+			Error(t.TraceID, fmt.Errorf("gate %s: %w", g.Name, err), true)
 		}
 
 		return false
