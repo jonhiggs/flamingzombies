@@ -1,10 +1,20 @@
 package run
 
 import (
+	"context"
 	"io"
 	"os/exec"
 	"time"
 )
+
+type Cmd struct {
+	Command string
+	Args    []string
+	Envs    []string
+	Dir     string
+	TraceID string
+	Timeout time.Duration
+}
 
 // The result of a command evaluation.
 type Result struct {
@@ -16,9 +26,16 @@ type Result struct {
 	TraceID     string
 }
 
-func Cmd(cmd *exec.Cmd, traceID string) Result {
+func (c Cmd) Start() Result {
 	var r Result
-	r.TraceID = traceID
+
+	r.TraceID = c.TraceID
+	ctx, cancel := context.WithTimeout(context.Background(), c.Timeout)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, c.Command, c.Args...)
+	cmd.Dir = c.Dir
+	cmd.Env = c.Envs
 
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()

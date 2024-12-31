@@ -1,9 +1,7 @@
 package fz
 
 import (
-	"context"
 	"fmt"
-	"os/exec"
 	"time"
 
 	"github.com/jonhiggs/flamingzombies/lib/run"
@@ -12,14 +10,16 @@ import (
 // Return a bool describe the state of the gate. The task is required because
 // in influences the environment used when invoking the gate's command.
 func (g Gate) IsOpen(t *Task) (bool, run.Result) {
-	ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_GATE_TIMEOUT_SECONDS*time.Second)
-	defer cancel()
-	cmd := exec.CommandContext(ctx, g.Command, g.Args...)
+	c := run.Cmd{
+		Command: g.Command,
+		Args:    g.Args,
+		Envs:    g.environment(t),
+		Dir:     cfg.Directory,
+		TraceID: t.TraceID,
+		Timeout: DEFAULT_GATE_TIMEOUT_SECONDS * time.Second,
+	}
 
-	cmd.Dir = cfg.Directory
-	cmd.Env = g.environment(t)
-
-	r := run.Cmd(cmd, t.TraceID)
+	r := c.Start()
 
 	return r.ExitCode == 0, r
 }
