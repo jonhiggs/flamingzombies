@@ -333,8 +333,8 @@ func TestConfigGateToFailed(t *testing.T) {
 		t.Errorf("got %v, want %v", got.Args, want.Args)
 	}
 
-	if fmt.Sprintf("%v", got.Environment()) != fmt.Sprintf("%s", wantEnvironment) {
-		t.Errorf("got %v, want %v", got.Environment(), wantEnvironment)
+	if fmt.Sprintf("%v", got.environment(nil)) != fmt.Sprintf("%s", wantEnvironment) {
+		t.Errorf("got %v, want %v", got.environment(nil), wantEnvironment)
 	}
 }
 

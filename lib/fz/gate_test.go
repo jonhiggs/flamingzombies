@@ -18,7 +18,7 @@ func TestGateEnvironment(t *testing.T) {
 			Priority:         3,
 		}
 
-		got := gate.Environment(task)
+		got := gate.environment(task)
 		want := []string{
 			"GATE_NAME=zero",
 			"GATE_TIMEOUT=1",
@@ -56,7 +56,7 @@ func TestGateEnvironment(t *testing.T) {
 			Priority:         3,
 		}
 
-		got := gate.Environment(task)
+		got := gate.environment(task)
 		want := []string{
 			"GATE_NAME=zero",
 			"GATE_TIMEOUT=1",

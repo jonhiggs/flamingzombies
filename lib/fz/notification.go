@@ -47,7 +47,8 @@ X:
 		openGates = []*Gate{} // ignore the gates from prior gateset
 
 		for _, g := range gs {
-			if g.Execute(n.Task) == false {
+			isOpen, _ := g.IsOpen(n.Task)
+			if !isOpen {
 				Logger.Debug("gate is closed",
 					"name", g.Name,
 					"notifier", n.Notifier.Name,

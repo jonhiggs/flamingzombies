@@ -6,49 +6,45 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 )
 
-func (g Gate) Execute(t *Task) bool {
+// Return a bool describe the state of the gate. The task is required because
+// in influences the environment used when invoking the gate's command.
+func (g Gate) IsOpen(t *Task) (bool, CommandResult) {
+	var r CommandResult
 	ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_GATE_TIMEOUT_SECONDS*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, g.Command, g.Args...)
 
 	cmd.Dir = cfg.Directory
-	cmd.Env = append(g.Environment(), t.Environment()...)
+	cmd.Env = g.environment(t)
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
 
 	err := cmd.Start()
-	stdoutBytes, _ := io.ReadAll(stdout)
-	stderrBytes, _ := io.ReadAll(stderr)
+	r.StdoutBytes, _ = io.ReadAll(stdout)
+	r.StderrBytes, _ = io.ReadAll(stderr)
 	cmd.Wait()
-
-	Logger.Debug("output",
-		"gate", g.Name,
-		"task", t.Name,
-		"stdout", strings.TrimSuffix(string(stdoutBytes), "\n"),
-		"stderr", strings.TrimSuffix(string(stderrBytes), "\n"),
-		"trace_id", t.TraceID,
-	)
 
 	if err != nil {
 		if os.IsPermission(err) {
-			Error(t.TraceID, fmt.Errorf("gate %s: %w", g.Name, ErrInvalidPermissions), true)
+			r.Err = ErrInvalidPermissions
 		} else if ctx.Err() == context.DeadlineExceeded {
-			Error(t.TraceID, fmt.Errorf("gate %s: %w", g.Name, ErrTimeout), true)
+			r.Err = ErrTimeout
 		} else {
-			Error(t.TraceID, fmt.Errorf("gate %s: %w", g.Name, err), true)
+			exiterr, _ := err.(*exec.ExitError)
+			r.ExitCode = exiterr.ExitCode()
 		}
 
-		return false
+		return false, r
 	}
 
-	return true
+	return true, r
 }
 
-func (g Gate) Environment(tasks ...Task) []string {
+// return the environment needed when invoking a Gate for a Task.
+func (g Gate) environment(i interface{}) []string {
 	var v []string
 
 	v = MergeEnvVars(v, []string{
@@ -57,9 +53,13 @@ func (g Gate) Environment(tasks ...Task) []string {
 	})
 
 	v = MergeEnvVars(v, g.Envs)
-	for _, t := range tasks {
+
+	// Fetch the task env vars if function was called with *Task as argument.
+	t, ok := i.(Task)
+	if ok {
 		v = MergeEnvVars(v, t.Environment())
 	}
+
 	v = MergeEnvVars(v, cfg.Defaults.Envs)
 
 	return v
