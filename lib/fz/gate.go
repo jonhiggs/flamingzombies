@@ -3,49 +3,25 @@ package fz
 import (
 	"context"
 	"fmt"
-	"io"
 	"os/exec"
 	"time"
+
+	"github.com/jonhiggs/flamingzombies/lib/run"
 )
 
 // Return a bool describe the state of the gate. The task is required because
 // in influences the environment used when invoking the gate's command.
-func (g Gate) IsOpen(t *Task) (bool, CommandResult) {
-	var r CommandResult
-	r.TraceID = t.TraceID
+func (g Gate) IsOpen(t *Task) (bool, run.Result) {
 	ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_GATE_TIMEOUT_SECONDS*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, g.Command, g.Args...)
 
 	cmd.Dir = cfg.Directory
 	cmd.Env = g.environment(t)
-	stderr, _ := cmd.StderrPipe()
-	stdout, _ := cmd.StdoutPipe()
 
-	startTime := time.Now()
-	err := cmd.Start()
-	if err != nil {
-		r.Err = err
-		r.ExitCode = -1
-		return false, r
-	}
-	r.StdoutBytes, _ = io.ReadAll(stdout)
-	r.StderrBytes, _ = io.ReadAll(stderr)
-	err = cmd.Wait()
-	r.Duration = time.Now().Sub(startTime)
+	r := run.Cmd(cmd, t.TraceID)
 
-	if err != nil {
-		if ctx.Err() == context.DeadlineExceeded {
-			r.Err = ErrTimeout
-		} else {
-			exiterr, _ := err.(*exec.ExitError)
-			r.ExitCode = exiterr.ExitCode()
-		}
-
-		return false, r
-	}
-
-	return true, r
+	return r.ExitCode == 0, r
 }
 
 // return the environment needed when invoking a Gate for a Task.

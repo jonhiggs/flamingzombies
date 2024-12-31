@@ -127,13 +127,3 @@ type ErrorNotification struct {
 	Error    error
 	TraceID  string
 }
-
-// The result of a command evaluation.
-type CommandResult struct {
-	StdoutBytes []byte
-	StderrBytes []byte
-	Duration    time.Duration
-	ExitCode    int
-	Err         error
-	TraceID     string
-}
