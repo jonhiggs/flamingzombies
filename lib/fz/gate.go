@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"time"
 )
@@ -13,6 +12,7 @@ import (
 // in influences the environment used when invoking the gate's command.
 func (g Gate) IsOpen(t *Task) (bool, CommandResult) {
 	var r CommandResult
+	r.TraceID = t.TraceID
 	ctx, cancel := context.WithTimeout(context.Background(), DEFAULT_GATE_TIMEOUT_SECONDS*time.Second)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, g.Command, g.Args...)
@@ -22,15 +22,20 @@ func (g Gate) IsOpen(t *Task) (bool, CommandResult) {
 	stderr, _ := cmd.StderrPipe()
 	stdout, _ := cmd.StdoutPipe()
 
+	startTime := time.Now()
 	err := cmd.Start()
+	if err != nil {
+		r.Err = err
+		r.ExitCode = -1
+		return false, r
+	}
 	r.StdoutBytes, _ = io.ReadAll(stdout)
 	r.StderrBytes, _ = io.ReadAll(stderr)
-	cmd.Wait()
+	err = cmd.Wait()
+	r.Duration = time.Now().Sub(startTime)
 
 	if err != nil {
-		if os.IsPermission(err) {
-			r.Err = ErrInvalidPermissions
-		} else if ctx.Err() == context.DeadlineExceeded {
+		if ctx.Err() == context.DeadlineExceeded {
 			r.Err = ErrTimeout
 		} else {
 			exiterr, _ := err.(*exec.ExitError)

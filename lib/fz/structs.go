@@ -135,4 +135,5 @@ type CommandResult struct {
 	Duration    time.Duration
 	ExitCode    int
 	Err         error
+	TraceID     string
 }
