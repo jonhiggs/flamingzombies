@@ -45,24 +45,34 @@ func (g Gate) IsOpen(t *Task) (bool, CommandResult) {
 
 // return the environment needed when invoking a Gate for a Task.
 func (g Gate) environment(i interface{}) []string {
-	var v []string
+	var e []string
 
-	v = MergeEnvVars(v, []string{
+	e = MergeEnvVars(e, []string{
 		fmt.Sprintf("GATE_NAME=%s", g.Name),
 		fmt.Sprintf("GATE_TIMEOUT=%d", DEFAULT_GATE_TIMEOUT_SECONDS),
 	})
 
-	v = MergeEnvVars(v, g.Envs)
+	e = MergeEnvVars(e, g.Envs)
 
 	// Fetch the task env vars if function was called with *Task as argument.
-	t, ok := i.(Task)
+	t, ok := i.(*Task)
 	if ok {
-		v = MergeEnvVars(v, t.Environment())
 	}
 
-	v = MergeEnvVars(v, cfg.Defaults.Envs)
+	switch v := i.(type) {
+	case *Task:
+		e = MergeEnvVars(e, t.Environment())
+	case Task:
+		e = MergeEnvVars(e, t.Environment())
+	case nil:
+		// do nothing
+	default:
+		panic(fmt.Sprintf("cannot accept %v", v))
+	}
 
-	return v
+	e = MergeEnvVars(e, cfg.Defaults.Envs)
+
+	return e
 }
 
 // check the state of a set of gates
