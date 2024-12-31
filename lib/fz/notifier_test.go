@@ -9,7 +9,7 @@ var notifiers = []Notifier{
 	Notifier{
 		Name:           "zero",
 		TimeoutSeconds: 3,
-		GateSets: [][]string{
+		GateSetStrings: [][]string{
 			[]string{"gate_zero"},
 		},
 	},

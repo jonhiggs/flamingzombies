@@ -55,7 +55,7 @@ func TestConfig(t *testing.T) {
 		t.Errorf("got %d, want %d", len(got.Gates), 6)
 	}
 
-	gotGateSetsLogger := got.GetNotifierGateSets("logger")
+	gotGateSetsLogger := got.GetNotifierByName("logger").GateSets()
 	if len(gotGateSetsLogger) != 2 {
 		t.Errorf("got %d, want %d", len(gotGateSetsLogger), 2)
 	}
@@ -72,7 +72,7 @@ func TestConfig(t *testing.T) {
 		t.Errorf("got %s, want %s", gotGateSetsLogger[0][1].Name, "to_failed")
 	}
 
-	gotGateSetsStatsd := got.GetNotifierGateSets("statsd")
+	gotGateSetsStatsd := got.GetNotifierByName("statsd").GateSets()
 	if len(gotGateSetsStatsd) != 0 {
 		t.Errorf("got %d, want %d", len(gotGateSetsStatsd), 0)
 	}
@@ -211,7 +211,7 @@ func TestConfigNotifierLogger(t *testing.T) {
 		Name:           "logger",
 		Command:        "notifier/null",
 		TimeoutSeconds: 1,
-		GateSets: [][]string{
+		GateSetStrings: [][]string{
 			[]string{"is_not_unknown", "to_failed", "defer"},
 			[]string{"is_not_unknown", "is_failed", "renotify"},
 		},
@@ -231,8 +231,8 @@ func TestConfigNotifierLogger(t *testing.T) {
 		t.Errorf("got %d, want %d", got.TimeoutSeconds, want.TimeoutSeconds)
 	}
 
-	if fmt.Sprintf("%v", got.GateSets) != fmt.Sprintf("%s", want.GateSets) {
-		t.Errorf("got %v, want %v", got.GateSets, want.GateSets)
+	if fmt.Sprintf("%v", got.GateSetStrings) != fmt.Sprintf("%s", want.GateSetStrings) {
+		t.Errorf("got %v, want %v", got.GateSetStrings, want.GateSetStrings)
 	}
 
 	if fmt.Sprintf("%v", got.Envs) != fmt.Sprintf("%s", want.Envs) {
@@ -252,7 +252,7 @@ func TestConfigNotifierErrorEmailer(t *testing.T) {
 		Name:           "error_emailer",
 		Command:        "notifier/email",
 		TimeoutSeconds: 3,
-		GateSets:       [][]string{},
+		GateSetStrings: [][]string{},
 		Envs: []string{
 			"EMAIL_ADDRESS=jon@altos.au",
 			"EMAIL_FROM=fz@altos.au",
@@ -284,8 +284,8 @@ func TestConfigNotifierErrorEmailer(t *testing.T) {
 		t.Errorf("got %d, want %d", got.TimeoutSeconds, want.TimeoutSeconds)
 	}
 
-	if fmt.Sprintf("%v", got.GateSets) != fmt.Sprintf("%s", want.GateSets) {
-		t.Errorf("got %v, want %v", got.GateSets, want.GateSets)
+	if fmt.Sprintf("%v", got.GateSetStrings) != fmt.Sprintf("%s", want.GateSetStrings) {
+		t.Errorf("got %v, want %v", got.GateSetStrings, want.GateSetStrings)
 	}
 
 	if fmt.Sprintf("%v", got.Environment()) != fmt.Sprintf("%s", wantEnvironment) {
@@ -372,7 +372,7 @@ func TestConfigValidateNotifiersExistForTask(t *testing.T) {
 func TestConfigValidateGatesExistForNotifier(t *testing.T) {
 	cfg = Config{
 		Notifiers: []Notifier{
-			Notifier{GateSets: [][]string{[]string{"dont_exist"}}},
+			Notifier{GateSetStrings: [][]string{[]string{"dont_exist"}}},
 		},
 	}
 

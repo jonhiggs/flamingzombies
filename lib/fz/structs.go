@@ -58,7 +58,7 @@ type ConfigDefaults struct {
 
 // A Notifier script is capable of emitting an event to an external service.
 type Notifier struct {
-	GateSets       [][]string `toml:"gates"`
+	GateSetStrings [][]string `toml:"gates"`
 	TimeoutSeconds int        `toml:"timeout"`
 	Args           []string   `toml:"args"`
 	Command        string     `toml:"command"`

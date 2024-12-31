@@ -43,7 +43,7 @@ func (n Notification) gateEvaluate() ([]*Gate, bool) {
 	openGates := []*Gate{}
 	closedGates := []*Gate{}
 X:
-	for gsi, gs := range cfg.GetNotifierGateSets(n.Notifier.Name) {
+	for gsi, gs := range n.Notifier.GateSets() {
 		openGates = []*Gate{} // ignore the gates from prior gateset
 
 		for _, g := range gs {

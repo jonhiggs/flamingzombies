@@ -176,22 +176,6 @@ func (c Config) GetGateByName(name string) *Gate {
 	return nil
 }
 
-// Return the GateSets attached to a notifier
-func (c Config) GetNotifierGateSets(notifierName string) [][]*Gate {
-	r := [][]*Gate{}
-
-	n := c.GetNotifierByName(notifierName)
-	for _, gateSet := range n.GateSets {
-		gs := []*Gate{}
-		for _, gateName := range gateSet {
-			gs = append(gs, cfg.GetGateByName(gateName))
-		}
-		r = append(r, gs)
-	}
-
-	return r
-}
-
 func (c Config) ErrorNotification() {
 	//for _, n := range c.ErrorNotifiers {
 	//	NotifyCh <- Notification{n, t}
@@ -227,7 +211,7 @@ func (c Config) validateNotifiersExist() error {
 
 func (c Config) validateGatesExist() error {
 	for _, n := range c.Notifiers {
-		for i, gs := range n.GateSets {
+		for i, gs := range n.GateSetStrings {
 			for ii, g := range gs {
 				if c.GetGateByName(g) == nil {
 					return fmt.Errorf("gate [%d][%d]: %w", i, ii, ErrNotExist)

@@ -47,6 +47,21 @@ func (n Notifier) Execute(traceID string, env []string, notifyErrors bool) {
 	}
 }
 
+// Resolve the *Gates from the GateSetStrings
+func (n Notifier) GateSets() [][]*Gate {
+	r := [][]*Gate{}
+
+	for _, gateSet := range n.GateSetStrings {
+		gs := []*Gate{}
+		for _, gateName := range gateSet {
+			gs = append(gs, cfg.GetGateByName(gateName))
+		}
+		r = append(r, gs)
+	}
+
+	return r
+}
+
 func (n Notifier) Environment() []string {
 	var v []string
 
