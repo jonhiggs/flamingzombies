@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-var NotifyCh = make(chan Notification, 100)
+var NotifyCh = make(chan TaskNotification, 100)
 var ErrorNotifyCh = make(chan ErrorNotification, 100)
 
 func ProcessNotifications() {
@@ -39,7 +39,7 @@ func ProcessNotifications() {
 }
 
 // evaluate the state of the gatesets, and return true if the gates are open.
-func (n Notification) gateEvaluate() ([]*Gate, bool) {
+func (n TaskNotification) gateEvaluate() ([]*Gate, bool) {
 	openGates := []*Gate{}
 	closedGates := []*Gate{}
 X:
@@ -85,7 +85,7 @@ X:
 }
 
 // The environment variables provided to the notifiers
-func (n Notification) Environment(tasks ...*Task) []string {
+func (n TaskNotification) Environment(tasks ...*Task) []string {
 	v := []string{
 		fmt.Sprintf("MSG=%s", n.Task.LastResultOutput),
 		fmt.Sprintf("SUBJECT=%s: state is %s", n.Task.Name, n.Task.State()),
