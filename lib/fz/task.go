@@ -51,8 +51,11 @@ func (t Task) Ready(ts time.Time) bool {
 }
 
 func (t *Task) Run() {
-	Logger.Info("executing task", "task", t.Name)
 	t.TraceID = trace.ID()
+	Logger.Info("executing task",
+		"task", t.Name,
+		"trace_id", t.TraceID,
+	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), t.timeout())
 	defer cancel()
@@ -79,6 +82,7 @@ func (t *Task) Run() {
 		"task", t.Name,
 		"stdout", t.LastResultOutput,
 		"stderr", strings.TrimSuffix(string(errorMessage), "\n"),
+		"trace_id", t.TraceID,
 	)
 
 	err = cmd.Wait()
@@ -107,6 +111,7 @@ func (t *Task) Run() {
 	Logger.Debug("exit code",
 		"task", t.Name,
 		"code", exitCode,
+		"trace_id", t.TraceID,
 	)
 
 	switch exitCode {
@@ -128,12 +133,14 @@ func (t *Task) Run() {
 			"notifier", n.Name,
 			"last_state", t.LastState(),
 			"new_state", t.State(),
+			"trace_id", t.TraceID,
 		)
 		NotifyCh <- Notification{
 			Duration:  duration,
 			Notifier:  n,
 			Task:      t,
 			Timestamp: time.Now(),
+			TraceID:   t.TraceID,
 		}
 	}
 
@@ -144,6 +151,7 @@ func (t *Task) RecordStatus(b bool) {
 	Logger.Debug("recording result",
 		"task", t.Name,
 		"state", t.State(),
+		"trace_id", t.TraceID,
 	)
 
 	t.History = t.History << 1

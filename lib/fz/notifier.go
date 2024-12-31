@@ -14,7 +14,7 @@ func (n Notifier) Timeout() time.Duration {
 	return time.Duration(n.TimeoutSeconds) * time.Second
 }
 
-func (n Notifier) Execute(env []string, notifyErrors bool) {
+func (n Notifier) Execute(traceID string, env []string, notifyErrors bool) {
 	ctx, cancel := context.WithTimeout(context.Background(), n.Timeout())
 	defer cancel()
 
@@ -33,6 +33,7 @@ func (n Notifier) Execute(env []string, notifyErrors bool) {
 		"notifier", n.Name,
 		"stdout", strings.TrimSuffix(string(stdoutBytes), "\n"),
 		"stderr", strings.TrimSuffix(string(stderrBytes), "\n"),
+		"trace_id", traceID,
 	)
 
 	if err != nil {

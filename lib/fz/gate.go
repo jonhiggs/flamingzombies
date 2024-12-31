@@ -30,6 +30,7 @@ func (g Gate) Execute(t *Task) bool {
 		"task", t.Name,
 		"stdout", strings.TrimSuffix(string(stdoutBytes), "\n"),
 		"stderr", strings.TrimSuffix(string(stderrBytes), "\n"),
+		"trace_id", t.TraceID,
 	)
 
 	if err != nil {

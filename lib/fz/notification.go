@@ -14,7 +14,7 @@ func ProcessNotifications() {
 			select {
 			case n := <-ErrorNotifyCh:
 				Logger.Info("sending error notification", "notifier", n.Notifier.Name)
-				n.Notifier.Execute(n.Environment(), false)
+				n.Notifier.Execute(n.TraceID, n.Environment(), false)
 
 			case n := <-NotifyCh:
 				_, ok := n.gateEvaluate()
@@ -22,12 +22,17 @@ func ProcessNotifications() {
 					Logger.Debug("notification cancelled. all gates are closed.",
 						"notifier", n.Notifier.Name,
 						"task", n.Task.Name,
+						"trace_id", n.TraceID,
 					)
 					break C
 				}
 
-				Logger.Info("sending notification", "notifier", n.Notifier.Name)
-				n.Notifier.Execute(n.Environment(n.Task), true)
+				Logger.Info("sending notification",
+					"notifier", n.Notifier.Name,
+					"task", n.Task.Name,
+					"trace_id", n.TraceID,
+				)
+				n.Notifier.Execute(n.TraceID, n.Environment(n.Task), true)
 			}
 		}
 	}()
@@ -47,6 +52,7 @@ X:
 					"name", g.Name,
 					"notifier", n.Notifier.Name,
 					"task", n.Task.Name,
+					"trace_id", n.TraceID,
 				)
 				closedGates = append(closedGates, g)
 				continue X
@@ -57,10 +63,12 @@ X:
 				"name", g.Name,
 				"notifier", n.Notifier.Name,
 				"task", n.Task.Name,
+				"trace_id", n.TraceID,
 			)
 		}
 		Logger.Debug("gateset is open",
 			"gateset", gsi,
+			"trace_id", n.TraceID,
 		)
 		return openGates, true
 	}

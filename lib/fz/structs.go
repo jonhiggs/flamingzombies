@@ -110,6 +110,7 @@ type Notification struct {
 	Notifier  *Notifier
 	Task      *Task
 	Timestamp time.Time
+	TraceID   string
 }
 
 // An ErrorNotification are generated on error events. This are never expected
@@ -118,4 +119,5 @@ type Notification struct {
 type ErrorNotification struct {
 	Notifier *Notifier
 	Error    error
+	TraceID  string
 }
