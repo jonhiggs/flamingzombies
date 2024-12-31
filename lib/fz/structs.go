@@ -103,6 +103,7 @@ type Gate struct {
 	Name    string   `toml:"name"`    // friendly name
 }
 
+// TODO(jh) 20241231: Finish setting this up.
 type Notification interface {
 	GateSetOpen() bool
 	Environment() []string
