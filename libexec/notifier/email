@@ -5,6 +5,9 @@
 [ -n "${MAIL_FROM}" ] \
   || ( echo "MAIL_FROM is undefined" >&2 && exit 1 )
 
+[ -n "${TASK_TRACE_ID}" ] \
+  || ( echo "TASK_TRACE_ID is undefined" >&2 && exit 1 )
+
 set -eu
 
 # allow the subject line to be overridden
@@ -13,4 +16,5 @@ MAIL_SUBJECT=${MAIL_SUBJECT:-${SUBJECT}}
 timeout 0.2 cat <<EOF | mail -r "${MAIL_FROM}" -s "${MAIL_SUBJECT}" "${MAIL_TO}"
 ${MSG}
 ---
+${TASK_TRACE_ID}
 EOF
