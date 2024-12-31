@@ -1,16 +1,12 @@
 package fz
 
 import (
-	"context"
 	"fmt"
 	"hash/fnv"
-	"io"
-	"os"
-	"os/exec"
 	"regexp"
-	"strings"
 	"time"
 
+	"github.com/jonhiggs/flamingzombies/lib/run"
 	"github.com/jonhiggs/flamingzombies/lib/trace"
 )
 
@@ -52,69 +48,25 @@ func (t Task) Ready(ts time.Time) bool {
 
 func (t *Task) Run() {
 	t.TraceID = trace.ID()
-	Logger.Info("executing task",
-		"task", t.Name,
-		"trace_id", t.TraceID,
-	)
 
-	ctx, cancel := context.WithTimeout(context.Background(), t.timeout())
-	defer cancel()
-	cmd := exec.CommandContext(ctx, t.Command, t.Args...)
-	cmd.Dir = cfg.Directory
-	cmd.Env = t.Environment()
+	c := run.Cmd{
+		Command: t.Command,
+		Args:    t.Args,
+		Envs:    t.Environment(),
+		Dir:     cfg.Directory,
+		TraceID: t.TraceID,
+		Timeout: t.timeout(),
+	}
 
-	stderr, _ := cmd.StderrPipe()
-	stdout, _ := cmd.StdoutPipe()
+	r := c.Start()
 
-	startTime := time.Now()
-	err := cmd.Start()
-	if err != nil {
-		Error(t.TraceID, fmt.Errorf("task %s: %w", t.Name, err), true)
-		return
+	if r.ExitCode < 0 {
+		Error(t.TraceID, fmt.Errorf("task %s: %w", t.Name, r.Err), true)
 	}
 
 	t.LastRun = time.Now()
 
-	errorMessage, _ := io.ReadAll(stderr)
-	stdoutBytes, _ := io.ReadAll(stdout)
-	t.LastResultOutput = strings.TrimSuffix(string(stdoutBytes), "\n")
-	Logger.Debug("output",
-		"task", t.Name,
-		"stdout", t.LastResultOutput,
-		"stderr", strings.TrimSuffix(string(errorMessage), "\n"),
-		"trace_id", t.TraceID,
-	)
-
-	err = cmd.Wait()
-	duration := time.Now().Sub(startTime)
-
-	if ctx.Err() == context.DeadlineExceeded {
-		Error(t.TraceID, fmt.Errorf("task %s: %w", t.Name, ErrTimeout), true)
-		return
-	}
-
-	if err != nil {
-		if os.IsPermission(err) {
-			Error(t.TraceID, fmt.Errorf("task %s: %w", t.Name, ErrInvalidPermissions), true)
-			return
-		}
-	}
-
-	var exitCode int
-	if err != nil {
-		exiterr, _ := err.(*exec.ExitError)
-		exitCode = exiterr.ExitCode()
-	} else {
-		exitCode = 0
-	}
-
-	Logger.Debug("exit code",
-		"task", t.Name,
-		"code", exitCode,
-		"trace_id", t.TraceID,
-	)
-
-	switch exitCode {
+	switch r.ExitCode {
 	case 0:
 		t.RecordStatus(true)
 	case 1: // warn or error
@@ -127,20 +79,26 @@ func (t *Task) Run() {
 		t.RecordStatus(false)
 	}
 
+	Logger.Debug("exit code",
+		"task", t.Name,
+		"code", r.ExitCode,
+		"trace_id", t.TraceID,
+	)
+
 	for _, n := range t.notifiers() {
 		Logger.Debug("raising notification",
 			"task", t.Name,
 			"notifier", n.Name,
 			"last_state", t.LastState(),
 			"new_state", t.State(),
-			"trace_id", t.TraceID,
+			"trace_id", r.TraceID,
 		)
 		NotifyCh <- TaskNotification{
-			Duration:  duration,
+			Duration:  r.Duration,
 			Notifier:  n,
 			Task:      t,
 			Timestamp: time.Now(),
-			TraceID:   t.TraceID,
+			TraceID:   r.TraceID,
 		}
 	}
 

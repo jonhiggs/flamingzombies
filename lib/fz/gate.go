@@ -24,6 +24,29 @@ func (g Gate) IsOpen(t *Task) (bool, run.Result) {
 	return r.ExitCode == 0, r
 }
 
+// check the state of a set of gates
+func GateSetOpen(t *Task, gates ...*Gate) bool {
+	for _, g := range gates {
+		open, r := g.IsOpen(t)
+		Logger.Debug("checking gate",
+			"name", g.Name,
+			"open", fmt.Sprintf("%v", open),
+			"stdout", string(r.StdoutBytes),
+			"stderr", string(r.StderrBytes),
+			"exit_code", r.ExitCode,
+			"trace_id", t.TraceID,
+		)
+
+		// gateset is closed if any gate is closed
+		if !open {
+			return false
+		}
+	}
+	return true
+}
+
+/// PRIVATE ///////////////////////////////////////////////////////////////////
+
 // return the environment needed when invoking a Gate for a Task.
 func (g Gate) environment(i interface{}) []string {
 	var e []string
@@ -54,26 +77,4 @@ func (g Gate) environment(i interface{}) []string {
 	e = MergeEnvVars(e, cfg.Defaults.Envs)
 
 	return e
-}
-
-// check the state of a set of gates
-func GateSetOpen(t *Task, gates ...*Gate) bool {
-	for i, g := range gates {
-		open, r := g.IsOpen(t)
-		Logger.Debug("checking gate",
-			"name", g.Name,
-			"gateset_id", i,
-			"open", fmt.Sprintf("%v", open),
-			"stdout", string(r.StdoutBytes),
-			"stderr", string(r.StderrBytes),
-			"exit_code", r.ExitCode,
-			"trace_id", t.TraceID,
-		)
-
-		// gateset is closed if any gate is closed
-		if !open {
-			return false
-		}
-	}
-	return true
 }
