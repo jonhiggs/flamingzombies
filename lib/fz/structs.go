@@ -103,6 +103,11 @@ type Gate struct {
 	Name    string   `toml:"name"`    // friendly name
 }
 
+type Notification interface {
+	GateSetOpen() bool
+	Environment() []string
+}
+
 // A notification is generated upon the successful completion of any task. It
 // extracts data from the task to provide to the notifier.
 type TaskNotification struct {

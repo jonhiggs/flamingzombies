@@ -16,7 +16,7 @@ var testNotifier = Notifier{Name: "testing"}
 
 func TestNotificationEnvironment(t *testing.T) {
 	cfg.Defaults.Envs = []string{"MAIL_NAME=test@example"}
-	n := Notification{
+	n := TaskNotification{
 		Notifier:  &testNotifier,
 		Task:      &testTask,
 		Duration:  time.Second * 1,
@@ -53,6 +53,7 @@ func TestErrorNotificationEnvironment(t *testing.T) {
 	n := ErrorNotification{
 		Notifier: &testNotifier,
 		Error:    fmt.Errorf("this is an error"),
+		TraceID:  "ABC",
 	}
 
 	t.Run("env", func(t *testing.T) {
@@ -60,6 +61,7 @@ func TestErrorNotificationEnvironment(t *testing.T) {
 		want := []string{
 			"MSG=this is an error",
 			"SUBJECT=fz experienced a critical error",
+			"TASK_TRACE_ID=ABC",
 			"MAIL_NAME=test@example",
 		}
 		got := n.Environment()

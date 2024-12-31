@@ -17,9 +17,8 @@ func ProcessNotifications() {
 				n.Notifier.Execute(n.TraceID, n.Environment(), false)
 
 			case n := <-NotifyCh:
-				_, ok := n.gateEvaluate()
-				if !ok {
-					Logger.Debug("notification cancelled. all gates are closed.",
+				if !n.GateSetOpen() {
+					Logger.Debug("notification cancelled. all gatesets are closed.",
 						"notifier", n.Notifier.Name,
 						"task", n.Task.Name,
 						"trace_id", n.TraceID,
@@ -38,50 +37,14 @@ func ProcessNotifications() {
 	}()
 }
 
-// evaluate the state of the gatesets, and return true if the gates are open.
-func (n TaskNotification) gateEvaluate() ([]*Gate, bool) {
-	openGates := []*Gate{}
-	closedGates := []*Gate{}
-X:
-	for gsi, gs := range n.Notifier.GateSets() {
-		openGates = []*Gate{} // ignore the gates from prior gateset
+// evaluate the state of the gatesets, and return true if any set is completely open.
+func (n TaskNotification) GateSetOpen() bool {
+	return gateSetOpen(n.Task, n.Notifier.GateSets())
+}
 
-		for _, g := range gs {
-			isOpen, r := g.IsOpen(n.Task)
-			Logger.Debug("checking gate",
-				"name", g.Name,
-				"stdout", string(r.StdoutBytes),
-				"stderr", string(r.StderrBytes),
-				"exit_code", r.ExitCode,
-				"trace_id", n.TraceID,
-			)
-			if !isOpen {
-				Logger.Debug("gate is closed",
-					"name", g.Name,
-					"notifier", n.Notifier.Name,
-					"task", n.Task.Name,
-					"trace_id", n.TraceID,
-				)
-				closedGates = append(closedGates, g)
-				continue X
-			}
-
-			openGates = append(openGates, g)
-			Logger.Debug("gate is open",
-				"name", g.Name,
-				"notifier", n.Notifier.Name,
-				"task", n.Task.Name,
-				"trace_id", n.TraceID,
-			)
-		}
-		Logger.Debug("gateset is open",
-			"gateset", gsi,
-			"trace_id", n.TraceID,
-		)
-		return openGates, true
-	}
-
-	return openGates, (len(closedGates) == 0)
+// evaluate the state of the gatesets, and return true if any set is completely open.
+func (n ErrorNotification) GateSetOpen() bool {
+	return gateSetOpen(&Task{TraceID: n.TraceID}, n.Notifier.GateSets())
 }
 
 // The environment variables provided to the notifiers
@@ -113,10 +76,22 @@ func (n ErrorNotification) Environment() []string {
 	v := []string{
 		fmt.Sprintf("MSG=%s", n.Error),
 		fmt.Sprintf("SUBJECT=%s", "fz experienced a critical error"),
+		fmt.Sprintf("TASK_TRACE_ID=%s", n.TraceID),
 	}
 
 	v = MergeEnvVars(v, n.Notifier.Envs)
 	v = MergeEnvVars(v, cfg.Defaults.Envs)
 
 	return v
+}
+
+func gateSetOpen(t *Task, gatesets [][]*Gate) bool {
+	for _, gs := range gatesets {
+		if GateSetOpen(t, gs...) {
+			return true
+		}
+	}
+
+	// no gatesets were open
+	return false
 }

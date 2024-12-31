@@ -135,7 +135,7 @@ func (t *Task) Run() {
 			"new_state", t.State(),
 			"trace_id", t.TraceID,
 		)
-		NotifyCh <- Notification{
+		NotifyCh <- TaskNotification{
 			Duration:  duration,
 			Notifier:  n,
 			Task:      t,
