@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -62,4 +63,12 @@ func (c Cmd) Start() Result {
 	}
 
 	return r
+}
+
+func (r Result) Stdout() string {
+	return strings.TrimSuffix(string(r.StdoutBytes), "\n")
+}
+
+func (r Result) Stderr() string {
+	return strings.TrimSuffix(string(r.StderrBytes), "\n")
 }
