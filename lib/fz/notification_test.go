@@ -23,13 +23,12 @@ func TestNotificationEnvironment(t *testing.T) {
 		Task:      &testTask,
 		Duration:  time.Second * 1,
 		Timestamp: time.Unix(1735517669, 0),
-		Message:   "hello",
 	}
 
 	t.Run("env", func(t *testing.T) {
 
 		want := []string{
-			"MSG=hello",
+			"MSG=no message recieved",
 			"SUBJECT=flappy: state is unknown",
 			"TASK_DURATION_MS=1000",
 			"TASK_EPOCH=1735517669",

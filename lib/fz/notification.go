@@ -51,6 +51,10 @@ func (n ErrorNotification) GateSetOpen() bool {
 
 // The environment variables provided to the notifiers
 func (n TaskNotification) Environment(tasks ...*Task) []string {
+	if len(n.Message) == 0 {
+		n.Message = "no message recieved"
+	}
+
 	v := []string{
 		fmt.Sprintf("MSG=%s", n.Message),
 		fmt.Sprintf("SUBJECT=%s: state is %s", n.Task.Name, n.Task.State()),
