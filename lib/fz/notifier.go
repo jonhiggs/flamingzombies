@@ -23,6 +23,14 @@ func (n Notifier) Execute(traceID string, env []string, notifyErrors bool) {
 
 	r := c.Start()
 
+	Logger.Debug("cmd result",
+		"notifier", n.Name,
+		"code", r.ExitCode,
+		"stdout", r.Stdout(),
+		"stderr", r.Stderr(),
+		"trace_id", traceID,
+	)
+
 	if r.ExitCode < 0 {
 		Error(traceID, fmt.Errorf("notifier %s: %w", n.Name, r.Err), notifyErrors)
 	}
