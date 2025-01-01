@@ -60,9 +60,11 @@ func (t *Task) Run() {
 
 	r := c.Start()
 
-	Logger.Debug("exit code",
+	Logger.Debug("task result",
 		"task", t.Name,
 		"code", r.ExitCode,
+		"stdout", r.Stdout(),
+		"stderr", r.Stderr(),
 		"trace_id", t.TraceID,
 	)
 
