@@ -98,6 +98,7 @@ func (t *Task) Run() {
 			Notifier:  n,
 			Task:      t,
 			Timestamp: time.Now(),
+			Message:   r.Stdout(),
 			TraceID:   r.TraceID,
 		}
 	}

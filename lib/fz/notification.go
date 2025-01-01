@@ -52,7 +52,7 @@ func (n ErrorNotification) GateSetOpen() bool {
 // The environment variables provided to the notifiers
 func (n TaskNotification) Environment(tasks ...*Task) []string {
 	v := []string{
-		fmt.Sprintf("MSG=%s", n.Task.LastResultOutput),
+		fmt.Sprintf("MSG=%s", n.Message),
 		fmt.Sprintf("SUBJECT=%s: state is %s", n.Task.Name, n.Task.State()),
 		fmt.Sprintf("TASK_DURATION_MS=%d", n.Duration.Milliseconds()),
 		fmt.Sprintf("TASK_EPOCH=%d", n.Timestamp.Unix()),
