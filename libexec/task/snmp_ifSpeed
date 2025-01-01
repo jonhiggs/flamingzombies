@@ -14,9 +14,10 @@
 #   snmp walk -c <SNMP_COMMUNITY> -v <SNMP_VERSION> <SNMP_HOST> ifSpeed
 #
 
-set -e
-[ -n "${SNMP_HOST}" ] \
-  || ( echo "SNMP_HOST is undefined" >&2 && exit 1 )
+set -eu
+. "$(dirname "$0")/../helpers.inc"
+
+fz_check_env SNMP_HOST
 
 [ $# -ne 2 ] \
   && ( echo "command did not receive two arguments" >&2 && exit 1 )
