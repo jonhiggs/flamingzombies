@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-. $(dirname "$0")/../helpers.inc
+. "$(dirname "$0")/../helpers.inc"
 
 fz_check_env TASK_STATE
 

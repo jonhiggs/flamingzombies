@@ -12,10 +12,9 @@ gotest:
 govet:
 	go vet $(dirs)
 
+shellcheck: files := $(shell find libexec -type f -not -name \*.bats -not -name \*.md)
 shellcheck:
-	shellcheck -e SC1091 -x -s sh \
-		 libexec/{task,notifier,gate}/*
-	#[[ $$(find libexec/ ! -executable ! -name README.md ! -name \*.inc) = "" ]]
+	shellcheck -e SC1091 -x -s sh $(files)
 
 bats: files = $(shell find . -iname \*.bats -not -path ./dist\*)
 bats:
