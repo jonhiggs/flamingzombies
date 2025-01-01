@@ -62,6 +62,7 @@ func (n TaskNotification) Environment(tasks ...*Task) []string {
 		fmt.Sprintf("TASK_PRIORITY=%d", n.Task.Priority),
 		fmt.Sprintf("TASK_STATE=%s", n.Task.State()),
 		fmt.Sprintf("TASK_TIMEOUT_MS=%d", n.Task.TimeoutSeconds*1000),
+		fmt.Sprintf("TASK_TRACE_ID=%s", n.Task.TraceID),
 	}
 
 	for _, t := range tasks {

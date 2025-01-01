@@ -12,6 +12,7 @@ var testTask = Task{
 	RecoverBody:      "flappy has recovered",
 	Retries:          3,
 	LastNotification: time.Unix(0, 0),
+	TraceID:          "123",
 }
 var testNotifier = Notifier{Name: "testing"}
 
@@ -37,6 +38,7 @@ func TestNotificationEnvironment(t *testing.T) {
 			"TASK_PRIORITY=0",
 			"TASK_STATE=unknown",
 			"TASK_TIMEOUT_MS=0",
+			"TASK_TRACE_ID=123",
 			"MAIL_NAME=test@example",
 		}
 		got := n.Environment(n.Task)
