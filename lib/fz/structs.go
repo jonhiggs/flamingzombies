@@ -91,6 +91,7 @@ type Task struct {
 	LastFail         time.Time // the time of the last failed execution
 	LastOk           time.Time // the time of the last successful execution
 	LastResultOutput string    // the result output of the last execution
+	LastNotification time.Time // the time of the last notification
 	LastRun          time.Time // the time of the last execution
 	TraceID          string    // the ID of the task execution to help with tracing
 }

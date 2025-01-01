@@ -240,12 +240,12 @@ func (t Task) Environment() []string {
 	var v []string
 
 	v = MergeEnvVars(v, []string{
-		fmt.Sprintf("TASK_TRACE_ID=%s", t.TraceID),
 		fmt.Sprintf("TASK_COMMAND=%s", t.Command),
 		fmt.Sprintf("TASK_FREQUENCY=%d", t.FrequencySeconds),
 		fmt.Sprintf("TASK_HISTORY=%d", t.History),
 		fmt.Sprintf("TASK_HISTORY_MASK=%d", t.HistoryMask),
 		fmt.Sprintf("TASK_LAST_FAIL=%d", envEpoch(t.LastFail)),
+		fmt.Sprintf("TASK_LAST_NOTIFICATION=%d", envEpoch(t.LastNotification)),
 		fmt.Sprintf("TASK_LAST_OK=%d", envEpoch(t.LastOk)),
 		fmt.Sprintf("TASK_LAST_STATE=%s", t.LastState()),
 		fmt.Sprintf("TASK_NAME=%s", t.Name),
@@ -253,6 +253,7 @@ func (t Task) Environment() []string {
 		fmt.Sprintf("TASK_STATE=%s", t.State()),
 		fmt.Sprintf("TASK_STATE_CHANGED=%v", t.StateChanged()),
 		fmt.Sprintf("TASK_TIMEOUT=%d", t.TimeoutSeconds),
+		fmt.Sprintf("TASK_TRACE_ID=%s", t.TraceID),
 	})
 
 	v = MergeEnvVars(v, t.Envs)

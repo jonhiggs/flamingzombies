@@ -2,6 +2,7 @@ package fz
 
 import (
 	"fmt"
+	"time"
 )
 
 var NotifyCh = make(chan TaskNotification, 100)
@@ -26,6 +27,7 @@ func ProcessNotifications() {
 					break C
 				}
 
+				n.Task.LastNotification = time.Now()
 				Logger.Info("sending notification",
 					"notifier", n.Notifier.Name,
 					"task", n.Task.Name,
@@ -54,6 +56,7 @@ func (n TaskNotification) Environment(tasks ...*Task) []string {
 		fmt.Sprintf("SUBJECT=%s: state is %s", n.Task.Name, n.Task.State()),
 		fmt.Sprintf("TASK_DURATION_MS=%d", n.Duration.Milliseconds()),
 		fmt.Sprintf("TASK_EPOCH=%d", n.Timestamp.Unix()),
+		fmt.Sprintf("TASK_LAST_NOTIFICATION=%d", n.Task.LastNotification.Unix()),
 		fmt.Sprintf("TASK_LAST_STATE=%s", n.Task.LastState()),
 		fmt.Sprintf("TASK_NAME=%s", n.Task.Name),
 		fmt.Sprintf("TASK_PRIORITY=%d", n.Task.Priority),

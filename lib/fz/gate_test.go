@@ -3,6 +3,7 @@ package fz
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestGateEnvironment(t *testing.T) {
@@ -16,18 +17,19 @@ func TestGateEnvironment(t *testing.T) {
 			Command:          "true",
 			FrequencySeconds: 60,
 			Priority:         3,
+			LastNotification: time.Unix(0, 0),
 		}
 
 		got := gate.environment(&task)
 		want := []string{
 			"GATE_NAME=zero",
 			"GATE_TIMEOUT=1",
-			"TASK_TRACE_ID=ABC",
 			"TASK_COMMAND=true",
 			"TASK_FREQUENCY=60",
 			"TASK_HISTORY=0",
 			"TASK_HISTORY_MASK=0",
 			"TASK_LAST_FAIL=0",
+			"TASK_LAST_NOTIFICATION=0",
 			"TASK_LAST_OK=0",
 			"TASK_LAST_STATE=ok",
 			"TASK_NAME=test",
@@ -35,6 +37,7 @@ func TestGateEnvironment(t *testing.T) {
 			"TASK_STATE=fail",
 			"TASK_STATE_CHANGED=false",
 			"TASK_TIMEOUT=0",
+			"TASK_TRACE_ID=ABC",
 		}
 
 		if fmt.Sprintf("%v", got) != fmt.Sprintf("%v", want) {
@@ -54,6 +57,7 @@ func TestGateEnvironment(t *testing.T) {
 			Envs:             []string{"TENV=from_task"},
 			FrequencySeconds: 60,
 			Priority:         3,
+			LastNotification: time.Unix(0, 0),
 		}
 
 		got := gate.environment(&task)
@@ -61,12 +65,12 @@ func TestGateEnvironment(t *testing.T) {
 			"GATE_NAME=zero",
 			"GATE_TIMEOUT=1",
 			"GENV=from_gate",
-			"TASK_TRACE_ID=ABC",
 			"TASK_COMMAND=true",
 			"TASK_FREQUENCY=60",
 			"TASK_HISTORY=0",
 			"TASK_HISTORY_MASK=0",
 			"TASK_LAST_FAIL=0",
+			"TASK_LAST_NOTIFICATION=0",
 			"TASK_LAST_OK=0",
 			"TASK_LAST_STATE=ok",
 			"TASK_NAME=test",
@@ -74,6 +78,7 @@ func TestGateEnvironment(t *testing.T) {
 			"TASK_STATE=fail",
 			"TASK_STATE_CHANGED=false",
 			"TASK_TIMEOUT=0",
+			"TASK_TRACE_ID=ABC",
 			"TENV=from_task",
 		}
 

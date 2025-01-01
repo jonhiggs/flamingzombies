@@ -148,15 +148,16 @@ func TestConfigTaskFlappy(t *testing.T) {
 		FrequencySeconds: 20,
 		ErrorBody:        "flappy has entered an error state\n",
 		RecoverBody:      "flappy has recovered\n",
+		LastNotification: time.Unix(0, 0),
 	}
 
 	wantEnvironment := []string{
-		"TASK_TRACE_ID=",
 		"TASK_COMMAND=task/flappy",
 		"TASK_FREQUENCY=20",
 		"TASK_HISTORY=2",
 		"TASK_HISTORY_MASK=0",
 		"TASK_LAST_FAIL=0",
+		"TASK_LAST_NOTIFICATION=0",
 		"TASK_LAST_OK=0",
 		"TASK_LAST_STATE=unknown",
 		"TASK_NAME=flappy",
@@ -164,6 +165,7 @@ func TestConfigTaskFlappy(t *testing.T) {
 		"TASK_STATE=unknown",
 		"TASK_STATE_CHANGED=false",
 		"TASK_TIMEOUT=1",
+		"TASK_TRACE_ID=",
 		"SNMP_COMMUNITY=default",
 		"SNMP_VERSION=2c",
 		"EMAIL_FROM=fz@example",

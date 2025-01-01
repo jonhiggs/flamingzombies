@@ -7,10 +7,11 @@ import (
 )
 
 var testTask = Task{
-	Name:        "flappy",
-	ErrorBody:   "flappy has entered an error state",
-	RecoverBody: "flappy has recovered",
-	Retries:     3,
+	Name:             "flappy",
+	ErrorBody:        "flappy has entered an error state",
+	RecoverBody:      "flappy has recovered",
+	Retries:          3,
+	LastNotification: time.Unix(0, 0),
 }
 var testNotifier = Notifier{Name: "testing"}
 
@@ -30,6 +31,7 @@ func TestNotificationEnvironment(t *testing.T) {
 			"SUBJECT=flappy: state is unknown",
 			"TASK_DURATION_MS=1000",
 			"TASK_EPOCH=1735517669",
+			"TASK_LAST_NOTIFICATION=0",
 			"TASK_LAST_STATE=unknown",
 			"TASK_NAME=flappy",
 			"TASK_PRIORITY=0",
