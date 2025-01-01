@@ -60,11 +60,11 @@ func (t *Task) Run() {
 
 	r := c.Start()
 
-	if r.ExitCode < 0 {
-		Error(t.TraceID, fmt.Errorf("task %s: %w", t.Name, r.Err), true)
-	}
-
-	t.LastRun = time.Now()
+	Logger.Debug("exit code",
+		"task", t.Name,
+		"code", r.ExitCode,
+		"trace_id", t.TraceID,
+	)
 
 	switch r.ExitCode {
 	case 0:
@@ -73,17 +73,19 @@ func (t *Task) Run() {
 		t.RecordStatus(false)
 	case 2: // warn or error
 		t.RecordStatus(false)
-	case 3: // unknown status
+	case 3: // unknown status (noop)
 	case 124: // unknown status due to timeout
+		Error(t.TraceID, fmt.Errorf("task %s: %w", t.Name, r.Err), true)
+		return
+	case 255: // the task blew up with an unrecoverable error
+		Error(t.TraceID, fmt.Errorf("task %s: %w", t.Name, r.Err), true)
+		return
 	default:
 		t.RecordStatus(false)
 	}
 
-	Logger.Debug("exit code",
-		"task", t.Name,
-		"code", r.ExitCode,
-		"trace_id", t.TraceID,
-	)
+	// update the LastRun only if it falls through to here.
+	t.LastRun = time.Now()
 
 	for _, n := range t.notifiers() {
 		Logger.Debug("raising notification",

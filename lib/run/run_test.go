@@ -162,7 +162,7 @@ func TestRunStart(t *testing.T) {
 		}
 
 		want := Result{
-			ExitCode: -1,
+			ExitCode: 255,
 			Err:      exec.ErrNotFound,
 		}
 
@@ -184,7 +184,7 @@ func TestRunStart(t *testing.T) {
 		}
 
 		want := Result{
-			ExitCode: -1,
+			ExitCode: 255,
 			Err:      syscall.EACCES,
 		}
 

@@ -45,7 +45,7 @@ func (c Cmd) Start() Result {
 	err := cmd.Start()
 	if err != nil {
 		r.Err = err
-		r.ExitCode = -1
+		r.ExitCode = 255
 		return r
 	}
 	r.StdoutBytes, _ = io.ReadAll(stdout)
