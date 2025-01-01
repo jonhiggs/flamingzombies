@@ -9,14 +9,13 @@
 #   snmp walk -c <SNMP_COMMUNITY> -v <SNMP_VERSION> <SNMP_HOST> hrStorageDescr
 #
 
-set -e
-[ -n "${SNMP_HOST}" ] \
-  || ( echo "SNMP_HOST is undefined" >&2 && exit 1 )
+set -eu
+. "$(dirname "$0")/../helpers.inc"
+
+fz_check_env SNMP_HOST
 
 [ $# -ne 2 ] \
-  && ( echo "command did not receive two arguments" >&2 && exit 1 )
-
-set -u
+  && ( echo "command did not receive two arguments" >&2 && exit 255 )
 
 VOL=$1
 THRESHOLD=$2
@@ -62,5 +61,5 @@ i=$(storageInt "${VOL}")
 n=$(storageAllocationUnits "$i")
 f=$(storageFreeBytes "$1" "$n")
 
-echo "volume ${VOL}: free space is $f, threshold is ${THRESHOLD}"
+echo "volume ${VOL}: free space is $(fz_bytes_to_mb "$f"), threshold is $(fz_bytes_to_mb "${THRESHOLD}")"
 [ "$f" -ge "${THRESHOLD}" ]

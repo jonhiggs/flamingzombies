@@ -13,3 +13,8 @@ source ${DIR}/helpers.inc
   [ "${output}" = "EXISTS is undefined" ]
   [ "${status}" -eq 1 ]
 }
+
+@test "fz_bytes_to_mb: 1048576" {
+  run fz_bytes_to_mb 1048576
+  [ "${output}" = "1 MB" ]
+}
