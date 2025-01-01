@@ -41,6 +41,15 @@ ifOperStatus() {
     | awk '{ print int($NF) }'
 }
 
+statusToString() {
+  case "$1" in
+    1) echo up ;;
+    2) echo down ;;
+    3) echo testing ;;
+    *) echo "unrecognised value" >&2 && exit 255
+  esac
+}
+
 status=$(ifOperStatus "$1")
-echo "${status}"
+echo "interface $1: $(statusToString "${status}")"
 [ "${status}" -eq "$2" ]
