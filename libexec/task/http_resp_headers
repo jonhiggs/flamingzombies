@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# Check a url for a pattern in the response headers.
+#
+# Usage: http_resp_headers <URL> <PATTERN>...
+#
+
+set -eu
+. "$(dirname "$0")/../helpers.inc"
+
+fz_check_env TASK_TIMEOUT
+
+[ $# -ne 2 ] \
+  && ( echo "command did not receive two arguments" >&2 && exit 255 )
+
+url=$1
+shift
+
+TMPFILE="$(mktemp)"
+trap 'rm -f "${TMPFILE}"' EXIT INT HUP
+
+curl -m "${TASK_TIMEOUT}" -s -o /dev/null -v "${url}" 2>&1 \
+  | grep "^< " \
+  | sed 's/^< //' \
+  > "${TMPFILE}"
+
+for pattern in "$@"; do
+  if ! grep -E -q "${pattern}" "${TMPFILE}"; then
+    echo "${url}: does not contain pattern ${pattern}"
+    exit 1
+  fi
+done
+
+exit 0
