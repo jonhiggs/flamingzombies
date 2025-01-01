@@ -42,5 +42,5 @@ ifSpeed() {
 }
 
 speed=$(ifSpeed "$1")
-echo "${speed}"
+echo "interface $1: $(fz_bps_to_string "${speed}")"
 [ "${speed}" -eq "$2" ]

@@ -12,3 +12,12 @@ fz_check_env() {
 fz_bytes_to_mb() {
   echo "$1" | awk '{ print int($1 / 1024 / 1024) " MB" }'
 }
+
+fz_bps_to_string() {
+  echo "$1" | awk '
+    ($1>=1000000000) { print $1/1000000000 " Gb"; exit 0 }
+    ($1>=   1000000) { print $1/   1000000 " Mb"; exit 0 }
+    ($1>=      1000) { print $1/      1000 " Kb"; exit 0 }
+    { print $1 " b" }
+  '
+}
