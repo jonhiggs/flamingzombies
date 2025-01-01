@@ -13,6 +13,7 @@ fz_bytes_to_mb() {
   echo "$1" | awk '{ print int($1 / 1024 / 1024) " MB" }'
 }
 
+# convert bps to a more familiar string
 fz_bps_to_string() {
   echo "$1" | awk '
     ($1>=1000000000) { print $1/1000000000 " Gb"; exit 0 }
