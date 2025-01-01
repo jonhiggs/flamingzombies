@@ -31,4 +31,5 @@ for pattern in "$@"; do
   fi
 done
 
+echo "${url}: contains all expected patterns"
 exit 0
