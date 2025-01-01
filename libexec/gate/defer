@@ -1,11 +1,25 @@
 #!/bin/sh
+set -eu
+. $(dirname "$0")/../helpers.inc
+
+fz_check_env TASK_STATE
+fz_check_env TASK_LAST_FAIL
+fz_check_env TASK_LAST_OK
+
+if [[ $# -ne 1 ]]; then
+  echo "insufficient arguments" >&2
+  exit -1
+fi
 
 now="$(date +%s)"
-defer_seconds=${1:-0}
+defer_seconds=$(echo $1 | awk '{ print int($1) }')
 
+set -x
 case "${TASK_STATE}" in
-  "fail") [ $((TASK_LAST_OK+defer_seconds))   -lt "${now}" ] && exit 0 ;;
-  "ok")   [ $((TASK_LAST_FAIL+defer_seconds)) -lt "${now}" ] && exit 0 ;;
+  "fail")    [ $((TASK_LAST_OK+defer_seconds))   -lt "${now}" ] && exit 0 ;;
+  "ok")      [ $((TASK_LAST_FAIL+defer_seconds)) -lt "${now}" ] && exit 0 ;;
+  "unknown") exit 1 ;;
+  *)         echo "unrecognised state" && exit -1 ;;
 esac
 
 exit 1
