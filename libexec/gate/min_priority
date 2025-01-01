@@ -1,2 +1,9 @@
 #!/bin/sh
+set -e
+. $(dirname "$0")/../helpers.inc
+
+fz_check_env TASK_PRIORITY
+
+set -ue
+
 [ "${TASK_PRIORITY}" -le "$1" ]

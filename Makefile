@@ -17,6 +17,6 @@ shellcheck:
 		 libexec/{task,notifier,gate}/*
 	#[[ $$(find libexec/ ! -executable ! -name README.md ! -name \*.inc) = "" ]]
 
-bats: files = $(shell find . -iname \*.bats)
+bats: files = $(shell find . -iname \*.bats -not -path ./dist\*)
 bats:
 	bats $(files)

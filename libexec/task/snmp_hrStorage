@@ -61,6 +61,6 @@ storageFreeBytes() {
 i=$(storageInt "${VOL}")
 n=$(storageAllocationUnits "$i")
 f=$(storageFreeBytes "$1" "$n")
-echo "$f"
 
-[ "$f" -gt "${THRESHOLD}" ]
+echo "volume ${VOL}: free space is $f, threshold is ${THRESHOLD}"
+[ "$f" -ge "${THRESHOLD}" ]
