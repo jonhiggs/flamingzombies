@@ -34,6 +34,6 @@ processCount() {
 }
 
 n=$(processCount "$1")
-echo "$n"
+echo "$1: matches $n processes"
 
 [ "$n" -ge "$2" ]
