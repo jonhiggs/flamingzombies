@@ -10,8 +10,8 @@ set -eu
 
 fz_check_env TASK_TIMEOUT
 
-[ $# -ne 2 ] \
-  && ( echo "command did not receive two arguments" >&2 && exit 255 )
+[ $# -lt 2 ] \
+  && ( echo "usage: $0 <URL> <HEADER_PATTERN> [HEADER_PATTERN]..." >&2 && exit 255 )
 
 url=$1
 shift
@@ -24,12 +24,17 @@ curl -m "${TASK_TIMEOUT}" -s -o /dev/null -v "${url}" 2>&1 \
   | sed 's/^< //' \
   > "${TMPFILE}"
 
+found=true
 for pattern in "$@"; do
   if ! grep -E -q "${pattern}" "${TMPFILE}"; then
-    echo "${url}: does not contain pattern ${pattern}"
-    exit 1
+    echo "${url}: does not contain pattern '${pattern}'"
+    found=false
   fi
 done
 
-echo "${url}: contains all expected patterns"
-exit 0
+if ${found}; then
+  echo "${url}: contains all expected patterns"
+  exit 0
+else
+  exit 1
+fi
