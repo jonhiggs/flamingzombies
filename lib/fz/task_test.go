@@ -18,7 +18,7 @@ func TestTaskValidate(t *testing.T) {
 	}{
 		{
 			Task{
-				Name:    "name with spaces",
+				Name:    "",
 				Command: "true",
 			},
 			ErrInvalidName,
