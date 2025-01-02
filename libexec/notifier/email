@@ -18,6 +18,7 @@ ${TASK_DESCRIPTION}
 
 message:
 ${MSG}
+
 ---
 ${TASK_TRACE_ID}
 EOF
