@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"hash/fnv"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/jonhiggs/flamingzombies/lib/run"
@@ -246,6 +247,7 @@ func (t Task) Environment() []string {
 
 	v = MergeEnvVars(v, []string{
 		fmt.Sprintf("TASK_COMMAND=%s", t.Command),
+		fmt.Sprintf("TASK_DESCRIPTION=%s", t.description()),
 		fmt.Sprintf("TASK_FREQUENCY=%d", t.FrequencySeconds),
 		fmt.Sprintf("TASK_HISTORY=%d", t.History),
 		fmt.Sprintf("TASK_HISTORY_MASK=%d", t.HistoryMask),
@@ -279,6 +281,14 @@ func (t Task) retryMask() uint32 {
 
 func (t Task) timeout() time.Duration {
 	return time.Duration(t.TimeoutSeconds) * time.Second
+}
+
+func (t Task) description() string {
+	if len(t.Description) > 0 {
+		return strings.TrimSuffix(t.Description, "\n")
+	} else {
+		return "no description"
+	}
 }
 
 func (t Task) notifiers() []*Notifier {

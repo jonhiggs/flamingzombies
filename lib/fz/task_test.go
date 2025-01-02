@@ -270,6 +270,7 @@ func TestTaskEnvironment(t *testing.T) {
 			},
 			[]string{
 				"TASK_COMMAND=true",
+				"TASK_DESCRIPTION=no description",
 				"TASK_FREQUENCY=300",
 				"TASK_HISTORY=2",
 				"TASK_HISTORY_MASK=0",
@@ -287,8 +288,9 @@ func TestTaskEnvironment(t *testing.T) {
 		},
 		{
 			Task{
-				TraceID: "ABC",
-				Command: "true",
+				TraceID:     "ABC",
+				Description: "a description",
+				Command:     "true",
 				Envs: []string{
 					"SNMP_COMMUNITY=public",
 					"SNMP_VERSION=2c",
@@ -303,6 +305,7 @@ func TestTaskEnvironment(t *testing.T) {
 			},
 			[]string{
 				"TASK_COMMAND=true",
+				"TASK_DESCRIPTION=a description",
 				"TASK_FREQUENCY=300",
 				"TASK_HISTORY=2",
 				"TASK_HISTORY_MASK=0",
