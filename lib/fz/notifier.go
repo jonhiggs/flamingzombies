@@ -31,8 +31,13 @@ func (n Notifier) Execute(traceID string, env []string, notifyErrors bool) {
 		"trace_id", traceID,
 	)
 
-	if r.ExitCode < 0 {
+	if r.Err != nil {
 		Error(traceID, fmt.Errorf("notifier %s: %w", n.Name, r.Err), notifyErrors)
+		return
+	}
+
+	if r.ExitCode != 0 {
+		Error(traceID, fmt.Errorf("notifier %s: %s", n.Name, r.Stderr()), notifyErrors)
 	}
 }
 
