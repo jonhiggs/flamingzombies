@@ -17,8 +17,8 @@ url=$1
 pattern=$2
 
 if curl -m "${TASK_TIMEOUT}" -s "${url}" | grep -E -q "${pattern}"; then
-  echo "${url}: contains pattern ${pattern}"
+  echo "${url}: body contains pattern ${pattern}"
   exit 0
 else
-  echo "${url}: does not contain pattern ${pattern}"
+  echo "${url}: body does not contain pattern ${pattern}"
 fi
