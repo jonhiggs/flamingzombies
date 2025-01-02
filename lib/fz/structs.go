@@ -16,7 +16,6 @@ const DEFAULT_LOG_FILE = "-"
 const DEFAULT_TIMEOUT_SECONDS = 5
 const DEFAULT_FREQUENCY_SECONDS = 300
 const DEFAULT_PRIORITY = 5
-const GRACE_TIME = time.Duration(500) * time.Millisecond
 const DEFAULT_GATE_TIMEOUT_SECONDS = 1
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const GRACE_TIME = time.Duration(500) * time.Millisecond
+
 type Cmd struct {
 	Command string
 	Args    []string
@@ -31,7 +33,7 @@ func (c Cmd) Start() Result {
 	var r Result
 
 	r.TraceID = c.TraceID
-	ctx, cancel := context.WithTimeout(context.Background(), c.Timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout())
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, c.Command, c.Args...)
@@ -63,6 +65,14 @@ func (c Cmd) Start() Result {
 	}
 
 	return r
+}
+
+// There will always be a little descrepency between the Go Timeout and the
+// actual time remaining once the process has forked and has began executing
+// the user-code. Adding GRACE_TIME to Cmd.Timeout ensures that the running
+// process will always get at least the requested Timeout of running time.
+func (c Cmd) timeout() time.Duration {
+	return GRACE_TIME + c.Timeout
 }
 
 func (r Result) Stdout() string {

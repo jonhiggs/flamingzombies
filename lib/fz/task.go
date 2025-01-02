@@ -278,7 +278,7 @@ func (t Task) retryMask() uint32 {
 }
 
 func (t Task) timeout() time.Duration {
-	return GRACE_TIME + time.Duration(t.TimeoutSeconds)*time.Second
+	return time.Duration(t.TimeoutSeconds) * time.Second
 }
 
 func (t Task) notifiers() []*Notifier {
