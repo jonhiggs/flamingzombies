@@ -19,6 +19,10 @@ set -eu
 MAIL_SUBJECT=${MAIL_SUBJECT:-${SUBJECT}}
 
 timeout 0.2 cat <<EOF | mail -r "${MAIL_FROM}" -s "${MAIL_SUBJECT}" "${MAIL_TO}"
+description:
+${TASK_DESCRIPTION}
+
+message:
 ${MSG}
 ---
 ${TASK_TRACE_ID}

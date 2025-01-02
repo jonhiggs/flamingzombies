@@ -58,6 +58,7 @@ func (n TaskNotification) Environment(tasks ...*Task) []string {
 	v := []string{
 		fmt.Sprintf("MSG=%s", n.Message),
 		fmt.Sprintf("SUBJECT=%s: state is %s", n.Task.Name, n.Task.State()),
+		fmt.Sprintf("TASK_DESCRIPTION=%s", n.Task.description()),
 		fmt.Sprintf("TASK_DURATION_MS=%d", n.Duration.Milliseconds()),
 		fmt.Sprintf("TASK_EPOCH=%d", n.Timestamp.Unix()),
 		fmt.Sprintf("TASK_LAST_NOTIFICATION=%d", n.Task.LastNotification.Unix()),
@@ -84,6 +85,7 @@ func (n ErrorNotification) Environment() []string {
 	v := []string{
 		fmt.Sprintf("MSG=%s", n.Error),
 		fmt.Sprintf("SUBJECT=%s", "fz experienced a critical error"),
+		fmt.Sprintf("TASK_DESCRIPTION=%s", "An unexpected error occurred"),
 		fmt.Sprintf("TASK_TRACE_ID=%s", n.TraceID),
 	}
 

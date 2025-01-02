@@ -30,6 +30,7 @@ func TestNotificationEnvironment(t *testing.T) {
 		want := []string{
 			"MSG=no message recieved",
 			"SUBJECT=flappy: state is unknown",
+			"TASK_DESCRIPTION=no description",
 			"TASK_DURATION_MS=1000",
 			"TASK_EPOCH=1735517669",
 			"TASK_LAST_NOTIFICATION=0",
@@ -65,6 +66,7 @@ func TestErrorNotificationEnvironment(t *testing.T) {
 		want := []string{
 			"MSG=this is an error",
 			"SUBJECT=fz experienced a critical error",
+			"TASK_DESCRIPTION=An unexpected error occurred",
 			"TASK_TRACE_ID=ABC",
 			"MAIL_NAME=test@example",
 		}
