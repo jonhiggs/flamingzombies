@@ -1,19 +1,13 @@
 #!/bin/sh
-set -e
-
-[ -n "${MAIL_TO}" ] \
-  || ( echo "MAIL_TO is undefined" >&2 && exit 1 )
-
-[ -n "${MAIL_FROM}" ] \
-  || ( echo "MAIL_FROM is undefined" >&2 && exit 1 )
-
-[ -n "${TASK_TRACE_ID}" ] \
-  || ( echo "TASK_TRACE_ID is undefined" >&2 && exit 1 )
-
-[ -n "${MSG}" ] \
-  || ( echo "MSG is undefined" >&2 && exit 1 )
-
 set -eu
+. "$(dirname "$0")/../helpers.inc"
+
+fz_check_env MAIL_FROM
+fz_check_env MAIL_TO
+fz_check_env MSG
+fz_check_env SUBJECT
+fz_check_env TASK_DESCRIPTION
+fz_check_env TASK_TRACE_ID
 
 # allow the subject line to be overridden
 MAIL_SUBJECT=${MAIL_SUBJECT:-${SUBJECT}}
