@@ -153,6 +153,7 @@ func TestConfigTaskFlappy(t *testing.T) {
 
 	wantEnvironment := []string{
 		"TASK_COMMAND=task/flappy",
+		"TASK_DESCRIPTION=an example task that flaps betweeen ok and fail every twenty seconds.",
 		"TASK_FREQUENCY=20",
 		"TASK_HISTORY=2",
 		"TASK_HISTORY_MASK=0",

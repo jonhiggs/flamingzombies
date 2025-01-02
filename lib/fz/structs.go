@@ -71,6 +71,7 @@ type Notifier struct {
 // daemons lifecycle.
 type Task struct {
 	Name                  string   `toml:"name"`            // friendly name
+	Description           string   `toml:"description"`     // description of the task
 	Command               string   `toml:"command"`         // command
 	Args                  []string `toml:"args"`            // command arguments
 	FrequencySeconds      int      `toml:"frequency"`       // how often to run

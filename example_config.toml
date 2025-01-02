@@ -20,6 +20,9 @@ envs = [
 
 [[task]]
 name = "flappy"
+description = """
+an example task that flaps betweeen ok and fail every twenty seconds.
+"""
 command = "task/flappy"
 frequency = 20
 retry_frequency = 20
