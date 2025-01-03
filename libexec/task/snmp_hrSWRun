@@ -17,17 +17,6 @@ fz_check_env SNMP_HOST
 [ $# -ne 2 ] \
   && ( echo "command did not receive two arguments" >&2 && exit 255 )
 
-set -eu
-
-SNMP_VERSION=${SNMP_VERSION:-2c}
-SNMP_COMMUNITY=${SNMP_COMMUNITY:-public}
-
-if [ "$(uname -s)" = "OpenBSD" ]; then
-  SNMP_WALK="snmp walk"
-else
-  SNMP_WALK="snmpwalk"
-fi
-
 processCount() {
   ${SNMP_WALK} -v "${SNMP_VERSION}" -c "${SNMP_COMMUNITY}" "${SNMP_HOST}" hrSWRunName \
     | grep -c "STRING: $1$"

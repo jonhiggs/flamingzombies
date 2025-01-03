@@ -22,17 +22,6 @@ fz_check_env SNMP_HOST
 [ $# -ne 2 ] \
   && ( echo "command did not receive two arguments" >&2 && exit 1 )
 
-set -u
-
-SNMP_VERSION=${SNMP_VERSION:-2c}
-SNMP_COMMUNITY=${SNMP_COMMUNITY:-public}
-
-if [ "$(uname -s)" = "OpenBSD" ]; then
-  SNMP_GET="snmp get"
-else
-  SNMP_GET="snmpget -Oe"
-fi
-
 ifOperStatus() {
   ${SNMP_GET}              \
     -v "${SNMP_VERSION}"   \

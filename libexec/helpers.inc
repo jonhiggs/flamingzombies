@@ -1,3 +1,14 @@
+export SNMP_VERSION="${SNMP_VERSION:-2c}"
+export SNMP_COMMUNITY="${SNMP_COMMUNITY:-public}"
+
+if [ "$(uname -s)" = "OpenBSD" ]; then
+  export SNMP_WALK="snmp walk"
+  export SNMP_GET="snmp get"
+else
+  export SNMP_WALK="snmpwalk"
+  export SNMP_GET="snmpget"
+fi
+
 # check that the enviornment contains variable supplied in $1
 fz_check_env() {
   if env | grep -q "^$1=.*"; then
