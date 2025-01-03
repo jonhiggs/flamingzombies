@@ -8,8 +8,7 @@ import (
 
 var testTask = Task{
 	Name:             "flappy",
-	ErrorBody:        "flappy has entered an error state",
-	RecoverBody:      "flappy has recovered",
+	Description:      "a flappy task",
 	Retries:          3,
 	LastNotification: time.Unix(0, 0),
 	TraceID:          "123",
@@ -30,7 +29,7 @@ func TestNotificationEnvironment(t *testing.T) {
 		want := []string{
 			"MSG=no message recieved",
 			"SUBJECT=flappy: state is unknown",
-			"TASK_DESCRIPTION=no description",
+			"TASK_DESCRIPTION=a flappy task",
 			"TASK_DURATION_MS=1000",
 			"TASK_EPOCH=1735517669",
 			"TASK_LAST_NOTIFICATION=0",
