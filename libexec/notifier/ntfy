@@ -27,7 +27,7 @@ _send() {
   [ "${TASK_STATE}" = "ok" ] && status_tag="green_circle"
   [ "${TASK_STATE}" = "fail" ] && status_tag="red_circle"
 
-  curl -v -f --data-binary @"${DATAFILE}" \
+  curl -s -f --data-binary @"${DATAFILE}" \
     -H "Title: ${SUBJECT}"                \
     -H "Priority: ${TASK_PRIORITY}"       \
     "${NTFY_HOST}/${NTFY_TOPIC}"
