@@ -146,8 +146,6 @@ func TestConfigTaskFlappy(t *testing.T) {
 		Name:             "flappy",
 		Command:          "task/flappy",
 		FrequencySeconds: 20,
-		ErrorBody:        "flappy has entered an error state\n",
-		RecoverBody:      "flappy has recovered\n",
 		LastNotification: time.Unix(0, 0),
 	}
 
@@ -187,14 +185,6 @@ func TestConfigTaskFlappy(t *testing.T) {
 
 	if got.Frequency() != time.Duration(want.FrequencySeconds)*time.Second {
 		t.Errorf("got %d, want %d", got.Frequency(), time.Duration(want.FrequencySeconds)*time.Second)
-	}
-
-	if got.ErrorBody != want.ErrorBody {
-		t.Errorf("got %s, want %s", got.ErrorBody, want.ErrorBody)
-	}
-
-	if got.RecoverBody != want.RecoverBody {
-		t.Errorf("got %s, want %s", got.RecoverBody, want.RecoverBody)
 	}
 
 	if fmt.Sprintf("%v", got.Environment()) != fmt.Sprintf("%s", wantEnvironment) {

@@ -93,13 +93,6 @@ func ReadConfig(f, dir, logFile, logLevel string) *Config {
 			cfg.Tasks[i].Priority = cfg.Defaults.Priority
 		}
 
-		if len(t.ErrorBody) == 0 {
-			cfg.Tasks[i].ErrorBody = "The task has entered an error state"
-		}
-		if len(t.RecoverBody) == 0 {
-			cfg.Tasks[i].RecoverBody = "The task has recovered from an error state"
-		}
-
 		if len(t.NotifierNames) == 0 {
 			cfg.Tasks[i].NotifierNames = cfg.Defaults.NotifierNames
 		}

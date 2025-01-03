@@ -26,12 +26,6 @@ an example task that flaps betweeen ok and fail every twenty seconds.
 command = "task/flappy"
 frequency = 20
 retry_frequency = 20
-error_body = """
-flappy has entered an error state
-"""
-recover_body = """
-flappy has recovered
-"""
 
 [[notifier]]
 name = "logger"

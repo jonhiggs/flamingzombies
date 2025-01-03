@@ -82,8 +82,6 @@ type Task struct {
 	ErrorNotifierNames    []string `toml:"error_notifiers"` // notifiers to trigger upon state change
 	Priority              int      `toml:"priority"`        // the priority of the notifications
 	Envs                  []string `toml:"envs"`            // environment variables supplied to task
-	ErrorBody             string   `toml:"error_body"`      // the body of the notification when entering an error state
-	RecoverBody           string   `toml:"recover_body"`    // the body of the notification when recovering from an error state
 
 	// public, but not configurable
 	History          uint32    // represented in binary. Successes are high
