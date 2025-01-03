@@ -26,11 +26,12 @@ func (g Gate) IsOpen(t *Task) (bool, run.Result) {
 
 // check the state of a set of gates
 func GateSetOpen(t *Task, gates ...*Gate) bool {
-	for _, g := range gates {
+	for i, g := range gates {
 		open, r := g.IsOpen(t)
 		Logger.Debug("checking gate",
 			"name", g.Name,
-			"open", fmt.Sprintf("%v", open),
+			"seq_number", i,
+			"is_open", fmt.Sprintf("%v", open),
 			"stdout", string(r.StdoutBytes),
 			"stderr", string(r.StderrBytes),
 			"exit_code", r.ExitCode,
