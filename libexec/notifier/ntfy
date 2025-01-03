@@ -1,13 +1,20 @@
 #!/bin/sh
 #
-# Deliver messages with ntfy.
+# Deliver messages over ntfy.
 # https://github.com/binwiederhier/ntfy
 #
 
-_send() {
-  subject="${NAME}: state ${STATE}"
+set -eu
+. "$(dirname "$0")/../helpers.inc"
 
-  case "${PRIORITY}" in
+fz_check_env NTFY_HOST
+fz_check_env NTFY_TOPIC
+fz_check_env TASK_STATE
+fz_check_env TASK_PRIORITY
+fz_check_env SUBJECT
+
+_send() {
+  case "${TASK_PRIORITY}" in
     1) ntfy_priority="max"     ;;
     2) ntfy_priority="high"    ;;
     3) ntfy_priority="default" ;;
@@ -17,31 +24,27 @@ _send() {
   esac
 
   status_tag="gray_question"
-  [ "${STATE}" = "ok" ] && status_tag="green_circle"
-  [ "${STATE}" = "fail" ] && status_tag="red_circle"
+  [ "${TASK_STATE}" = "ok" ] && status_tag="green_circle"
+  [ "${TASK_STATE}" = "fail" ] && status_tag="red_circle"
 
-  curl -v -f --data-binary @"${DATAFILE}"                        \
-    -H "Title: ${subject}"                                       \
-    -H "Priority: ${ntfy_priority}"                              \
-    -H "X-Tags: ${status_tag},host:$(hostname -s),last_state:${LAST_STATE},${OPEN_GATES}" \
+  curl -v -f --data-binary @"${DATAFILE}" \
+    -H "Title: ${SUBJECT}"                \
+    -H "Priority: ${TASK_PRIORITY}"       \
     "${NTFY_HOST}/${NTFY_TOPIC}"
 }
 
-if [ $# -eq 0 ]; then
-  echo "you must supply the topic as first argument" >&2
-  exit 1
-fi
-
-NTFY_TOPIC="$1"
-NTFY_HOST="${2:-https://ntfy.sh}"
 DATAFILE=$(mktemp)
+trap 'rm -f "${DATAFILE}"' EXIT INT HUP
 
-cat <<EOF > "${DATAFILE}"
-${RESULT_OUTPUT}
+timeout 0.2 cat <<EOF >"${DATAFILE}"
+description:
+${TASK_DESCRIPTION}
+
+message:
+${MSG}
+
 ---
-$(timeout 0.2 cat)
+${TASK_TRACE_ID}
 EOF
 
 _send
-
-rm -f "${DATAFILE}"
