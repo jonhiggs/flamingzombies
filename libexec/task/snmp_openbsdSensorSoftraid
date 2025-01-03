@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+# Checks an OpenBSD softraid sensor
+#
+# Usage: snmp_openbsdSensorSoftraid <DEVICE>
+#
+# You can get a list of available devices with the command:
+#
+#   snmp walk -c <SNMP_COMMUNITY> -v <SNMP_VERSION> <SNMP_HOST> .1.3.6.1.4.1.30155.2.1.2.1.4
+#
+# Make sure that the unit of the device is degC using the command:
+#
+#   snmp walk -c <SNMP_COMMUNITY> -v <SNMP_VERSION> <SNMP_HOST> .1.3.6.1.4.1.30155.2.1.2.1.6
+#
+
+set -eu
+. "$(dirname "$0")/../helpers.inc"
+
+fz_check_env SNMP_HOST
+
+[ $# -ne 1 ] \
+  && ( echo "command did not receive one argument" >&2 && exit 1 )
+
+device=$1
+
+device_id() {
+  ${SNMP_WALK} -c "${SNMP_COMMUNITY}" -v "${SNMP_VERSION}" "${SNMP_HOST}" .1.3.6.1.4.1.30155.2.1.2.1.2 \
+    | awk -v d="${device}" '($NF~d) { print $1 }' | awk -F. '{ print $NF }'
+}
+
+raid_status() {
+  ${SNMP_GET} -c "${SNMP_COMMUNITY}" -v "${SNMP_VERSION}" "${SNMP_HOST}" ".1.3.6.1.4.1.30155.2.1.2.1.5.$1" \
+    | awk '{ gsub("\"","",$NF); print $NF }'
+}
+
+id=$(device_id "${device}")
+status=$(raid_status "${id}")
+
+echo "${device}: ${status}"
+[ "${status}" = "online" ]

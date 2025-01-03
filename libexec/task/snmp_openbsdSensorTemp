@@ -35,5 +35,5 @@ device_name() {
 }
 
 t=$(temp "$id")
-echo "device $(device_name "$id"): temperature is $t, threshold is ${threshold}"
+echo "$(device_name "$id"): temperature is $t, threshold is ${threshold}"
 echo "$t ${threshold}" | awk '($1>$2) { exit 1 }'
