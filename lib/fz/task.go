@@ -91,17 +91,18 @@ func (t *Task) Run() {
 	t.LastRun = time.Now()
 
 	for _, n := range t.notifiers() {
+		var tCopy Task = *t
 		Logger.Debug("raising notification",
-			"task", t.Name,
+			"task", tCopy.Name,
 			"notifier", n.Name,
-			"last_state", t.LastState(),
-			"new_state", t.State(),
+			"last_state", tCopy.LastState(),
+			"new_state", tCopy.State(),
 			"trace_id", r.TraceID,
 		)
 		NotifyCh <- TaskNotification{
 			Duration:  r.Duration,
 			Notifier:  n,
-			Task:      t,
+			Task:      tCopy,
 			Timestamp: time.Now(),
 			Message:   r.Stdout(),
 			TraceID:   r.TraceID,

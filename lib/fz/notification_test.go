@@ -19,7 +19,7 @@ func TestNotificationEnvironment(t *testing.T) {
 	cfg.Defaults.Envs = []string{"MAIL_NAME=test@example"}
 	n := TaskNotification{
 		Notifier:  &testNotifier,
-		Task:      &testTask,
+		Task:      testTask,
 		Duration:  time.Second * 1,
 		Timestamp: time.Unix(1735517669, 0),
 	}
@@ -41,7 +41,7 @@ func TestNotificationEnvironment(t *testing.T) {
 			"TASK_TRACE_ID=123",
 			"MAIL_NAME=test@example",
 		}
-		got := n.Environment(n.Task)
+		got := n.Environment(&n.Task)
 
 		if fmt.Sprintf("%v", got) != fmt.Sprintf("%v", want) {
 			t.Errorf("Expect '%v' but got '%v'", want, got)

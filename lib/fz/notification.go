@@ -33,7 +33,7 @@ func ProcessNotifications() {
 					"task", n.Task.Name,
 					"trace_id", n.TraceID,
 				)
-				n.Notifier.Execute(n.TraceID, n.Environment(n.Task), true)
+				n.Notifier.Execute(n.TraceID, n.Environment(&n.Task), true)
 			}
 		}
 	}()
@@ -41,7 +41,7 @@ func ProcessNotifications() {
 
 // evaluate the state of the gatesets, and return true if any set is completely open.
 func (n TaskNotification) GateSetOpen() bool {
-	return gateSetOpen(n.Task, n.Notifier.GateSets())
+	return gateSetOpen(&n.Task, n.Notifier.GateSets())
 }
 
 // evaluate the state of the gatesets, and return true if any set is completely open.

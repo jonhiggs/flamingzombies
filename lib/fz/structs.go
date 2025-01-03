@@ -112,7 +112,7 @@ type Notification interface {
 type TaskNotification struct {
 	Duration  time.Duration
 	Notifier  *Notifier
-	Task      *Task
+	Task      Task
 	Timestamp time.Time
 	Message   string
 	TraceID   string
