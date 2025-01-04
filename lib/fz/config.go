@@ -140,7 +140,7 @@ func (c Config) Validate() error {
 
 	for i, t := range cfg.Tasks {
 		if err := t.Validate(); err != nil {
-			return fmt.Errorf("task [%d]: %w", i, err)
+			return fmt.Errorf("task %s [%d]: %w", t.Name, i, err)
 		}
 	}
 
@@ -205,7 +205,7 @@ func (c Config) validateNotifiersExist() error {
 	for _, t := range c.Tasks {
 		for i, n := range t.NotifierNames {
 			if c.GetNotifierByName(n) == nil {
-				return fmt.Errorf("task [%d]: notifier '%s': %w", i, n, ErrNotExist)
+				return fmt.Errorf("task %s [%d]: notifier '%s': %w", t.Name, i, n, ErrNotExist)
 			}
 		}
 	}
@@ -233,7 +233,7 @@ func (c Config) validateCommandsExist() error {
 		Logger.Debug("checking command", "cmd", cmd)
 
 		if _, err := os.Stat(cmd); os.IsNotExist(err) {
-			return fmt.Errorf("task [%d]: command '%s': %w", i, t.Command, ErrCommandNotExist)
+			return fmt.Errorf("task %s [%d]: command '%s': %w", t.Name, i, t.Command, ErrCommandNotExist)
 		}
 	}
 
