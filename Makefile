@@ -13,6 +13,7 @@ govet:
 	go vet $(dirs)
 
 shellcheck: files := $(shell find libexec -type f -not -name \*.bats -not -name \*.md)
+shellcheck: files += scripts/redis-submit
 shellcheck:
 	shellcheck -e SC1091 -x -s sh $(files)
 

@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# Fetch a key from a Redis database.
+#
+# This is one mechanism to connect push events to a tasks polls. You would use
+# what ever means you choose to insert a key into the Redis database --
+# preferablly with an expiration -- then task/redis will use the value stored
+# against they key as its result.
+#
+# The expected Redis keys are:
+#
+#   - $1.stdout: a base64 encoded string containing stdout
+#   - $1.stderr: a base64 encoded string containing stderr
+#   - $1.code: the exit code
+#
+
+set -eu
+. "$(dirname "$0")/../helpers.inc"
+
+[ $# -ne 1 ] \
+  && ( echo "command did not receive one argument" >&2 && exit 255 )
+
+REDIS_HOST=${REDIS_HOST:-127.0.0.1}
+REDIS_PORT=${REDIS_PORT:-6379}
+cmd="redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} --raw"
+
+${cmd} get "$1.stdout" | base64 -d
+${cmd} get "$1.stderr" | base64 -d >&2
+
+exit "$(${cmd} get "$1.code")"

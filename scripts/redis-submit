@@ -1,0 +1,41 @@
+#!/bin/sh
+
+# A wrapper to submit a command result to Redis to be later consumed by
+# task/redis.
+#
+# The usage is:
+#
+#   redis-submit NAME EXPIRE_SECONDS -- COMMAND [ARGS]...
+#
+
+set -eu
+
+REDIS_HOST=${REDIS_HOST:-127.0.0.1}
+REDIS_PORT=${REDIS_PORT:-6379}
+REDIS_CMD="redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT}"
+
+metric=$1
+expiration=$2
+until [ "$1" = "--" ]; do shift; done
+shift # one more to shift out the --
+
+stdout=$(mktemp)
+stderr=$(mktemp)
+trap 'rm -f "${stdout} ${stderr}"' EXIT INT HUP
+
+"$@" > "${stdout}" 2> "${stderr}"
+code=$?
+
+${REDIS_CMD} mset \
+  "${metric}.code" "${code}" \
+  "${metric}.stdout" "$(base64 < "${stdout}")" \
+  "${metric}.stderr" "$(base64 < "${stderr}")" \
+  > /dev/null
+
+${REDIS_CMD} expire "${metric}.code" "${expiration}" > /dev/null
+${REDIS_CMD} expire "${metric}.stdout" "${expiration}" > /dev/null
+${REDIS_CMD} expire "${metric}.stderr" "${expiration}" > /dev/null
+
+cat "${stdout}"
+cat "${stderr}" >&2
+exit "${code}"
