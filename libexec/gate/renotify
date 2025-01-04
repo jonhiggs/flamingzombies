@@ -1,7 +1,21 @@
 #!/bin/sh
+set -eu
+. "$(dirname "$0")/../helpers.inc"
+
+fz_check_env TASK_LAST_NOTIFICATION
+fz_check_env TASK_LAST_FAIL
+fz_check_env TASK_LAST_OK
+fz_check_env TASK_LAST_STATE
+
+[ $# -ne 1 ] \
+  && ( echo "command did not receive one argument" >&2 && exit 255 )
 
 now="$(date +%s)"
 delay_seconds=${1:-0}
+
+inFlux() { [ "${TASK_STATE}" = "${TASK_LAST_STATE}" ]; }
+
+inFlux || exit 1
 
 # exit 1 until the regular notification has been made
 case "${TASK_LAST_STATE}" in
