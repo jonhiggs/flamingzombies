@@ -323,6 +323,37 @@ func TestTaskEnvironment(t *testing.T) {
 				"SNMP_VERSION=2c",
 			},
 		},
+		{
+			Task{
+				TraceID:               "ABC",
+				Description:           "a task without retries",
+				Command:               "true",
+				FrequencySeconds:      60,
+				History:               0b10,
+				Name:                  "no_retries",
+				Priority:              3,
+				Retries:               0,
+				RetryFrequencySeconds: 300,
+				TimeoutSeconds:        10,
+			},
+			[]string{
+				"TASK_COMMAND=true",
+				"TASK_DESCRIPTION=a task without retries",
+				"TASK_FREQUENCY=60",
+				"TASK_HISTORY=2",
+				"TASK_HISTORY_MASK=0",
+				"TASK_LAST_FAIL=0",
+				"TASK_LAST_NOTIFICATION=0",
+				"TASK_LAST_OK=0",
+				"TASK_LAST_STATE=ok",
+				"TASK_NAME=no_retries",
+				"TASK_PRIORITY=3",
+				"TASK_STATE=fail",
+				"TASK_STATE_CHANGED=false",
+				"TASK_TIMEOUT=10",
+				"TASK_TRACE_ID=ABC",
+			},
+		},
 	}
 
 	for _, tt := range tests {

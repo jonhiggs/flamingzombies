@@ -228,7 +228,7 @@ func (t Task) Validate() error {
 		return fmt.Errorf("timeout_seconds '%d': %w", t.RetryFrequencySeconds, ErrTimeoutSlowerThanRetry)
 	}
 
-	if t.RetryFrequencySeconds > t.FrequencySeconds {
+	if t.Retries > 0 && t.RetryFrequencySeconds > t.FrequencySeconds {
 		return fmt.Errorf("retry_requency '%d': %w", t.RetryFrequencySeconds, ErrRetriesSlowerThanFrequency)
 	}
 
