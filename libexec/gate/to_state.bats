@@ -38,7 +38,7 @@ CMD="${DIR}/to_state"
 
 @test "when ok from fail" {
   TASK_STATE=ok TASK_LAST_STATE=fail TASK_LAST_NOTIFICATION=0 TASK_LAST_FAIL=0 TASK_LAST_OK=0 \
-    run "${CMD}" "ok"
+    run bash -x "${CMD}" "ok"
 
   [ "${status}" -eq 0 ]
 }
@@ -47,9 +47,12 @@ CMD="${DIR}/to_state"
   TASK_STATE=fail TASK_LAST_STATE=ok TASK_LAST_NOTIFICATION=0 TASK_LAST_FAIL=0 TASK_LAST_OK=0 \
     run "${CMD}" "fail"
 
-  echo ${output}
-  echo ${status}
-
-
   [ "${status}" -eq 0 ]
+}
+
+@test "when ok from ok" {
+  TASK_STATE=ok TASK_LAST_STATE=ok TASK_LAST_NOTIFICATION=0 TASK_LAST_FAIL=0 TASK_LAST_OK=0 \
+    run "${CMD}" "ok"
+
+  [ "${status}" -eq 1 ]
 }

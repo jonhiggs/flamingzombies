@@ -8,26 +8,24 @@ fz_check_env TASK_LAST_FAIL
 fz_check_env TASK_LAST_OK
 fz_check_env TASK_LAST_STATE
 
+
+hasTransition()  { [ "${TASK_STATE}" != "${TASK_LAST_STATE}" ]; }
+fromStable()     { [ "${TASK_LAST_STATE}" != "unknown" ]; }
+firstDetection() { [ "${TASK_LAST_NOTIFICATION}" -le "${TASK_LAST_FAIL}" ]; }
+
 [ $# -ne 1 ] \
   && ( echo "command did not receive one argument" >&2 && exit 255 )
 
-case $1 in
-  "ok")
-    [ "${TASK_STATE}" = "ok" ]                                   \
-      && [ "${TASK_LAST_STATE}" != "unknown" ]                   \
-      && [ "${TASK_LAST_NOTIFICATION}" -le "${TASK_LAST_FAIL}" ] \
-      && exit 0
-    ;;
-  "fail")
-    [ "${TASK_STATE}" = "fail" ]                               \
-      && [ "${TASK_LAST_STATE}" != "unknown" ]                 \
-      && [ "${TASK_LAST_NOTIFICATION}" -le "${TASK_LAST_OK}" ] \
-      && exit 0
-    ;;
-  *)
+if [ "$1" != "ok" ] && [ "$1" != "fail" ]; then
     echo "received invalid argument" >&2
     exit 255
-    ;;
-esac
+fi
 
-exit 1
+hasTransition || exit 1
+fromStable || exit 1
+
+if [ "${TASK_STATE}" = "$1" ] && firstDetection; then
+  exit 0
+else
+  exit 1
+fi

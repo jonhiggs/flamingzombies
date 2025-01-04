@@ -14,18 +14,18 @@ fz_check_env TASK_PRIORITY
 fz_check_env SUBJECT
 
 _send() {
-  case "${TASK_PRIORITY}" in
-    1) ntfy_priority="max"     ;;
-    2) ntfy_priority="high"    ;;
-    3) ntfy_priority="default" ;;
-    4) ntfy_priority="low"     ;;
-    5) ntfy_priority="min"     ;;
-    *) ntfy_priority="default" ;;
-  esac
+  #case "${TASK_PRIORITY}" in
+  #  1) ntfy_priority="max"     ;;
+  #  2) ntfy_priority="high"    ;;
+  #  3) ntfy_priority="default" ;;
+  #  4) ntfy_priority="low"     ;;
+  #  5) ntfy_priority="min"     ;;
+  #  *) ntfy_priority="default" ;;
+  #esac
 
-  status_tag="gray_question"
-  [ "${TASK_STATE}" = "ok" ] && status_tag="green_circle"
-  [ "${TASK_STATE}" = "fail" ] && status_tag="red_circle"
+  #status_tag="gray_question"
+  #[ "${TASK_STATE}" = "ok" ] && status_tag="green_circle"
+  #[ "${TASK_STATE}" = "fail" ] && status_tag="red_circle"
 
   curl -s -f --data-binary @"${DATAFILE}" \
     -H "Title: ${SUBJECT}"                \
