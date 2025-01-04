@@ -113,7 +113,7 @@ func (t *Task) Run() {
 }
 
 func (t *Task) RecordStatus(b bool) {
-	Logger.Debug("recording result",
+	Logger.Info("recording result",
 		"task", t.Name,
 		"state", t.State(),
 		"trace_id", t.TraceID,
