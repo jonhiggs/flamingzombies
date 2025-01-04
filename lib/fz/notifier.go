@@ -11,7 +11,7 @@ func (n Notifier) Timeout() time.Duration {
 	return time.Duration(n.TimeoutSeconds) * time.Second
 }
 
-func (n Notifier) Execute(traceID string, env []string, notifyErrors bool) {
+func (n Notifier) Execute(traceID string, env []string, notifyErrors bool) error {
 	c := run.Cmd{
 		Command: n.Command,
 		Args:    n.Args,
@@ -33,12 +33,16 @@ func (n Notifier) Execute(traceID string, env []string, notifyErrors bool) {
 
 	if r.Err != nil {
 		Error(traceID, fmt.Errorf("notifier %s: %w", n.Name, r.Err), notifyErrors)
-		return
+		return r.Err
 	}
 
 	if r.ExitCode != 0 {
-		Error(traceID, fmt.Errorf("notifier %s: %s", n.Name, r.Stderr()), notifyErrors)
+		err := fmt.Errorf("notifier %s: %s", n.Name, r.Stderr())
+		Error(traceID, err, notifyErrors)
+		return err
 	}
+
+	return nil
 }
 
 // Resolve the *Gates from the GateSetStrings

@@ -55,6 +55,11 @@ func TestConfig(t *testing.T) {
 		t.Errorf("got %d, want %d", len(got.Gates), 6)
 	}
 
+	gotTaskFlappy := got.GetTaskByName("flappy")
+	if gotTaskFlappy.Name != "flappy" {
+		t.Errorf("got %s, want %s", gotTaskFlappy.Name, "flappy")
+	}
+
 	gotGateSetsLogger := got.GetNotifierByName("logger").GateSets()
 	if len(gotGateSetsLogger) != 2 {
 		t.Errorf("got %d, want %d", len(gotGateSetsLogger), 2)

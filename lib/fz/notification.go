@@ -33,7 +33,10 @@ func ProcessNotifications() {
 					"task", n.Task.Name,
 					"trace_id", n.TraceID,
 				)
-				n.Notifier.Execute(n.TraceID, n.Environment(&n.Task), true)
+				err := n.Notifier.Execute(n.TraceID, n.Environment(&n.Task), true)
+				if err == nil {
+					n.UpdateLastNotification()
+				}
 			}
 		}
 	}()
@@ -78,6 +81,13 @@ func (n TaskNotification) Environment(tasks ...*Task) []string {
 	v = MergeEnvVars(v, cfg.Defaults.Envs)
 
 	return v
+}
+
+// Update the configuration's Task.
+// The task that's attached to the notification is only a copy.
+func (n TaskNotification) UpdateLastNotification() {
+	t := cfg.GetTaskByName(n.Task.Name)
+	t.LastNotification = time.Now()
 }
 
 // The environment variables provided to the error_notifiers

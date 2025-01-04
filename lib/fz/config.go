@@ -147,6 +147,17 @@ func (c Config) Validate() error {
 	return nil
 }
 
+// Find and return a Task by its name.
+func (c Config) GetTaskByName(name string) *Task {
+	for i, t := range c.Tasks {
+		if t.Name == name {
+			return &c.Tasks[i]
+		}
+	}
+
+	return nil
+}
+
 // Find and return a Notifier by its name.
 func (c Config) GetNotifierByName(name string) *Notifier {
 	for i, n := range c.Notifiers {
