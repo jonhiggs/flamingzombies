@@ -15,7 +15,7 @@ var ErrCircularDependency = errors.New("a circular dependency found")
 // The preprocessor is responsible for expanding "include <file>"
 
 // Run the preprocessor against a configuration file.
-func Run(f *os.File, stack []*os.File) ([]byte, error) {
+func PreProcess(f *os.File, stack []*os.File) ([]byte, error) {
 	for _, sf := range stack {
 		if sf.Name() == f.Name() {
 			return []byte{}, ErrCircularDependency
@@ -45,7 +45,7 @@ func Run(f *os.File, stack []*os.File) ([]byte, error) {
 				return []byte{}, err
 			}
 
-			by, err := Run(fh, stack)
+			by, err := PreProcess(fh, stack)
 			if err != nil {
 				return []byte{}, err
 			}

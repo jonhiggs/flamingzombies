@@ -29,7 +29,7 @@ func ReadConfig(f, dir, logFile, logLevel string) *Config {
 	//	Fatal(fmt.Sprintf("Error reading the configuration file '%s'\n", f), fmt.Sprint(err))
 	//}
 
-	b, err := config.Run(fh, []*os.File{})
+	b, err := config.PreProcess(fh, []*os.File{})
 	if err != nil {
 		log.Fatal(fmt.Errorf("preprocessing config: %w", err))
 	}

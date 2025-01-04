@@ -105,7 +105,7 @@ frequency = 20
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprint(tt.fh.Name()), func(t *testing.T) {
-			got, err := Run(tt.fh, []*os.File{})
+			got, err := PreProcess(tt.fh, []*os.File{})
 			if string(got) != string(tt.want) {
 				t.Errorf("\ngot: %s\nwant: %s\n", got, tt.want)
 			}
