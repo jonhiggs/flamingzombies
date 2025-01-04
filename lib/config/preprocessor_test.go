@@ -1,4 +1,4 @@
-package preprocessor
+package config
 
 import (
 	"fmt"
