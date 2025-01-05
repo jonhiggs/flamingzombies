@@ -66,5 +66,4 @@ func TestLoad(t *testing.T) {
 			Directory = ""
 		})
 	}
-
 }

@@ -69,3 +69,26 @@ func Load(f *os.File) error {
 
 	return nil
 }
+
+// Extract the named toml blocks from a configuration file. This is needed so
+// that the default values can be applied to anything unset during the
+// Decoding. Otherwise it's not possible to differenciate between a
+// user-declared 0 or a default value of 0. The former should be used, the
+// latter should be replaced with the default value.
+func extractTomlOjbects(n string, b []byte) [][]byte {
+
+	// EXAMPLE: https://github.com/BurntSushi/toml/issues/47
+	//config := Host{
+	//	Servers: []Server{
+	//		{
+	//			Url:  "http://google.com",
+	//			Port: 80,
+	//		},
+	//	},
+	//}
+	//if _, err := toml.Decode(blob, &config); err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Printf("%#v\n", config)
+
+}
