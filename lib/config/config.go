@@ -42,7 +42,7 @@ type defaultConfig struct {
 }
 
 // populate the package variables from the content of the TOML
-func New(f *os.File) error {
+func Load(f *os.File) error {
 	b, err := PreProcess(f, []*os.File{})
 	if err != nil {
 		return err

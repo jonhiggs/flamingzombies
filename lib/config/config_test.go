@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestNew(t *testing.T) {
+func TestLoad(t *testing.T) {
 	fhA, _ := os.Open("./examples/A.toml")
 
 	var tests = []struct {
@@ -32,7 +32,7 @@ func TestNew(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprint(tt.fh.Name()), func(t *testing.T) {
-			err := New(tt.fh)
+			err := Load(tt.fh)
 			if err != nil {
 				panic(fmt.Errorf("%w", err))
 			}
