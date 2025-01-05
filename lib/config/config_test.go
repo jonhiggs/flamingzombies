@@ -99,3 +99,6 @@ func TestExtractTomlObjects(t *testing.T) {
 		}
 	})
 }
+
+func TestTomlTasks(t *testing.T) {
+}
