@@ -67,3 +67,35 @@ func TestLoad(t *testing.T) {
 		})
 	}
 }
+
+func TestExtractTomlObjects(t *testing.T) {
+	f, _ := os.Open("./examples/A.toml")
+	b, err := PreProcess(f, []*os.File{})
+	if err != nil {
+		panic(fmt.Errorf("%w", err))
+	}
+
+	t.Run("task", func(t *testing.T) {
+		got := extractTomlOjbects("task", b)
+
+		if len(got) != 1 {
+			t.Errorf(" got: %d, want: %d", len(got), 1)
+		}
+	})
+
+	t.Run("gate", func(t *testing.T) {
+		got := extractTomlOjbects("gate", b)
+
+		if len(got) != 1 {
+			t.Errorf(" got: %d, want: %d", len(got), 1)
+		}
+	})
+
+	t.Run("notifier", func(t *testing.T) {
+		got := extractTomlOjbects("notifier", b)
+
+		if len(got) != 1 {
+			t.Errorf(" got: %d, want: %d", len(got), 1)
+		}
+	})
+}

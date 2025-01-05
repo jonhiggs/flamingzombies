@@ -1,7 +1,11 @@
 package config
 
 import (
+	"bufio"
+	"bytes"
+	"fmt"
 	"os"
+	"regexp"
 
 	"github.com/BurntSushi/toml"
 )
@@ -76,6 +80,29 @@ func Load(f *os.File) error {
 // user-declared 0 or a default value of 0. The former should be used, the
 // latter should be replaced with the default value.
 func extractTomlOjbects(n string, b []byte) [][]byte {
+	startBlock := regexp.MustCompile(fmt.Sprintf(`^\[\[%s\]\]`, n))
+	endBlock := regexp.MustCompile(`^\[`)
+	inBlock := false
+
+	scanner := bufio.NewScanner(bytes.NewReader(b))
+
+	for scanner.Scan() {
+		l := scanner.Bytes()
+
+		if endBlock.Match(l) {
+			inBlock = false
+		}
+
+		if startBlock.Match(l) {
+			inBlock = true
+		}
+
+		if inBlock {
+			// add the line to the current object
+		}
+	}
+
+	return [][]byte{}
 
 	// EXAMPLE: https://github.com/BurntSushi/toml/issues/47
 	//config := Host{
