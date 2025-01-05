@@ -1,0 +1,89 @@
+log_file = "-"
+log_level = "info"
+
+[defaults]
+retries = 5
+timeout = 1
+notifiers = [
+    "logger",
+    "statsd",
+]
+error_notifiers = [
+    "error_emailer",
+]
+priority = 3
+envs = [
+    "SNMP_COMMUNITY=default",
+    "SNMP_VERSION=2c",
+    "EMAIL_FROM=fz@example",
+]
+
+[[task]]
+name = "flappy"
+description = """
+an example task that flaps betweeen ok and fail every twenty seconds.
+"""
+command = "task/flappy"
+frequency = 20
+retry_frequency = 20
+
+[[notifier]]
+name = "logger"
+command = "notifier/null"
+timeout = 1
+gates = [
+    ["is_not_unknown", "to_failed", "defer"],
+    ["is_not_unknown", "is_failed", "renotify"],
+]
+
+[[notifier]]
+name = "error_emailer"
+command = "notifier/email"
+envs = [
+    "EMAIL_ADDRESS=root@example",
+    "EMAIL_FROM=fz_errors@example",
+    "EMAIL_SUBJECT='fz experienced a critical error'",
+]
+timeout = 3
+gates = []
+
+[[notifier]]
+name = "statsd"
+command = "notifier/statsd"
+envs = [
+    "STATSD_HOST=127.0.0.1",
+    "STATSD_PORT=8125",
+    "STATSD_PREFIX=fz",
+]
+timeout = 1
+gates = []
+
+[[gate]]
+name = "to_failed"
+command = "gate/to_state"
+args = ["fail"]
+
+[[gate]]
+name = "is_failed"
+command = "gate/is_state"
+args = ["fail"]
+
+[[gate]]
+name = "is_not_unknown"
+command = "gate/is_not_state"
+args = ["unknown"]
+
+[[gate]]
+name = "is_ok"
+command = "gate/is_state"
+args = ["ok"]
+
+[[gate]]
+name = "defer"
+command = "gate/defer"
+args = ["6"]
+
+[[gate]]
+name = "renotify"
+command = "gate/renotify"
+args = ["5"]

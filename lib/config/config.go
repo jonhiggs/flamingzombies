@@ -86,11 +86,21 @@ func extractTomlOjbects(n string, b []byte) [][]byte {
 
 	scanner := bufio.NewScanner(bytes.NewReader(b))
 
+	var objects [][]byte
+
+	var o []byte
+
 	for scanner.Scan() {
 		l := scanner.Bytes()
 
 		if endBlock.Match(l) {
+			// if the object has data, flush it to the objects result
+			if len(o) > 0 {
+				objects = append(objects, o)
+			}
+
 			inBlock = false
+			o = []byte{}
 		}
 
 		if startBlock.Match(l) {
@@ -98,11 +108,16 @@ func extractTomlOjbects(n string, b []byte) [][]byte {
 		}
 
 		if inBlock {
-			// add the line to the current object
+			o = append(o, l...)
 		}
 	}
 
-	return [][]byte{}
+	// flush any remaining data after scan has complete.
+	if len(o) > 0 {
+		objects = append(objects, o)
+	}
+
+	return objects
 
 	// EXAMPLE: https://github.com/BurntSushi/toml/issues/47
 	//config := Host{
