@@ -4,20 +4,14 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-// return a configuration from the []byte returned from PreProcess.
-func Parse() (Config, error) {
-
-	return Config{}, nil
-}
-
 // return the default values from the []byte returned from PreProcess.
-func parseDefault(b []byte) (defaultConfig, error) {
-	var cfg Config
+func getDefault(b []byte) (defaultConfig, error) {
+	var cfg tomlConfig
 
 	err := toml.Unmarshal(b, &cfg)
 	if err != nil {
 		return defaultConfig{}, err
 	}
 
-	return cfg.Def, nil
+	return cfg.Default, nil
 }

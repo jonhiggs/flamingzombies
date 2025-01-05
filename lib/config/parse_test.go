@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestParseDefault(t *testing.T) {
+func TestGetDefault(t *testing.T) {
 	fhA, _ := os.Open("./examples/A.toml")
 
 	var tests = []struct {
@@ -31,7 +31,7 @@ func TestParseDefault(t *testing.T) {
 				panic(fmt.Errorf("while preprocessing: %w", err))
 			}
 
-			got, err := parseDefault(b)
+			got, err := getDefault(b)
 
 			if got.Retries != tt.want.Retries {
 				t.Errorf("retries got: %d,want: %d", got.Retries, tt.want.Retries)

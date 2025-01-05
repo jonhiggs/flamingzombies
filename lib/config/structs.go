@@ -2,7 +2,14 @@ package config
 
 var Directory, LogFile, LogLevel string
 
-type Config struct {
+var Default defaultConfig
+
+// TODO(jh) 20250106: the resources
+//var Tasks []Task
+//var Notifiers []Notifier
+//var Gates []Gate
+
+type tomlConfig struct {
 	//Gates     []Gate         `toml:"gate"`
 	//Notifiers []Notifier     `toml:"notifier"`
 	//Tasks     []Task         `toml:"task"`
@@ -10,5 +17,5 @@ type Config struct {
 	Directory string        `toml:"directory"`
 	LogFile   string        `toml:"log_file"`
 	LogLevel  string        `toml:"log_level"`
-	Def       defaultConfig `toml:"defaults"`
+	Default   defaultConfig `toml:"defaults"`
 }
