@@ -228,6 +228,9 @@ func tomlTasks(b []byte, d defaultConfig) ([]Task, error) {
 			return []Task{}, err
 		}
 
+		// trim any trailing new lines
+		task.Description = strings.TrimSuffix(task.Description, "\n")
+
 		// the default merge of toml.Decode doesn't do what is needed.
 		task.Envs = mergeEnvVars(task.Envs, d.Envs)
 

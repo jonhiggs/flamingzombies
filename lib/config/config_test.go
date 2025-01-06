@@ -148,6 +148,26 @@ func TestTomlTasks(t *testing.T) {
 			t.Errorf("got: %s, want: %s", got[0].Name, "simple task")
 		}
 
+		if got[0].Description != "this is a simple task" {
+			t.Errorf("got: %s, want: %s", got[0].Description, "this is a simple task")
+		}
+
+		if got[0].Command != "task/command" {
+			t.Errorf("got: %s, want: %s", got[0].Command, "task/command")
+		}
+
+		if got[0].FrequencySeconds != 20 {
+			t.Errorf("got: %d, want: %d", got[0].FrequencySeconds, 20)
+		}
+
+		if got[0].RetryFrequencySeconds != 20 {
+			t.Errorf("got: %d, want: %d", got[0].RetryFrequencySeconds, 20)
+		}
+
+		if got[0].Priority != 3 {
+			t.Errorf("got: %d, want: %d", got[0].Priority, 3)
+		}
+
 		envs := []string{
 			"EXTRA=123",
 			"SNMP_COMMUNITY=public",
