@@ -79,7 +79,7 @@ func TestExtractTomlObjects(t *testing.T) {
 		got := extractTomlOjbects("task", b)
 
 		if len(got) != 1 {
-			t.Errorf(" got: %d, want: %d", len(got), 1)
+			t.Errorf("got: %d, want: %d", len(got), 1)
 		}
 	})
 
@@ -87,7 +87,7 @@ func TestExtractTomlObjects(t *testing.T) {
 		got := extractTomlOjbects("gate", b)
 
 		if len(got) != 6 {
-			t.Errorf(" got: %d, want: %d", len(got), 6)
+			t.Errorf("got: %d, want: %d", len(got), 6)
 		}
 	})
 
@@ -95,10 +95,43 @@ func TestExtractTomlObjects(t *testing.T) {
 		got := extractTomlOjbects("notifier", b)
 
 		if len(got) != 3 {
-			t.Errorf(" got: %d, want: %d", len(got), 3)
+			t.Errorf("got: %d, want: %d", len(got), 3)
 		}
 	})
 }
 
 func TestTomlTasks(t *testing.T) {
+	t.Run("no data", func(t *testing.T) {
+		b := []byte{}
+		got, err := tomlTasks(b)
+
+		if err != nil {
+			t.Errorf("got: %v, want: %v", err, nil)
+		}
+
+		if len(got) != 0 {
+			t.Errorf("got: %d, want: %d", len(got), 0)
+		}
+	})
+
+	t.Run("simple task", func(t *testing.T) {
+		b, err := os.ReadFile("./examples/task_simple.toml")
+		if err != nil {
+			panic(err)
+		}
+
+		got, err := tomlTasks(b)
+
+		if err != nil {
+			t.Errorf("got: %s, want: %v", err, nil)
+		}
+
+		if len(got) != 1 {
+			t.Errorf("got: %d, want: %d", len(got), 1)
+		}
+
+		if got[0].Name != "simple task" {
+			t.Errorf("got: %s, want: %v", got[0].Name, "simple task")
+		}
+	})
 }

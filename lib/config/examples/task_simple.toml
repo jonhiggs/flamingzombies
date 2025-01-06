@@ -1,0 +1,8 @@
+[[task]]
+name = "simple task"
+description = """
+this is a simple task
+"""
+command = "task/command"
+frequency = 20
+retry_frequency = 20

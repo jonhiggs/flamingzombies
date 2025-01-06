@@ -152,10 +152,12 @@ func extractTomlOjbects(n string, b []byte) [][]byte {
 
 		if startBlock.Match(l) {
 			inBlock = true
+			continue // remove the block heading
 		}
 
 		if inBlock {
 			o = append(o, l...)
+			o = append(o, byte('\n'))
 		}
 	}
 
