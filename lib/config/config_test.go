@@ -132,7 +132,7 @@ func TestExtractTomlObjectsBasic(t *testing.T) {
 func TestTomlTasks(t *testing.T) {
 	t.Run("no data", func(t *testing.T) {
 		b := []byte{}
-		got, err := tomlTasks(b, defaultConfig{})
+		got, err := tasksFromToml(b, defaultConfig{})
 
 		if err != nil {
 			t.Errorf("got: %v, want: %v", err, nil)
@@ -150,11 +150,11 @@ func TestTomlTasks(t *testing.T) {
 			panic(fmt.Errorf("preProcess: %w", err))
 		}
 
-		d, err := tomlDefaultConfig(extractTomlOjbects("default", b)[0])
+		d, err := defaultConfigFromToml(extractTomlOjbects("default", b)[0])
 		if err != nil {
 			panic(fmt.Errorf("tomlDefaultConfig: %w", err))
 		}
-		got, err := tomlTasks(b, d)
+		got, err := tasksFromToml(b, d)
 
 		if err != nil {
 			t.Errorf("got: %s, want: %v", err, nil)
@@ -210,11 +210,11 @@ func TestTomlTasks(t *testing.T) {
 			panic(fmt.Errorf("preProcess: %w", err))
 		}
 
-		d, err := tomlDefaultConfig(extractTomlOjbects("default", b)[0])
+		d, err := defaultConfigFromToml(extractTomlOjbects("default", b)[0])
 		if err != nil {
 			panic(fmt.Errorf("tomlDefaultConfig: %w", err))
 		}
-		got, err := tomlTasks(b, d)
+		got, err := tasksFromToml(b, d)
 
 		if err != nil {
 			t.Errorf("got: %s, want: %v", err, nil)

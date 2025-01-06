@@ -106,7 +106,7 @@ func Load(f *os.File) error {
 		LogLevel = cfg.LogLevel
 	}
 
-	Tasks, err = tomlTasks(b, def)
+	Tasks, err = tasksFromToml(b, def)
 	if err != nil {
 		return err
 	}
@@ -189,7 +189,7 @@ func extractTomlOjbects(n string, b []byte) [][]byte {
 }
 
 // convert the toml response from extractTomlOjbects into a defaultConfig.
-func tomlDefaultConfig(b []byte) (defaultConfig, error) {
+func defaultConfigFromToml(b []byte) (defaultConfig, error) {
 	var c defaultConfig
 	if err := toml.Unmarshal(b, &c); err != nil {
 		return defaultConfig{}, err
@@ -198,7 +198,7 @@ func tomlDefaultConfig(b []byte) (defaultConfig, error) {
 	return c, nil
 }
 
-func tomlTasks(b []byte, d defaultConfig) ([]Task, error) {
+func tasksFromToml(b []byte, d defaultConfig) ([]Task, error) {
 	defaultTask := Task{
 		Args:                  d.Args,
 		Command:               d.Command,
