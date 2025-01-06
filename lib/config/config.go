@@ -21,6 +21,7 @@ var LogLevel = "info"
 var def defaultConfig
 
 var Tasks []Task
+var Gates []Gate
 
 // TODO(jh) 20250106: the resources
 //var Notifiers []Notifier
@@ -80,6 +81,13 @@ type Task struct {
 	TraceID          string    // the ID of the task execution to help with tracing
 }
 
+type Gate struct {
+	Args    []string `toml:"args"`    // command arguments
+	Command string   `toml:"command"` // command
+	Envs    []string `toml:"envs"`    // environment variables
+	Name    string   `toml:"name"`    // friendly name
+}
+
 // populate the package variables from the content of the TOML
 func Load(f *os.File) error {
 	b, err := PreProcess(f, []*os.File{})
@@ -111,19 +119,10 @@ func Load(f *os.File) error {
 		return err
 	}
 
-	// EXAMPLE: https://github.com/BurntSushi/toml/issues/47
-	//config := Host{
-	//	Servers: []Server{
-	//		{
-	//			Url:  "http://google.com",
-	//			Port: 80,
-	//		},
-	//	},
-	//}
-	//if _, err := toml.Decode(blob, &config); err != nil {
-	//	log.Fatal(err)
-	//}
-	//fmt.Printf("%#v\n", config)
+	Gates, err = gatesFromToml(b, def)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -235,6 +234,32 @@ func tasksFromToml(b []byte, d defaultConfig) ([]Task, error) {
 		task.Envs = mergeEnvVars(task.Envs, d.Envs)
 
 		r = append(r, task)
+
+	}
+
+	return r, nil
+}
+
+func gatesFromToml(b []byte, d defaultConfig) ([]Gate, error) {
+	defaultGate := Gate{
+		Args:    d.Args,
+		Command: d.Command,
+		Name:    d.Name,
+	}
+
+	var r []Gate
+
+	for _, blob := range extractTomlOjbects("gate", b) {
+		gate := defaultGate
+		_, err := toml.Decode(string(blob), &gate)
+		if err != nil {
+			return []Gate{}, err
+		}
+
+		// the default merge of toml.Decode doesn't do what is needed.
+		gate.Envs = mergeEnvVars(gate.Envs, d.Envs)
+
+		r = append(r, gate)
 
 	}
 

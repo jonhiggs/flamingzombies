@@ -66,9 +66,14 @@ func TestLoad(t *testing.T) {
 				t.Errorf("task count got: %d, want: %d", len(Tasks), 1)
 			}
 
+			if len(Gates) != 2 {
+				t.Errorf("gate count got: %d, want: %d", len(Gates), 2)
+			}
+
 			// unset the global state
 			def = defaultConfig{}
 			Tasks = []Task{}
+			Gates = []Gate{}
 			Directory = ""
 		})
 	}
@@ -129,7 +134,7 @@ func TestExtractTomlObjectsBasic(t *testing.T) {
 	})
 }
 
-func TestTomlTasks(t *testing.T) {
+func TestTasksFromToml(t *testing.T) {
 	t.Run("no data", func(t *testing.T) {
 		b := []byte{}
 		got, err := tasksFromToml(b, defaultConfig{})
@@ -238,5 +243,80 @@ func TestTomlTasks(t *testing.T) {
 
 		// unset global state
 		def = defaultConfig{}
+	})
+}
+
+func TestGatesFromToml(t *testing.T) {
+	t.Run("no data", func(t *testing.T) {
+		b := []byte{}
+		got, err := gatesFromToml(b, defaultConfig{})
+
+		if err != nil {
+			t.Errorf("got: %v, want: %v", err, nil)
+		}
+
+		if len(got) != 0 {
+			t.Errorf("got: %d, want: %d", len(got), 0)
+		}
+	})
+
+	t.Run("simple task", func(t *testing.T) {
+		fh, _ := os.Open("./examples/task_simple.toml")
+		b, err := PreProcess(fh, []*os.File{})
+		if err != nil {
+			panic(fmt.Errorf("preProcess: %w", err))
+		}
+
+		d, err := defaultConfigFromToml(extractTomlOjbects("default", b)[0])
+		if err != nil {
+			panic(fmt.Errorf("tomlDefaultConfig: %w", err))
+		}
+		got, err := gatesFromToml(b, d)
+
+		if err != nil {
+			t.Errorf("got: %s, want: %v", err, nil)
+		}
+
+		if len(got) != 2 {
+			t.Errorf("got: %d, want: %d", len(got), 2)
+		}
+
+		if got[0].Name != "to_failed" {
+			t.Errorf("got: %s, want: %s", got[0].Name, "to_failed")
+		}
+
+		if got[1].Name != "to_ok" {
+			t.Errorf("got: %s, want: %s", got[0].Name, "to_ok")
+		}
+
+		if got[0].Command != "gate/to_state" {
+			t.Errorf("got: %s, want: %s", got[0].Command, "gate/to_state")
+		}
+
+		if got[1].Command != "gate/to_state" {
+			t.Errorf("got: %s, want: %s", got[1].Command, "gate/to_state")
+		}
+
+		if fmt.Sprintf("%v", got[0].Args) != fmt.Sprintf("%v", []string{"fail"}) {
+			t.Errorf("got: %v, want: %v", got[0].Args, []string{"fail"})
+		}
+
+		if fmt.Sprintf("%v", got[1].Args) != fmt.Sprintf("%v", []string{"ok"}) {
+			t.Errorf("got: %v, want: %v", got[1].Args, []string{"ok"})
+		}
+
+		envs := []string{
+			"SNMP_COMMUNITY=public",
+			"SNMP_VERSION=2c",
+			"EMAIL_FROM=fz@example",
+		}
+
+		if fmt.Sprintf("%s", got[0].Envs) != fmt.Sprintf("%s", envs) {
+			t.Errorf("got: %s, want: %s", got[0].Envs, envs)
+		}
+
+		if fmt.Sprintf("%s", got[1].Envs) != fmt.Sprintf("%s", envs) {
+			t.Errorf("got: %s, want: %s", got[1].Envs, envs)
+		}
 	})
 }
