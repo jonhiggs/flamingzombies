@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -34,7 +35,7 @@ func TestLoad(t *testing.T) {
 		t.Run(fmt.Sprint(tt.fh.Name()), func(t *testing.T) {
 			err := Load(tt.fh)
 			if err != nil {
-				panic(fmt.Errorf("%w", err))
+				panic(fmt.Errorf("load: %w", err))
 			}
 
 			if def.Retries != tt.wantDef.Retries {
@@ -73,7 +74,7 @@ func TestLoad(t *testing.T) {
 	}
 }
 
-func TestExtractTomlObjects(t *testing.T) {
+func TestExtractTomlObjectsBasic(t *testing.T) {
 	f, _ := os.Open("./examples/basic.toml")
 	b, err := PreProcess(f, []*os.File{})
 	if err != nil {
@@ -86,6 +87,17 @@ func TestExtractTomlObjects(t *testing.T) {
 		if len(got) != 1 {
 			t.Errorf("got: %d, want: %d", len(got), 1)
 		}
+
+		gotLines := strings.Split(string(got[0]), "\n")
+
+		if len(gotLines) != 17 {
+			t.Errorf("got: %d, want: %d", len(gotLines), 17)
+		}
+
+		if gotLines[0] != "retries = 5" {
+			t.Errorf("got: %s, want: %s", gotLines[0], "retries = 5")
+		}
+
 	})
 
 	t.Run("task", func(t *testing.T) {
@@ -93,6 +105,10 @@ func TestExtractTomlObjects(t *testing.T) {
 
 		if len(got) != 1 {
 			t.Errorf("got: %d, want: %d", len(got), 1)
+		}
+
+		if len(strings.Split(string(got[0]), "\n")) != 9 {
+			t.Errorf("got: %d, want: %d", len(strings.Split(string(got[0]), "\n")), 9)
 		}
 	})
 
@@ -128,12 +144,16 @@ func TestTomlTasks(t *testing.T) {
 	})
 
 	t.Run("simple task", func(t *testing.T) {
-		b, err := os.ReadFile("./examples/task_simple.toml")
+		fh, _ := os.Open("./examples/task_simple.toml")
+		b, err := PreProcess(fh, []*os.File{})
 		if err != nil {
-			panic(err)
+			panic(fmt.Errorf("preProcess: %w", err))
 		}
 
-		d, _ := tomlDefaultConfig(extractTomlOjbects("default", b)[0])
+		d, err := tomlDefaultConfig(extractTomlOjbects("default", b)[0])
+		if err != nil {
+			panic(fmt.Errorf("tomlDefaultConfig: %w", err))
+		}
 		got, err := tomlTasks(b, d)
 
 		if err != nil {

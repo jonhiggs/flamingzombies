@@ -1,15 +1,4 @@
-[default]
-retries = 5
-frequency = 60
-timeout = 1
-notifiers = [ "logger", "statsd", ]
-error_notifiers = []
-priority = 3
-envs = [
-    "SNMP_COMMUNITY=public",
-    "SNMP_VERSION=2c",
-    "EMAIL_FROM=fz@example",
-]
+include "default.toml"
 
 [[task]]
 name = "simple task"

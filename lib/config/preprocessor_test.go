@@ -26,7 +26,7 @@ func TestExampleA(t *testing.T) {
 log_file = "-"
 log_level = "info"
 
-[defaults]
+[default]
 retries = 5
 timeout = 1
 notifiers = []
@@ -51,7 +51,7 @@ frequency = 20
 log_file = "-"
 log_level = "info"
 
-[defaults]
+[default]
 retries = 5
 timeout = 1
 notifiers = []
@@ -66,7 +66,7 @@ notifiers = []
 log_file = "-"
 log_level = "info"
 
-[defaults]
+[default]
 retries = 5
 timeout = 1
 notifiers = []
