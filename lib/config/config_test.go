@@ -70,10 +70,15 @@ func TestLoad(t *testing.T) {
 				t.Errorf("gate count got: %d, want: %d", len(Gates), 2)
 			}
 
+			if len(Notifiers) != 1 {
+				t.Errorf("gate count got: %d, want: %d", len(Notifiers), 1)
+			}
+
 			// unset the global state
 			def = defaultConfig{}
 			Tasks = []Task{}
 			Gates = []Gate{}
+			Notifiers = []Notifier{}
 			Directory = ""
 		})
 	}
@@ -317,6 +322,62 @@ func TestGatesFromToml(t *testing.T) {
 
 		if fmt.Sprintf("%s", got[1].Envs) != fmt.Sprintf("%s", envs) {
 			t.Errorf("got: %s, want: %s", got[1].Envs, envs)
+		}
+	})
+}
+
+func TestNotifiersFromToml(t *testing.T) {
+	t.Run("no data", func(t *testing.T) {
+		b := []byte{}
+		got, err := notifiersFromToml(b, defaultConfig{})
+
+		if err != nil {
+			t.Errorf("got: %v, want: %v", err, nil)
+		}
+
+		if len(got) != 0 {
+			t.Errorf("got: %d, want: %d", len(got), 0)
+		}
+	})
+
+	t.Run("simple task", func(t *testing.T) {
+		fh, _ := os.Open("./examples/task_simple.toml")
+		b, err := PreProcess(fh, []*os.File{})
+		if err != nil {
+			panic(fmt.Errorf("preProcess: %w", err))
+		}
+
+		d, err := defaultConfigFromToml(extractTomlOjbects("default", b)[0])
+		if err != nil {
+			panic(fmt.Errorf("tomlDefaultConfig: %w", err))
+		}
+		got, err := notifiersFromToml(b, d)
+
+		if err != nil {
+			t.Errorf("got: %s, want: %v", err, nil)
+		}
+
+		if len(got) != 1 {
+			t.Errorf("got: %d, want: %d", len(got), 1)
+		}
+
+		if got[0].Name != "mailer" {
+			t.Errorf("got: %s, want: %s", got[0].Name, "mailer")
+		}
+
+		if got[0].Command != "notifier/email" {
+			t.Errorf("got: %s, want: %s", got[0].Command, "notifier/email")
+		}
+
+		envs := []string{
+			"EMAIL_ADDRESS=root@example",
+			"SNMP_COMMUNITY=public",
+			"SNMP_VERSION=2c",
+			"EMAIL_FROM=fz@example",
+		}
+
+		if fmt.Sprintf("%s", got[0].Envs) != fmt.Sprintf("%s", envs) {
+			t.Errorf("got: %s, want: %s", got[0].Envs, envs)
 		}
 	})
 }

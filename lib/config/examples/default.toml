@@ -21,3 +21,15 @@ args = ["fail"]
 name = "to_ok"
 command = "gate/to_state"
 args = ["ok"]
+
+[[notifier]]
+name = "mailer"
+command = "notifier/email"
+envs = [
+    "EMAIL_ADDRESS=root@example",
+]
+timeout = 3
+gates = [
+    [ "to_fail" ],
+    [ "to_ok" ],
+]

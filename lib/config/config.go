@@ -22,16 +22,9 @@ var def defaultConfig
 
 var Tasks []Task
 var Gates []Gate
-
-// TODO(jh) 20250106: the resources
-//var Notifiers []Notifier
-//var Gates []Gate
+var Notifiers []Notifier
 
 type tomlConfig struct {
-	//Gates     []Gate         `toml:"gate"`
-	//Notifiers []Notifier     `toml:"notifier"`
-	//Tasks     []Task         `toml:"task"`
-
 	Directory string        `toml:"directory"`
 	LogFile   string        `toml:"log_file"`
 	LogLevel  string        `toml:"log_level"`
@@ -58,25 +51,25 @@ type defaultConfig struct {
 // and it's metadata and history which are generated over the course of the
 // daemons lifecycle.
 type Task struct {
-	Name                  string   `toml:"name"`            // friendly name
-	Description           string   `toml:"description"`     // description of the task
-	Command               string   `toml:"command"`         // command
 	Args                  []string `toml:"args"`            // command arguments
+	Command               string   `toml:"command"`         // command
+	Description           string   `toml:"description"`     // description of the task
+	Envs                  []string `toml:"envs"`            // environment variables supplied to task
+	ErrorNotifierNames    []string `toml:"error_notifiers"` // notifiers to trigger upon state change
 	FrequencySeconds      int      `toml:"frequency"`       // how often to run
+	Name                  string   `toml:"name"`            // friendly name
+	NotifierNames         []string `toml:"notifiers"`       // notifiers to trigger upon state change
+	Priority              int      `toml:"priority"`        // the priority of the notifications
+	Retries               int      `toml:"retries"`         // number of retries before changing the state
 	RetryFrequencySeconds int      `toml:"retry_frequency"` // how quickly to retry when state unknown
 	TimeoutSeconds        int      `toml:"timeout"`         // how long an execution may run
-	Retries               int      `toml:"retries"`         // number of retries before changing the state
-	NotifierNames         []string `toml:"notifiers"`       // notifiers to trigger upon state change
-	ErrorNotifierNames    []string `toml:"error_notifiers"` // notifiers to trigger upon state change
-	Priority              int      `toml:"priority"`        // the priority of the notifications
-	Envs                  []string `toml:"envs"`            // environment variables supplied to task
 
 	// public, but not configurable
 	History          uint32    // represented in binary. Successes are high
 	HistoryMask      uint32    // the bits in the history with a recorded value. Needed to understand a history of 0
 	LastFail         time.Time // the time of the last failed execution
-	LastOk           time.Time // the time of the last successful execution
 	LastNotification time.Time // the time of the last notification
+	LastOk           time.Time // the time of the last successful execution
 	LastRun          time.Time // the time of the last execution
 	TraceID          string    // the ID of the task execution to help with tracing
 }
@@ -86,6 +79,15 @@ type Gate struct {
 	Command string   `toml:"command"` // command
 	Envs    []string `toml:"envs"`    // environment variables
 	Name    string   `toml:"name"`    // friendly name
+}
+
+type Notifier struct {
+	Args           []string   `toml:"args"`
+	Command        string     `toml:"command"`
+	Envs           []string   `toml:"envs"`
+	GateSetStrings [][]string `toml:"gates"`
+	Name           string     `toml:"name"`
+	TimeoutSeconds int        `toml:"timeout"`
 }
 
 // populate the package variables from the content of the TOML
@@ -120,6 +122,11 @@ func Load(f *os.File) error {
 	}
 
 	Gates, err = gatesFromToml(b, def)
+	if err != nil {
+		return err
+	}
+
+	Notifiers, err = notifiersFromToml(b, def)
 	if err != nil {
 		return err
 	}
@@ -210,7 +217,6 @@ func tasksFromToml(b []byte, d defaultConfig) ([]Task, error) {
 		LastNotification:      time.Unix(0, 0),
 		LastOk:                time.Unix(0, 0),
 		LastRun:               time.Unix(0, 0),
-		Name:                  d.Name,
 		NotifierNames:         d.NotifierNames,
 		Priority:              d.Priority,
 		Retries:               d.Retries,
@@ -244,7 +250,6 @@ func gatesFromToml(b []byte, d defaultConfig) ([]Gate, error) {
 	defaultGate := Gate{
 		Args:    d.Args,
 		Command: d.Command,
-		Name:    d.Name,
 	}
 
 	var r []Gate
@@ -260,6 +265,32 @@ func gatesFromToml(b []byte, d defaultConfig) ([]Gate, error) {
 		gate.Envs = mergeEnvVars(gate.Envs, d.Envs)
 
 		r = append(r, gate)
+
+	}
+
+	return r, nil
+}
+
+func notifiersFromToml(b []byte, d defaultConfig) ([]Notifier, error) {
+	defaultNotifier := Notifier{
+		Args:           d.Args,
+		Command:        d.Command,
+		TimeoutSeconds: d.TimeoutSeconds,
+	}
+
+	var r []Notifier
+
+	for _, blob := range extractTomlOjbects("notifier", b) {
+		notifier := defaultNotifier
+		_, err := toml.Decode(string(blob), &notifier)
+		if err != nil {
+			return []Notifier{}, err
+		}
+
+		// the default merge of toml.Decode doesn't do what is needed.
+		notifier.Envs = mergeEnvVars(notifier.Envs, d.Envs)
+
+		r = append(r, notifier)
 
 	}
 
