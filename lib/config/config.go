@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/BurntSushi/toml"
@@ -19,8 +20,9 @@ var LogLevel = "info"
 // when needed.
 var def defaultConfig
 
+var Tasks []Task
+
 // TODO(jh) 20250106: the resources
-//var Tasks []Task
 //var Notifiers []Notifier
 //var Gates []Gate
 
@@ -32,7 +34,7 @@ type tomlConfig struct {
 	Directory string        `toml:"directory"`
 	LogFile   string        `toml:"log_file"`
 	LogLevel  string        `toml:"log_level"`
-	Default   defaultConfig `toml:"defaults"`
+	Default   defaultConfig `toml:"default"`
 }
 
 type defaultConfig struct {
@@ -104,6 +106,11 @@ func Load(f *os.File) error {
 		LogLevel = cfg.LogLevel
 	}
 
+	Tasks, err = tomlTasks(b, def)
+	if err != nil {
+		return err
+	}
+
 	// EXAMPLE: https://github.com/BurntSushi/toml/issues/47
 	//config := Host{
 	//	Servers: []Server{
@@ -127,7 +134,19 @@ func Load(f *os.File) error {
 // user-declared 0 or a default value of 0. The former should be used, the
 // latter should be replaced with the default value.
 func extractTomlOjbects(n string, b []byte) [][]byte {
-	startBlock := regexp.MustCompile(fmt.Sprintf(`^\[\[%s\]\]`, n))
+	var startBlock *regexp.Regexp
+
+	switch n {
+	case "default":
+		startBlock = regexp.MustCompile(fmt.Sprintf(`^\[%s\]`, n))
+	case "task":
+		startBlock = regexp.MustCompile(fmt.Sprintf(`^\[\[%s\]\]`, n))
+	case "gate":
+		startBlock = regexp.MustCompile(fmt.Sprintf(`^\[\[%s\]\]`, n))
+	case "notifier":
+		startBlock = regexp.MustCompile(fmt.Sprintf(`^\[\[%s\]\]`, n))
+	}
+
 	endBlock := regexp.MustCompile(`^\[`)
 	inBlock := false
 
@@ -169,26 +188,35 @@ func extractTomlOjbects(n string, b []byte) [][]byte {
 	return objects
 }
 
-func tomlTasks(b []byte) ([]Task, error) {
+// convert the toml response from extractTomlOjbects into a defaultConfig.
+func tomlDefaultConfig(b []byte) (defaultConfig, error) {
+	var c defaultConfig
+	if err := toml.Unmarshal(b, &c); err != nil {
+		return defaultConfig{}, err
+	}
+
+	return c, nil
+}
+
+func tomlTasks(b []byte, d defaultConfig) ([]Task, error) {
 	defaultTask := Task{
-		Args:                  def.Args,
-		Command:               def.Command,
-		Description:           def.Description,
-		Envs:                  def.Envs,
-		ErrorNotifierNames:    def.ErrorNotifierNames,
-		FrequencySeconds:      def.FrequencySeconds,
+		Args:                  d.Args,
+		Command:               d.Command,
+		Description:           d.Description,
+		ErrorNotifierNames:    d.ErrorNotifierNames,
+		FrequencySeconds:      d.FrequencySeconds,
 		History:               0b010,
 		HistoryMask:           0b111,
 		LastFail:              time.Unix(0, 0),
 		LastNotification:      time.Unix(0, 0),
 		LastOk:                time.Unix(0, 0),
 		LastRun:               time.Unix(0, 0),
-		Name:                  def.Name,
-		NotifierNames:         def.NotifierNames,
-		Priority:              def.Priority,
-		Retries:               def.Retries,
-		RetryFrequencySeconds: def.RetryFrequencySeconds,
-		TimeoutSeconds:        def.TimeoutSeconds,
+		Name:                  d.Name,
+		NotifierNames:         d.NotifierNames,
+		Priority:              d.Priority,
+		Retries:               d.Retries,
+		RetryFrequencySeconds: d.RetryFrequencySeconds,
+		TimeoutSeconds:        d.TimeoutSeconds,
 	}
 
 	var r []Task
@@ -200,9 +228,50 @@ func tomlTasks(b []byte) ([]Task, error) {
 			return []Task{}, err
 		}
 
+		// the default merge of toml.Decode doesn't do what is needed.
+		task.Envs = mergeEnvVars(task.Envs, d.Envs)
+
 		r = append(r, task)
 
 	}
 
 	return r, nil
+}
+
+// Merge and deduplicate environment variables
+func mergeEnvVars(a, b []string) []string {
+	var res, keys []string
+	for _, s := range a {
+		found := false
+		k := strings.Split(s, "=")[0]
+
+		for _, ks := range keys {
+			if k == ks {
+				found = true
+			}
+		}
+
+		if !found {
+			keys = append(keys, k)
+			res = append(res, s)
+		}
+	}
+
+	for _, s := range b {
+		found := false
+		k := strings.Split(s, "=")[0]
+
+		for _, ks := range keys {
+			if k == ks {
+				found = true
+			}
+		}
+
+		if !found {
+			keys = append(keys, k)
+			res = append(res, s)
+		}
+	}
+
+	return res
 }

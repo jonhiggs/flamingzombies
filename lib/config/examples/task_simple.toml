@@ -1,3 +1,15 @@
+[default]
+retries = 5
+timeout = 1
+notifiers = [ "logger", "statsd", ]
+error_notifiers = []
+priority = 3
+envs = [
+    "SNMP_COMMUNITY=public",
+    "SNMP_VERSION=2c",
+    "EMAIL_FROM=fz@example",
+]
+
 [[task]]
 name = "simple task"
 description = """
@@ -6,3 +18,6 @@ this is a simple task
 command = "task/command"
 frequency = 20
 retry_frequency = 20
+envs = [
+    "EXTRA=123",
+]

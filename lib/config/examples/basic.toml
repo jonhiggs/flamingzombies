@@ -1,7 +1,7 @@
 log_file = "-"
 log_level = "info"
 
-[defaults]
+[default]
 retries = 5
 timeout = 1
 notifiers = [

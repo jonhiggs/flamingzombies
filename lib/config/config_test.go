@@ -7,7 +7,7 @@ import (
 )
 
 func TestLoad(t *testing.T) {
-	fhA, _ := os.Open("./examples/A.toml")
+	fhA, _ := os.Open("./examples/task_simple.toml")
 
 	var tests = []struct {
 		fh           *os.File
@@ -42,7 +42,7 @@ func TestLoad(t *testing.T) {
 			}
 
 			if def.TimeoutSeconds != tt.wantDef.TimeoutSeconds {
-				t.Errorf("default timeout got: %d, want: %d", def.Retries, tt.wantDef.Retries)
+				t.Errorf("default timeout got: %d, want: %d", def.TimeoutSeconds, tt.wantDef.TimeoutSeconds)
 			}
 
 			if err != tt.wantErr {
@@ -61,8 +61,13 @@ func TestLoad(t *testing.T) {
 				t.Errorf("LogLevel got: %s, want: %s", LogLevel, tt.wantLogLevel)
 			}
 
+			if len(Tasks) != 1 {
+				t.Errorf("task count got: %d, want: %d", len(Tasks), 1)
+			}
+
 			// unset the global state
 			def = defaultConfig{}
+			Tasks = []Task{}
 			Directory = ""
 		})
 	}
@@ -74,6 +79,14 @@ func TestExtractTomlObjects(t *testing.T) {
 	if err != nil {
 		panic(fmt.Errorf("%w", err))
 	}
+
+	t.Run("default", func(t *testing.T) {
+		got := extractTomlOjbects("default", b)
+
+		if len(got) != 1 {
+			t.Errorf("got: %d, want: %d", len(got), 1)
+		}
+	})
 
 	t.Run("task", func(t *testing.T) {
 		got := extractTomlOjbects("task", b)
@@ -103,7 +116,7 @@ func TestExtractTomlObjects(t *testing.T) {
 func TestTomlTasks(t *testing.T) {
 	t.Run("no data", func(t *testing.T) {
 		b := []byte{}
-		got, err := tomlTasks(b)
+		got, err := tomlTasks(b, defaultConfig{})
 
 		if err != nil {
 			t.Errorf("got: %v, want: %v", err, nil)
@@ -120,7 +133,8 @@ func TestTomlTasks(t *testing.T) {
 			panic(err)
 		}
 
-		got, err := tomlTasks(b)
+		d, _ := tomlDefaultConfig(extractTomlOjbects("default", b)[0])
+		got, err := tomlTasks(b, d)
 
 		if err != nil {
 			t.Errorf("got: %s, want: %v", err, nil)
@@ -131,7 +145,54 @@ func TestTomlTasks(t *testing.T) {
 		}
 
 		if got[0].Name != "simple task" {
-			t.Errorf("got: %s, want: %v", got[0].Name, "simple task")
+			t.Errorf("got: %s, want: %s", got[0].Name, "simple task")
 		}
+
+		envs := []string{
+			"EXTRA=123",
+			"SNMP_COMMUNITY=public",
+			"SNMP_VERSION=2c",
+			"EMAIL_FROM=fz@example",
+		}
+
+		if fmt.Sprintf("%s", got[0].Envs) != fmt.Sprintf("%s", envs) {
+			t.Errorf("got: %s, want: %s", got[0].Envs, envs)
+		}
+
+		// unset global state
+		def = defaultConfig{}
 	})
+}
+
+func TestMergeEnvVars(t *testing.T) {
+	var tests = []struct {
+		a    []string
+		b    []string
+		want []string
+	}{
+		{ // 0
+			[]string{"A=1"},
+			[]string{"B=2"},
+			[]string{"A=1", "B=2"},
+		},
+		{ // 1
+			[]string{"A=1"},
+			[]string{"A=2"},
+			[]string{"A=1"},
+		},
+		{ // 1
+			[]string{"A=1"},
+			[]string{"B=2", "C=3"},
+			[]string{"A=1", "B=2", "C=3"},
+		},
+	}
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprint(i), func(t *testing.T) {
+			got := mergeEnvVars(tt.a, tt.b)
+			if fmt.Sprintf("%v", got) != fmt.Sprintf("%v", tt.want) {
+				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
