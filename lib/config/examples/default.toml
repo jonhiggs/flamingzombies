@@ -1,5 +1,6 @@
 [default]
 retries = 5
+retry_frequency = 10
 frequency = 60
 timeout = 1
 notifiers = [ "logger", "statsd", ]

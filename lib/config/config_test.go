@@ -202,6 +202,43 @@ func TestTomlTasks(t *testing.T) {
 		// unset global state
 		def = defaultConfig{}
 	})
+
+	t.Run("no retries", func(t *testing.T) {
+		fh, _ := os.Open("./examples/no_retries.toml")
+		b, err := PreProcess(fh, []*os.File{})
+		if err != nil {
+			panic(fmt.Errorf("preProcess: %w", err))
+		}
+
+		d, err := tomlDefaultConfig(extractTomlOjbects("default", b)[0])
+		if err != nil {
+			panic(fmt.Errorf("tomlDefaultConfig: %w", err))
+		}
+		got, err := tomlTasks(b, d)
+
+		if err != nil {
+			t.Errorf("got: %s, want: %v", err, nil)
+		}
+
+		if len(got) != 1 {
+			t.Errorf("got: %d, want: %d", len(got), 1)
+		}
+
+		if got[0].Name != "no_retries" {
+			t.Errorf("got: %s, want: %s", got[0].Name, "no_retries")
+		}
+
+		if got[0].Retries != 0 {
+			t.Errorf("got: %d, want: %d", got[0].Retries, 0)
+		}
+
+		if got[0].RetryFrequencySeconds != 0 {
+			t.Errorf("got: %d, want: %d", got[0].RetryFrequencySeconds, 0)
+		}
+
+		// unset global state
+		def = defaultConfig{}
+	})
 }
 
 func TestMergeEnvVars(t *testing.T) {

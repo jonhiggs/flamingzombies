@@ -1,0 +1,7 @@
+include "default.toml"
+
+[[task]]
+name = "no_retries"
+description = "override the default value with 0"
+retries = 0
+retry_frequency = 0
