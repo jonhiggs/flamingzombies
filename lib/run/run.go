@@ -29,6 +29,14 @@ type Result struct {
 	TraceID     string
 }
 
+type Starter interface {
+	Command() Cmd
+}
+
+func Start(c Starter) Result {
+	return c.Command().Start()
+}
+
 func (c Cmd) Start() Result {
 	var r Result
 
