@@ -5,6 +5,9 @@ import (
 	"hash/fnv"
 	"regexp"
 	"time"
+
+	"github.com/jonhiggs/flamingzombies/lib/run"
+	"github.com/jonhiggs/flamingzombies/lib/trace"
 )
 
 // A Task is a command that is executed on a schedule. The struct contains the
@@ -34,20 +37,19 @@ type Task struct {
 	traceID               string     // the ID of the task execution to help with tracing
 }
 
-func (t *Task) Args() []string {
-	return t.args
-}
-
-func (t *Task) Command() string {
-	return t.command
+func (t *Task) Command() run.Cmd {
+	return run.Cmd{
+		Command: t.command,
+		Args:    t.args,
+		Envs:    t.envs,
+		Dir:     Directory,
+		TraceID: trace.ID(),
+		Timeout: t.timeout(),
+	}
 }
 
 func (t *Task) Description() string {
 	return t.description
-}
-
-func (t *Task) Environment() []string {
-	return t.envs
 }
 
 func (t *Task) ErrorNotifiers() []Notifier {
@@ -213,10 +215,6 @@ func (t *Task) StateChanged() bool {
 	return t.State() != t.LastState()
 }
 
-func (t *Task) Timeout() time.Duration {
-	return time.Duration(t.timeoutSeconds) * time.Second
-}
-
 /// PRIVATE ///////////////////////////////////////////////////////////////////
 
 // Create a checksum of a tasks configuration. The hash is used for a
@@ -225,12 +223,12 @@ func (t *Task) Timeout() time.Duration {
 func (t *Task) hash() uint32 {
 	// To help with testing, return hash of zero when there isn't a command or
 	// any arguments.
-	if t.Command() == "" && len(t.Args()) == 0 {
+	if t.command == "" && len(t.args) == 0 {
 		return uint32(0)
 	}
 
-	s := t.Command()
-	for _, a := range t.Args() {
+	s := t.command
+	for _, a := range t.args {
 		s += a
 	}
 
@@ -248,4 +246,8 @@ func (t *Task) retryMask() uint32 {
 	}
 
 	return m
+}
+
+func (t *Task) timeout() time.Duration {
+	return time.Duration(t.timeoutSeconds) * time.Second
 }

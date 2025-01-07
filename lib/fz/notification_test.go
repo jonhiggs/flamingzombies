@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/jonhiggs/flamingzombies/lib/config"
 )
 
-var testTask = Task{
-	Name:             "flappy",
-	Description:      "a flappy task",
-	Retries:          3,
-	LastNotification: time.Unix(0, 0),
-	TraceID:          "123",
+var testTask = config.Task{
+	name:             "flappy",
+	description:      "a flappy task",
+	retries:          3,
+	lastNotification: time.Unix(0, 0),
+	traceID:          "123",
 }
 var testNotifier = Notifier{Name: "testing"}
 

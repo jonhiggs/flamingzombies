@@ -183,10 +183,6 @@ func TestTasksFromToml(t *testing.T) {
 			t.Errorf("got: %s, want: %s", got[0].Description(), "this is a simple task")
 		}
 
-		if got[0].Command() != "task/command" {
-			t.Errorf("got: %s, want: %s", got[0].Command(), "task/command")
-		}
-
 		if got[0].Frequency() != 20*time.Second {
 			t.Errorf("got: %d, want: %d", got[0].Frequency(), 20*time.Second)
 		}
@@ -199,6 +195,11 @@ func TestTasksFromToml(t *testing.T) {
 			t.Errorf("got: %d, want: %d", got[0].Priority(), 3)
 		}
 
+		gotCmd := got[0].Command()
+		if gotCmd.Command != "task/command" {
+			t.Errorf("got: %s, want: %s", gotCmd.Command, "task/command")
+		}
+
 		envs := []string{
 			"EXTRA=123",
 			"SNMP_COMMUNITY=public",
@@ -206,8 +207,8 @@ func TestTasksFromToml(t *testing.T) {
 			"EMAIL_FROM=fz@example",
 		}
 
-		if fmt.Sprintf("%s", got[0].Environment()) != fmt.Sprintf("%s", envs) {
-			t.Errorf("got: %s, want: %s", got[0].Environment(), envs)
+		if fmt.Sprintf("%s", gotCmd.Envs) != fmt.Sprintf("%s", envs) {
+			t.Errorf("got: %s, want: %s", gotCmd.Envs, envs)
 		}
 
 		// unset global state
