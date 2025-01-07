@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestLoad(t *testing.T) {
@@ -174,28 +175,28 @@ func TestTasksFromToml(t *testing.T) {
 			t.Errorf("got: %d, want: %d", len(got), 1)
 		}
 
-		if got[0].Name != "simple task" {
-			t.Errorf("got: %s, want: %s", got[0].Name, "simple task")
+		if got[0].Name() != "simple task" {
+			t.Errorf("got: %s, want: %s", got[0].Name(), "simple task")
 		}
 
-		if got[0].Description != "this is a simple task" {
-			t.Errorf("got: %s, want: %s", got[0].Description, "this is a simple task")
+		if got[0].Description() != "this is a simple task" {
+			t.Errorf("got: %s, want: %s", got[0].Description(), "this is a simple task")
 		}
 
-		if got[0].Command != "task/command" {
-			t.Errorf("got: %s, want: %s", got[0].Command, "task/command")
+		if got[0].Command() != "task/command" {
+			t.Errorf("got: %s, want: %s", got[0].Command(), "task/command")
 		}
 
-		if got[0].FrequencySeconds != 20 {
-			t.Errorf("got: %d, want: %d", got[0].FrequencySeconds, 20)
+		if got[0].Frequency() != 20*time.Second {
+			t.Errorf("got: %d, want: %d", got[0].Frequency(), 20*time.Second)
 		}
 
-		if got[0].RetryFrequencySeconds != 20 {
-			t.Errorf("got: %d, want: %d", got[0].RetryFrequencySeconds, 20)
+		if got[0].RetryFrequency() != 20*time.Second {
+			t.Errorf("got: %d, want: %d", got[0].RetryFrequency(), 20*time.Second)
 		}
 
-		if got[0].Priority != 3 {
-			t.Errorf("got: %d, want: %d", got[0].Priority, 3)
+		if got[0].Priority() != 3 {
+			t.Errorf("got: %d, want: %d", got[0].Priority(), 3)
 		}
 
 		envs := []string{
@@ -205,8 +206,8 @@ func TestTasksFromToml(t *testing.T) {
 			"EMAIL_FROM=fz@example",
 		}
 
-		if fmt.Sprintf("%s", got[0].Envs) != fmt.Sprintf("%s", envs) {
-			t.Errorf("got: %s, want: %s", got[0].Envs, envs)
+		if fmt.Sprintf("%s", got[0].Environment()) != fmt.Sprintf("%s", envs) {
+			t.Errorf("got: %s, want: %s", got[0].Environment(), envs)
 		}
 
 		// unset global state
@@ -234,16 +235,16 @@ func TestTasksFromToml(t *testing.T) {
 			t.Errorf("got: %d, want: %d", len(got), 1)
 		}
 
-		if got[0].Name != "no_retries" {
-			t.Errorf("got: %s, want: %s", got[0].Name, "no_retries")
+		if got[0].Name() != "no_retries" {
+			t.Errorf("got: %s, want: %s", got[0].Name(), "no_retries")
 		}
 
-		if got[0].Retries != 0 {
-			t.Errorf("got: %d, want: %d", got[0].Retries, 0)
+		if got[0].Retries() != 0 {
+			t.Errorf("got: %d, want: %d", got[0].Retries(), 0)
 		}
 
-		if got[0].RetryFrequencySeconds != 0 {
-			t.Errorf("got: %d, want: %d", got[0].RetryFrequencySeconds, 0)
+		if got[0].RetryFrequency() != 0 {
+			t.Errorf("got: %d, want: %d", got[0].RetryFrequency(), 0)
 		}
 
 		// unset global state

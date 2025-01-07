@@ -7,7 +7,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/BurntSushi/toml"
 )
@@ -50,30 +49,6 @@ type defaultConfig struct {
 // static configuration of the task which is read from the configuration file,
 // and it's metadata and history which are generated over the course of the
 // daemons lifecycle.
-type Task struct {
-	Args                  []string `toml:"args"`            // command arguments
-	Command               string   `toml:"command"`         // command
-	Description           string   `toml:"description"`     // description of the task
-	Envs                  []string `toml:"envs"`            // environment variables supplied to task
-	ErrorNotifierNames    []string `toml:"error_notifiers"` // notifiers to trigger upon state change
-	FrequencySeconds      int      `toml:"frequency"`       // how often to run
-	Name                  string   `toml:"name"`            // friendly name
-	NotifierNames         []string `toml:"notifiers"`       // notifiers to trigger upon state change
-	Priority              int      `toml:"priority"`        // the priority of the notifications
-	Retries               int      `toml:"retries"`         // number of retries before changing the state
-	RetryFrequencySeconds int      `toml:"retry_frequency"` // how quickly to retry when state unknown
-	TimeoutSeconds        int      `toml:"timeout"`         // how long an execution may run
-
-	// public, but not configurable
-	History          uint32     // represented in binary. Successes are high
-	HistoryMask      uint32     // the bits in the history with a recorded value. Needed to understand a history of 0
-	LastFail         time.Time  // the time of the last failed execution
-	LastNotification time.Time  // the time of the last notification
-	LastOk           time.Time  // the time of the last successful execution
-	LastRun          time.Time  // the time of the last execution
-	Notifiers        []Notifier // the child notifiers of this task
-	TraceID          string     // the ID of the task execution to help with tracing
-}
 
 // populate the package variables from the content of the TOML
 func Load(f *os.File) error {
@@ -190,29 +165,36 @@ func defaultConfigFromToml(b []byte) (defaultConfig, error) {
 }
 
 func tasksFromToml(b []byte, d defaultConfig) ([]Task, error) {
-	defaultTask := Task{
-		Args:                  d.Args,
-		Command:               d.Command,
-		Description:           d.Description,
-		ErrorNotifierNames:    d.ErrorNotifierNames,
-		FrequencySeconds:      d.FrequencySeconds,
-		History:               0b010,
-		HistoryMask:           0b111,
-		LastFail:              time.Unix(0, 0),
-		LastNotification:      time.Unix(0, 0),
-		LastOk:                time.Unix(0, 0),
-		LastRun:               time.Unix(0, 0),
-		NotifierNames:         d.NotifierNames,
-		Priority:              d.Priority,
-		Retries:               d.Retries,
-		RetryFrequencySeconds: d.RetryFrequencySeconds,
-		TimeoutSeconds:        d.TimeoutSeconds,
-	}
-
 	var r []Task
 
+	type taskData struct {
+		Args                  []string `toml:"args"`            // command arguments
+		Command               string   `toml:"command"`         // command
+		Description           string   `toml:"description"`     // description of the task
+		Envs                  []string `toml:"envs"`            // environment variables supplied to task
+		ErrorNotifierNames    []string `toml:"error_notifiers"` // notifiers to trigger upon state change
+		FrequencySeconds      int      `toml:"frequency"`       // how often to run
+		Name                  string   `toml:"name"`            // friendly name
+		NotifierNames         []string `toml:"notifiers"`       // notifiers to trigger upon state change
+		Priority              int      `toml:"priority"`        // the priority of the notifications
+		Retries               int      `toml:"retries"`         // number of retries before changing the state
+		RetryFrequencySeconds int      `toml:"retry_frequency"` // how quickly to retry when state unknown
+		TimeoutSeconds        int      `toml:"timeout"`         // how long an execution may run
+	}
+
 	for _, blob := range extractTomlOjbects("task", b) {
-		task := defaultTask
+		task := taskData{
+			Args:                  d.Args,
+			Command:               d.Command,
+			Description:           d.Description,
+			ErrorNotifierNames:    d.ErrorNotifierNames,
+			FrequencySeconds:      d.FrequencySeconds,
+			NotifierNames:         d.NotifierNames,
+			Priority:              d.Priority,
+			Retries:               d.Retries,
+			RetryFrequencySeconds: d.RetryFrequencySeconds,
+			TimeoutSeconds:        d.TimeoutSeconds,
+		}
 		_, err := toml.Decode(string(blob), &task)
 		if err != nil {
 			return []Task{}, err
@@ -224,8 +206,20 @@ func tasksFromToml(b []byte, d defaultConfig) ([]Task, error) {
 		// the default merge of toml.Decode doesn't do what is needed.
 		task.Envs = mergeEnvVars(task.Envs, d.Envs)
 
-		r = append(r, task)
-
+		r = append(r, Task{
+			args:                  task.Args,
+			command:               task.Command,
+			description:           task.Description,
+			envs:                  mergeEnvVars(task.Envs, d.Envs),
+			errorNotifierNames:    task.ErrorNotifierNames,
+			frequencySeconds:      task.FrequencySeconds,
+			name:                  task.Name,
+			notifierNames:         task.NotifierNames,
+			priority:              task.Priority,
+			retries:               task.Retries,
+			retryFrequencySeconds: task.RetryFrequencySeconds,
+			timeoutSeconds:        task.TimeoutSeconds,
+		})
 	}
 
 	return r, nil
