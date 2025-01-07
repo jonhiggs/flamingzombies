@@ -75,16 +75,6 @@ type Task struct {
 	TraceID          string     // the ID of the task execution to help with tracing
 }
 
-type Notifier struct {
-	Args           []string   `toml:"args"`
-	Command        string     `toml:"command"`
-	Envs           []string   `toml:"envs"`
-	GateSetStrings [][]string `toml:"gates"`
-	Name           string     `toml:"name"`
-	TimeoutSeconds int        `toml:"timeout"`
-	GateSets       [][]Gate   // the gates attached to the notifier
-}
-
 // populate the package variables from the content of the TOML
 func Load(f *os.File) error {
 	b, err := PreProcess(f, []*os.File{})
@@ -241,6 +231,7 @@ func tasksFromToml(b []byte, d defaultConfig) ([]Task, error) {
 	return r, nil
 }
 
+// Extract and return gates from a toml configuration as []Gate
 func gatesFromToml(b []byte, d defaultConfig) ([]Gate, error) {
 	var r []Gate
 
@@ -274,27 +265,39 @@ func gatesFromToml(b []byte, d defaultConfig) ([]Gate, error) {
 	return r, nil
 }
 
+// Extract and return gates from a toml configuration as []Gate
 func notifiersFromToml(b []byte, d defaultConfig) ([]Notifier, error) {
-	defaultNotifier := Notifier{
-		Args:           d.Args,
-		Command:        d.Command,
-		TimeoutSeconds: d.TimeoutSeconds,
-	}
-
 	var r []Notifier
 
+	type notifierData struct {
+		Args           []string   `toml:"args"`
+		Command        string     `toml:"command"`
+		Envs           []string   `toml:"envs"`
+		GateSetStrings [][]string `toml:"gates"`
+		Name           string     `toml:"name"`
+		TimeoutSeconds int        `toml:"timeout"`
+	}
+
 	for _, blob := range extractTomlOjbects("notifier", b) {
-		notifier := defaultNotifier
+		notifier := notifierData{
+			Args:           d.Args,
+			Command:        d.Command,
+			TimeoutSeconds: d.TimeoutSeconds,
+		}
+
 		_, err := toml.Decode(string(blob), &notifier)
 		if err != nil {
 			return []Notifier{}, err
 		}
 
-		// the default merge of toml.Decode doesn't do what is needed.
-		notifier.Envs = mergeEnvVars(notifier.Envs, d.Envs)
-
-		r = append(r, notifier)
-
+		r = append(r, Notifier{
+			args:           notifier.Args,
+			command:        notifier.Command,
+			envs:           mergeEnvVars(notifier.Envs, d.Envs),
+			gateSetStrings: notifier.GateSetStrings,
+			name:           notifier.Name,
+			timeoutSeconds: notifier.TimeoutSeconds,
+		})
 	}
 
 	return r, nil

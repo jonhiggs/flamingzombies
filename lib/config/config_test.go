@@ -361,12 +361,12 @@ func TestNotifiersFromToml(t *testing.T) {
 			t.Errorf("got: %d, want: %d", len(got), 1)
 		}
 
-		if got[0].Name != "mailer" {
-			t.Errorf("got: %s, want: %s", got[0].Name, "mailer")
+		if got[0].Name() != "mailer" {
+			t.Errorf("got: %s, want: %s", got[0].Name(), "mailer")
 		}
 
-		if got[0].Command != "notifier/email" {
-			t.Errorf("got: %s, want: %s", got[0].Command, "notifier/email")
+		if got[0].Command() != "notifier/email" {
+			t.Errorf("got: %s, want: %s", got[0].Command(), "notifier/email")
 		}
 
 		envs := []string{
@@ -376,8 +376,8 @@ func TestNotifiersFromToml(t *testing.T) {
 			"EMAIL_FROM=fz@example",
 		}
 
-		if fmt.Sprintf("%s", got[0].Envs) != fmt.Sprintf("%s", envs) {
-			t.Errorf("got: %s, want: %s", got[0].Envs, envs)
+		if fmt.Sprintf("%s", got[0].Environment()) != fmt.Sprintf("%s", envs) {
+			t.Errorf("got: %s, want: %s", got[0].Environment(), envs)
 		}
 	})
 }
