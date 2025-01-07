@@ -180,7 +180,7 @@ func (t config.Task) LastState() State {
 }
 
 // if the state changed
-func (t config.Task) StateChanged() bool {
+func (t Task) StateChanged() bool {
 	// if state is unknown, then we can't make an assessment.
 	if t.State() == STATE_UNKNOWN {
 		return false

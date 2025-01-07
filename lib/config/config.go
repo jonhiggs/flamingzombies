@@ -45,6 +45,25 @@ type defaultConfig struct {
 	TimeoutSeconds        int      `toml:"timeout"`         // how long an execution may run
 }
 
+type State int8
+
+const (
+	STATE_UNKNOWN = State(iota)
+	STATE_FAIL
+	STATE_OK
+)
+
+func (s State) String() string {
+	switch s {
+	case STATE_FAIL:
+		return "fail"
+	case STATE_OK:
+		return "ok"
+	default:
+		return "unknown"
+	}
+}
+
 // A Task is a command that is executed on a schedule. The struct contains the
 // static configuration of the task which is read from the configuration file,
 // and it's metadata and history which are generated over the course of the
