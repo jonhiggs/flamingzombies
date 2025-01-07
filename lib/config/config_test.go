@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/jonhiggs/flamingzombies/lib/trace"
 )
 
 func TestLoad(t *testing.T) {
@@ -296,34 +298,46 @@ func TestGatesFromToml(t *testing.T) {
 			t.Errorf("got: %s, want: %s", got[0].Name(), "to_ok")
 		}
 
-		if got[0].Command() != "gate/to_state" {
-			t.Errorf("got: %s, want: %s", got[0].Command(), "gate/to_state")
+		{
+			gotCmd := got[0].Command(trace.ID())
+			wantEnvs := []string{
+				"SNMP_COMMUNITY=public",
+				"SNMP_VERSION=2c",
+				"EMAIL_FROM=fz@example",
+			}
+
+			if gotCmd.Command != "gate/to_state" {
+				t.Errorf("got: %s, want: %s", gotCmd.Command, "gate/to_state")
+			}
+
+			if fmt.Sprintf("%v", gotCmd.Args) != fmt.Sprintf("%v", []string{"fail"}) {
+				t.Errorf("got: %v, want: %v", gotCmd.Args, []string{"fail"})
+			}
+
+			if fmt.Sprintf("%s", gotCmd.Envs) != fmt.Sprintf("%s", wantEnvs) {
+				t.Errorf("got: %s, want: %s", gotCmd.Envs, wantEnvs)
+			}
 		}
 
-		if got[1].Command() != "gate/to_state" {
-			t.Errorf("got: %s, want: %s", got[1].Command(), "gate/to_state")
-		}
+		{
+			gotCmd := got[1].Command(trace.ID())
+			wantEnvs := []string{
+				"SNMP_COMMUNITY=public",
+				"SNMP_VERSION=2c",
+				"EMAIL_FROM=fz@example",
+			}
 
-		if fmt.Sprintf("%v", got[0].Args()) != fmt.Sprintf("%v", []string{"fail"}) {
-			t.Errorf("got: %v, want: %v", got[0].Args(), []string{"fail"})
-		}
+			if gotCmd.Command != "gate/to_state" {
+				t.Errorf("got: %s, want: %s", gotCmd.Command, "gate/to_state")
+			}
 
-		if fmt.Sprintf("%v", got[1].Args()) != fmt.Sprintf("%v", []string{"ok"}) {
-			t.Errorf("got: %v, want: %v", got[1].Args(), []string{"ok"})
-		}
+			if fmt.Sprintf("%v", gotCmd.Args) != fmt.Sprintf("%v", []string{"ok"}) {
+				t.Errorf("got: %v, want: %v", gotCmd.Args, []string{"ok"})
+			}
 
-		envs := []string{
-			"SNMP_COMMUNITY=public",
-			"SNMP_VERSION=2c",
-			"EMAIL_FROM=fz@example",
-		}
-
-		if fmt.Sprintf("%s", got[0].Environment()) != fmt.Sprintf("%s", envs) {
-			t.Errorf("got: %s, want: %s", got[0].Environment(), envs)
-		}
-
-		if fmt.Sprintf("%s", got[1].Environment()) != fmt.Sprintf("%s", envs) {
-			t.Errorf("got: %s, want: %s", got[1].Environment(), envs)
+			if fmt.Sprintf("%s", gotCmd.Envs) != fmt.Sprintf("%s", wantEnvs) {
+				t.Errorf("got: %s, want: %s", gotCmd.Envs, wantEnvs)
+			}
 		}
 	})
 }

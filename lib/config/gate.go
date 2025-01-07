@@ -1,5 +1,13 @@
 package config
 
+import (
+	"time"
+
+	"github.com/jonhiggs/flamingzombies/lib/run"
+)
+
+const GATE_TIMEOUT = 1 * time.Second
+
 type Gate struct {
 	args    []string // command arguments
 	command string   // command
@@ -7,18 +15,17 @@ type Gate struct {
 	name    string   // friendly name
 }
 
-func (g Gate) Args() []string {
-	return g.args
-}
-
-func (g Gate) Command() string {
-	return g.command
-}
-
-func (g Gate) Environment() []string {
-	return g.envs
-}
-
 func (g Gate) Name() string {
 	return g.name
+}
+
+func (g Gate) Command(t string) run.Cmd {
+	return run.Cmd{
+		Command: g.command,
+		Args:    g.args,
+		Envs:    g.envs,
+		Dir:     Directory,
+		TraceID: t,
+		Timeout: GATE_TIMEOUT,
+	}
 }
