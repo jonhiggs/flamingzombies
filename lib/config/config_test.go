@@ -286,28 +286,28 @@ func TestGatesFromToml(t *testing.T) {
 			t.Errorf("got: %d, want: %d", len(got), 2)
 		}
 
-		if got[0].Name != "to_failed" {
-			t.Errorf("got: %s, want: %s", got[0].Name, "to_failed")
+		if got[0].Name() != "to_failed" {
+			t.Errorf("got: %s, want: %s", got[0].Name(), "to_failed")
 		}
 
-		if got[1].Name != "to_ok" {
-			t.Errorf("got: %s, want: %s", got[0].Name, "to_ok")
+		if got[1].Name() != "to_ok" {
+			t.Errorf("got: %s, want: %s", got[0].Name(), "to_ok")
 		}
 
-		if got[0].Command != "gate/to_state" {
-			t.Errorf("got: %s, want: %s", got[0].Command, "gate/to_state")
+		if got[0].Command() != "gate/to_state" {
+			t.Errorf("got: %s, want: %s", got[0].Command(), "gate/to_state")
 		}
 
-		if got[1].Command != "gate/to_state" {
-			t.Errorf("got: %s, want: %s", got[1].Command, "gate/to_state")
+		if got[1].Command() != "gate/to_state" {
+			t.Errorf("got: %s, want: %s", got[1].Command(), "gate/to_state")
 		}
 
-		if fmt.Sprintf("%v", got[0].Args) != fmt.Sprintf("%v", []string{"fail"}) {
-			t.Errorf("got: %v, want: %v", got[0].Args, []string{"fail"})
+		if fmt.Sprintf("%v", got[0].Args()) != fmt.Sprintf("%v", []string{"fail"}) {
+			t.Errorf("got: %v, want: %v", got[0].Args(), []string{"fail"})
 		}
 
-		if fmt.Sprintf("%v", got[1].Args) != fmt.Sprintf("%v", []string{"ok"}) {
-			t.Errorf("got: %v, want: %v", got[1].Args, []string{"ok"})
+		if fmt.Sprintf("%v", got[1].Args()) != fmt.Sprintf("%v", []string{"ok"}) {
+			t.Errorf("got: %v, want: %v", got[1].Args(), []string{"ok"})
 		}
 
 		envs := []string{
@@ -316,12 +316,12 @@ func TestGatesFromToml(t *testing.T) {
 			"EMAIL_FROM=fz@example",
 		}
 
-		if fmt.Sprintf("%s", got[0].Envs) != fmt.Sprintf("%s", envs) {
-			t.Errorf("got: %s, want: %s", got[0].Envs, envs)
+		if fmt.Sprintf("%s", got[0].Environment()) != fmt.Sprintf("%s", envs) {
+			t.Errorf("got: %s, want: %s", got[0].Environment(), envs)
 		}
 
-		if fmt.Sprintf("%s", got[1].Envs) != fmt.Sprintf("%s", envs) {
-			t.Errorf("got: %s, want: %s", got[1].Envs, envs)
+		if fmt.Sprintf("%s", got[1].Environment()) != fmt.Sprintf("%s", envs) {
+			t.Errorf("got: %s, want: %s", got[1].Environment(), envs)
 		}
 	})
 }

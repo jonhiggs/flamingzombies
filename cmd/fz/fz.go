@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/jonhiggs/flamingzombies/lib/config"
 	"github.com/jonhiggs/flamingzombies/lib/fz"
 	"nullprogram.com/x/optparse"
 )
@@ -71,17 +72,11 @@ func init() {
 		logLevel = os.Getenv("FZ_LOG_LEVEL")
 	}
 
-	cfg = fz.ReadConfig(
-		configFile,
-		dir,
-		logFile,
-		logLevel,
-	)
-
-	fz.StartLogger(cfg.LogLevel)
+	config.Load(configFile)
+	fz.StartLogger(config.LogLevel)
 
 	// validation
-	if err = cfg.Validate(); err != nil {
+	if err = config.Validate(); err != nil {
 		log.Fatal(err)
 	}
 	if configTest {

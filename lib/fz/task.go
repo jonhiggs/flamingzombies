@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jonhiggs/flamingzombies/lib/config"
 	"github.com/jonhiggs/flamingzombies/lib/run"
 	"github.com/jonhiggs/flamingzombies/lib/trace"
 )
@@ -14,7 +15,7 @@ import (
 // Create a checksum of a tasks configuration. The hash is used for a
 // consistent execution offset. Offsetting the execution prevents the time that
 // tasks are executed from clustering around each other.
-func (t Task) Hash() uint32 {
+func (t config.Task) Hash() uint32 {
 	// To help with testing, return hash of zero when there isn't a command or
 	// any arguments.
 	if t.Command == "" && len(t.Args) == 0 {
@@ -32,11 +33,11 @@ func (t Task) Hash() uint32 {
 }
 
 // how often to run
-func (t Task) Frequency() time.Duration {
+func (t config.Task) Frequency() time.Duration {
 	return time.Duration(t.FrequencySeconds) * time.Second
 }
 
-func (t Task) Ready(ts time.Time) bool {
+func (t config.Task) Ready(ts time.Time) bool {
 	// the hash is used to spread the checks across time.
 	// while the state is unknown, retry at the rate of RetryFrequencySeconds
 
@@ -47,7 +48,7 @@ func (t Task) Ready(ts time.Time) bool {
 	return (uint32(ts.Unix())+t.Hash())%uint32(t.FrequencySeconds) == 0
 }
 
-func (t *Task) Run() {
+func (t *config.Task) Run() {
 	t.TraceID = trace.ID()
 
 	c := run.Cmd{
@@ -112,7 +113,7 @@ func (t *Task) Run() {
 	return
 }
 
-func (t *Task) RecordStatus(b bool) {
+func (t *config.Task) RecordStatus(b bool) {
 	Logger.Info("recording result",
 		"task", t.Name,
 		"state", t.State(),
@@ -136,7 +137,7 @@ func (t *Task) RecordStatus(b bool) {
 }
 
 // extract the current state from the history
-func (t Task) State() State {
+func (t config.Task) State() State {
 	// if there aren't enough measurements, return STATE_UNKNOWN
 	if t.retryMask() > t.HistoryMask {
 		return STATE_UNKNOWN
@@ -156,7 +157,7 @@ func (t Task) State() State {
 }
 
 // step back though the data to find the previous state
-func (t Task) LastState() State {
+func (t config.Task) LastState() State {
 	h := t.History >> t.Retries
 	m := t.HistoryMask >> t.Retries
 
@@ -179,7 +180,7 @@ func (t Task) LastState() State {
 }
 
 // if the state changed
-func (t Task) StateChanged() bool {
+func (t config.Task) StateChanged() bool {
 	// if state is unknown, then we can't make an assessment.
 	if t.State() == STATE_UNKNOWN {
 		return false
@@ -200,7 +201,7 @@ func (t Task) StateChanged() bool {
 }
 
 // Check that the task is in a valid state.
-func (t Task) Validate() error {
+func (t config.Task) Validate() error {
 	re := regexp.MustCompile(`^.+$`)
 	if !re.Match([]byte(t.Name)) {
 		return fmt.Errorf("name '%s': %w", t.Name, ErrInvalidName)
@@ -243,7 +244,7 @@ func (t Task) Validate() error {
 }
 
 // return a list of envs that are placed into the environment when task is ran
-func (t Task) Environment() []string {
+func (t config.Task) Environment() []string {
 	var v []string
 
 	v = MergeEnvVars(v, []string{
@@ -270,7 +271,7 @@ func (t Task) Environment() []string {
 	return v
 }
 
-func (t Task) retryMask() uint32 {
+func (t config.Task) retryMask() uint32 {
 	var m uint32
 	for i := 0; i < t.Retries; i++ {
 		m = m << 1
@@ -280,11 +281,11 @@ func (t Task) retryMask() uint32 {
 	return m
 }
 
-func (t Task) timeout() time.Duration {
+func (t config.Task) timeout() time.Duration {
 	return time.Duration(t.TimeoutSeconds) * time.Second
 }
 
-func (t Task) description() string {
+func (t config.Task) description() string {
 	if len(t.Description) > 0 {
 		return strings.TrimSuffix(t.Description, "\n")
 	} else {
@@ -292,7 +293,7 @@ func (t Task) description() string {
 	}
 }
 
-func (t Task) notifiers() []*Notifier {
+func (t config.Task) notifiers() []*config.Notifier {
 	var ns []*Notifier
 	for _, nName := range t.NotifierNames {
 		for i, _ := range cfg.Notifiers {
@@ -306,7 +307,7 @@ func (t Task) notifiers() []*Notifier {
 	return ns
 }
 
-func (t Task) errorNotifiers() []*Notifier {
+func (t config.Task) errorNotifiers() []*config.Notifier {
 	var ns []*Notifier
 	for _, nName := range t.ErrorNotifierNames {
 		for i, _ := range cfg.Notifiers {

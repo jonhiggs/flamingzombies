@@ -4,17 +4,18 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jonhiggs/flamingzombies/lib/config"
 	"github.com/jonhiggs/flamingzombies/lib/run"
 )
 
 // Return a bool describe the state of the gate. The task is required because
 // in influences the environment used when invoking the gate's command.
-func (g Gate) IsOpen(t *Task) (bool, run.Result) {
+func (g config.Gate) IsOpen(t *config.Task) (bool, run.Result) {
 	c := run.Cmd{
 		Command: g.Command,
 		Args:    g.Args,
 		Envs:    g.environment(t),
-		Dir:     cfg.Directory,
+		Dir:     config.Directory,
 		TraceID: t.TraceID,
 		Timeout: DEFAULT_GATE_TIMEOUT_SECONDS * time.Second,
 	}
@@ -25,7 +26,7 @@ func (g Gate) IsOpen(t *Task) (bool, run.Result) {
 }
 
 // check the state of a set of gates
-func GateSetOpen(t *Task, gates ...*Gate) bool {
+func GateSetOpen(t *config.Task, gates ...*config.Gate) bool {
 	for i, g := range gates {
 		open, r := g.IsOpen(t)
 		Logger.Debug("checking gate",
@@ -49,7 +50,7 @@ func GateSetOpen(t *Task, gates ...*Gate) bool {
 /// PRIVATE ///////////////////////////////////////////////////////////////////
 
 // return the environment needed when invoking a Gate for a Task.
-func (g Gate) environment(i interface{}) []string {
+func (g config.Gate) environment(i interface{}) []string {
 	var e []string
 
 	e = MergeEnvVars(e, []string{
@@ -65,9 +66,9 @@ func (g Gate) environment(i interface{}) []string {
 	}
 
 	switch v := i.(type) {
-	case *Task:
+	case *config.Task:
 		e = MergeEnvVars(e, t.Environment())
-	case Task:
+	case config.Task:
 		e = MergeEnvVars(e, t.Environment())
 	case nil:
 		// do nothing

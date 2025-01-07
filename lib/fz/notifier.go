@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jonhiggs/flamingzombies/lib/config"
 	"github.com/jonhiggs/flamingzombies/lib/run"
 )
 
-func (n Notifier) Timeout() time.Duration {
+func (n config.Notifier) Timeout() time.Duration {
 	return time.Duration(n.TimeoutSeconds) * time.Second
 }
 
-func (n Notifier) Execute(traceID string, env []string, notifyErrors bool) error {
+func (n config.Notifier) Execute(traceID string, env []string, notifyErrors bool) error {
 	c := run.Cmd{
 		Command: n.Command,
 		Args:    n.Args,
@@ -46,7 +47,7 @@ func (n Notifier) Execute(traceID string, env []string, notifyErrors bool) error
 }
 
 // Resolve the *Gates from the GateSetStrings
-func (n Notifier) GateSets() [][]*Gate {
+func (n config.Notifier) GateSets() [][]*config.Gate {
 	r := [][]*Gate{}
 
 	for _, gateSet := range n.GateSetStrings {
@@ -60,7 +61,7 @@ func (n Notifier) GateSets() [][]*Gate {
 	return r
 }
 
-func (n Notifier) Environment() []string {
+func (n config.Notifier) Environment() []string {
 	var v []string
 
 	v = MergeEnvVars(v, n.Envs)

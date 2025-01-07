@@ -65,20 +65,14 @@ type Task struct {
 	TimeoutSeconds        int      `toml:"timeout"`         // how long an execution may run
 
 	// public, but not configurable
-	History          uint32    // represented in binary. Successes are high
-	HistoryMask      uint32    // the bits in the history with a recorded value. Needed to understand a history of 0
-	LastFail         time.Time // the time of the last failed execution
-	LastNotification time.Time // the time of the last notification
-	LastOk           time.Time // the time of the last successful execution
-	LastRun          time.Time // the time of the last execution
-	TraceID          string    // the ID of the task execution to help with tracing
-}
-
-type Gate struct {
-	Args    []string `toml:"args"`    // command arguments
-	Command string   `toml:"command"` // command
-	Envs    []string `toml:"envs"`    // environment variables
-	Name    string   `toml:"name"`    // friendly name
+	History          uint32     // represented in binary. Successes are high
+	HistoryMask      uint32     // the bits in the history with a recorded value. Needed to understand a history of 0
+	LastFail         time.Time  // the time of the last failed execution
+	LastNotification time.Time  // the time of the last notification
+	LastOk           time.Time  // the time of the last successful execution
+	LastRun          time.Time  // the time of the last execution
+	Notifiers        []Notifier // the child notifiers of this task
+	TraceID          string     // the ID of the task execution to help with tracing
 }
 
 type Notifier struct {
@@ -88,6 +82,7 @@ type Notifier struct {
 	GateSetStrings [][]string `toml:"gates"`
 	Name           string     `toml:"name"`
 	TimeoutSeconds int        `toml:"timeout"`
+	GateSets       [][]Gate   // the gates attached to the notifier
 }
 
 // populate the package variables from the content of the TOML
@@ -247,25 +242,33 @@ func tasksFromToml(b []byte, d defaultConfig) ([]Task, error) {
 }
 
 func gatesFromToml(b []byte, d defaultConfig) ([]Gate, error) {
-	defaultGate := Gate{
-		Args:    d.Args,
-		Command: d.Command,
-	}
-
 	var r []Gate
 
+	type gateData struct {
+		Args    []string `toml:"args"`    // command arguments
+		Command string   `toml:"command"` // command
+		Envs    []string `toml:"envs"`    // environment variables
+		Name    string   `toml:"name"`    // friendly name
+	}
+
 	for _, blob := range extractTomlOjbects("gate", b) {
-		gate := defaultGate
+		// set the default values
+		gate := gateData{
+			Args:    d.Args,
+			Command: d.Command,
+		}
+
 		_, err := toml.Decode(string(blob), &gate)
 		if err != nil {
 			return []Gate{}, err
 		}
 
-		// the default merge of toml.Decode doesn't do what is needed.
-		gate.Envs = mergeEnvVars(gate.Envs, d.Envs)
-
-		r = append(r, gate)
-
+		r = append(r, Gate{
+			args:    gate.Args,
+			command: gate.Command,
+			envs:    mergeEnvVars(gate.Envs, d.Envs),
+			name:    gate.Name,
+		})
 	}
 
 	return r, nil
