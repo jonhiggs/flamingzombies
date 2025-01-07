@@ -1,4 +1,4 @@
-package run
+package command
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const GRACE_TIME = time.Duration(500) * time.Millisecond
+const GRACE_TIME = 500 * time.Millisecond
 
 type Cmd struct {
 	Command string
@@ -29,11 +29,11 @@ type Result struct {
 	TraceID     string
 }
 
-type Starter interface {
+type Runner interface {
 	Command() Cmd
 }
 
-func Start(c Starter) Result {
+func Run(c Runner) Result {
 	return c.Command().Start()
 }
 

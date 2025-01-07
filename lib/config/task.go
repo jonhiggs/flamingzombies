@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/jonhiggs/flamingzombies/lib/run"
+	"github.com/jonhiggs/flamingzombies/lib/command"
 	"github.com/jonhiggs/flamingzombies/lib/trace"
 )
 
@@ -37,8 +37,8 @@ type Task struct {
 	traceID               string     // the ID of the task execution to help with tracing
 }
 
-func (t *Task) Command() run.Cmd {
-	return run.Cmd{
+func (t *Task) Command() command.Cmd {
+	return command.Cmd{
 		Command: t.command,
 		Args:    t.args,
 		Envs:    t.envs,

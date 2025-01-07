@@ -3,7 +3,7 @@ package config
 import (
 	"time"
 
-	"github.com/jonhiggs/flamingzombies/lib/run"
+	"github.com/jonhiggs/flamingzombies/lib/command"
 )
 
 const GATE_TIMEOUT = 1 * time.Second
@@ -19,8 +19,8 @@ func (g Gate) Name() string {
 	return g.name
 }
 
-func (g Gate) Command(t string) run.Cmd {
-	return run.Cmd{
+func (g Gate) Command(t string) command.Cmd {
+	return command.Cmd{
 		Command: g.command,
 		Args:    g.args,
 		Envs:    g.envs,
