@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestTraceID(t *testing.T) {
+func TestID(t *testing.T) {
 	got := New()
 
 	if len(fmt.Sprint(got)) != 16 {
