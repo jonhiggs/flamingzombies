@@ -6,14 +6,23 @@ import (
 	"strings"
 )
 
-func ID() string {
-	b := make([]byte, 8)
+type TraceID struct {
+	Bytes []byte
+}
 
-	_, err := rand.Read(b)
+func New() TraceID {
+	var id TraceID
+	id.Bytes = make([]byte, 8)
+
+	_, err := rand.Read(id.Bytes)
 	if err != nil {
 		fmt.Println("Error: ", err)
-		return ""
+		return TraceID{}
 	}
 
-	return strings.ToLower(fmt.Sprintf("%X", b))
+	return id
+}
+
+func (id TraceID) String() string {
+	return strings.ToLower(fmt.Sprintf("%X", id.Bytes))
 }
