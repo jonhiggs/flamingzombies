@@ -15,7 +15,6 @@ type Cmd struct {
 	Args    []string
 	Envs    []string
 	Dir     string
-	TraceID string
 	Timeout time.Duration
 }
 
@@ -26,21 +25,11 @@ type Result struct {
 	Duration    time.Duration
 	ExitCode    int
 	Err         error
-	TraceID     string
 }
 
-type Runner interface {
-	Command() Cmd
-}
-
-func Run(c Runner) Result {
-	return c.Command().Start()
-}
-
-func (c Cmd) Start() Result {
+func (c Cmd) Exec() Result {
 	var r Result
 
-	r.TraceID = c.TraceID
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout())
 	defer cancel()
 

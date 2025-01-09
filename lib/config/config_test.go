@@ -6,8 +6,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/jonhiggs/flamingzombies/lib/trace"
 )
 
 func TestLoad(t *testing.T) {
@@ -299,7 +297,7 @@ func TestGatesFromToml(t *testing.T) {
 		}
 
 		{
-			gotCmd := got[0].Command(trace.ID())
+			gotCmd := got[0].Command()
 			wantEnvs := []string{
 				"SNMP_COMMUNITY=public",
 				"SNMP_VERSION=2c",
@@ -320,7 +318,7 @@ func TestGatesFromToml(t *testing.T) {
 		}
 
 		{
-			gotCmd := got[1].Command(trace.ID())
+			gotCmd := got[1].Command()
 			wantEnvs := []string{
 				"SNMP_COMMUNITY=public",
 				"SNMP_VERSION=2c",
@@ -381,19 +379,22 @@ func TestNotifiersFromToml(t *testing.T) {
 			t.Errorf("got: %s, want: %s", got[0].Name(), "mailer")
 		}
 
-		if got[0].Command() != "notifier/email" {
-			t.Errorf("got: %s, want: %s", got[0].Command(), "notifier/email")
-		}
+		{
+			gotCmd := got[0].Command()
+			wantEnvs := []string{
+				"EMAIL_ADDRESS=root@example",
+				"SNMP_COMMUNITY=public",
+				"SNMP_VERSION=2c",
+				"EMAIL_FROM=fz@example",
+			}
 
-		envs := []string{
-			"EMAIL_ADDRESS=root@example",
-			"SNMP_COMMUNITY=public",
-			"SNMP_VERSION=2c",
-			"EMAIL_FROM=fz@example",
-		}
+			if gotCmd.Command != "notifier/email" {
+				t.Errorf("got: %s, want: %s", gotCmd.Command, "notifier/email")
+			}
 
-		if fmt.Sprintf("%s", got[0].Environment()) != fmt.Sprintf("%s", envs) {
-			t.Errorf("got: %s, want: %s", got[0].Environment(), envs)
+			if fmt.Sprintf("%s", gotCmd.Envs) != fmt.Sprintf("%s", wantEnvs) {
+				t.Errorf("got: %s, want: %s", gotCmd.Envs, wantEnvs)
+			}
 		}
 	})
 }

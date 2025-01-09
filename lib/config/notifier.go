@@ -1,6 +1,10 @@
 package config
 
-import "time"
+import (
+	"time"
+
+	"github.com/jonhiggs/flamingzombies/lib/command"
+)
 
 type Notifier struct {
 	args           []string
@@ -11,16 +15,41 @@ type Notifier struct {
 	timeoutSeconds int
 }
 
-func (n Notifier) Args() []string {
-	return n.args
+func (n Notifier) Command() command.Cmd {
+	return command.Cmd{
+		Command: n.command,
+		Args:    n.args,
+		Envs:    n.envs,
+		Dir:     Directory,
+		Timeout: time.Duration(n.timeoutSeconds) * time.Second,
+	}
 }
 
-func (n Notifier) Command() string {
-	return n.command
+func (n Notifier) EvaluateGates() bool {
+	for _, gs := range n.GateSets() {
+		for _, g := range gs {
+			if !g.Exec() {
+				return false
+			}
+		}
+
+		// this gateset is open
+		return true
+	}
+
+	// no more gatesets to check
+	return false
 }
 
-func (n Notifier) Environment() []string {
-	return n.envs
+func (n *Notifier) Exec() bool {
+	result := n.Command().Exec()
+
+	if result.Err != nil {
+		// TODO(jh) 20250110: handle the error
+		return false
+	}
+
+	return result.ExitCode == 0
 }
 
 // the gates attached to the notifier
@@ -30,8 +59,4 @@ func (n Notifier) GateSets() [][]Gate {
 
 func (n Notifier) Name() string {
 	return n.name
-}
-
-func (n Notifier) Timeout() time.Duration {
-	return time.Duration(n.timeoutSeconds) * time.Second
 }

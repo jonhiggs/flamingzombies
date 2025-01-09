@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func TestRunStart(t *testing.T) {
+func TestCommandExec(t *testing.T) {
 	var tests = []struct {
 		name string
 		cmd  Cmd
@@ -22,7 +22,6 @@ func TestRunStart(t *testing.T) {
 				Args:    []string{},
 				Envs:    []string{},
 				Dir:     "/",
-				TraceID: "0",
 				Timeout: 1 * time.Second,
 			},
 			want: Result{
@@ -30,7 +29,6 @@ func TestRunStart(t *testing.T) {
 				StderrBytes: []byte(""),
 				ExitCode:    0,
 				Err:         nil,
-				TraceID:     "0",
 			},
 		},
 		{
@@ -40,7 +38,6 @@ func TestRunStart(t *testing.T) {
 				Args:    []string{},
 				Envs:    []string{},
 				Dir:     "/",
-				TraceID: "1",
 				Timeout: 1 * time.Second,
 			},
 			want: Result{
@@ -48,7 +45,6 @@ func TestRunStart(t *testing.T) {
 				StderrBytes: []byte(""),
 				ExitCode:    1,
 				Err:         nil,
-				TraceID:     "1",
 			},
 		},
 		{
@@ -58,7 +54,6 @@ func TestRunStart(t *testing.T) {
 				Args:    []string{"-n", "hello"},
 				Envs:    []string{},
 				Dir:     "/",
-				TraceID: "2",
 				Timeout: 1 * time.Second,
 			},
 			want: Result{
@@ -66,7 +61,6 @@ func TestRunStart(t *testing.T) {
 				StderrBytes: []byte(""),
 				ExitCode:    0,
 				Err:         nil,
-				TraceID:     "2",
 			},
 		},
 		{
@@ -76,7 +70,6 @@ func TestRunStart(t *testing.T) {
 				Args:    []string{"-n", "hello"},
 				Envs:    []string{},
 				Dir:     "./",
-				TraceID: "3",
 				Timeout: 1 * time.Second,
 			},
 			want: Result{
@@ -84,7 +77,6 @@ func TestRunStart(t *testing.T) {
 				StderrBytes: []byte("hello"),
 				ExitCode:    0,
 				Err:         nil,
-				TraceID:     "3",
 			},
 		},
 		{
@@ -94,7 +86,6 @@ func TestRunStart(t *testing.T) {
 				Args:    []string{"X"},
 				Envs:    []string{"X=yes"},
 				Dir:     "./",
-				TraceID: "4",
 				Timeout: 1 * time.Second,
 			},
 			want: Result{
@@ -102,7 +93,6 @@ func TestRunStart(t *testing.T) {
 				StderrBytes: []byte(""),
 				ExitCode:    0,
 				Err:         nil,
-				TraceID:     "4",
 			},
 		},
 		{
@@ -112,7 +102,6 @@ func TestRunStart(t *testing.T) {
 				Args:    []string{"X"},
 				Envs:    []string{""},
 				Dir:     "./",
-				TraceID: "5",
 				Timeout: 1 * time.Second,
 			},
 			want: Result{
@@ -120,21 +109,16 @@ func TestRunStart(t *testing.T) {
 				StderrBytes: []byte("test_commands/test_env: line 3: !1: unbound variable"),
 				ExitCode:    1,
 				Err:         nil,
-				TraceID:     "5",
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(fmt.Sprint(tt.name), func(t *testing.T) {
-			got := tt.cmd.Start()
+			got := tt.cmd.Exec()
 
 			if got.ExitCode != tt.want.ExitCode {
 				t.Errorf("exit code: got: %d, want: %d", got.ExitCode, tt.want.ExitCode)
-			}
-
-			if got.TraceID != tt.want.TraceID {
-				t.Errorf("trace id: got: %s, want: %s", got.TraceID, tt.want.TraceID)
 			}
 
 			if got.Stdout() != tt.want.Stdout() {
@@ -166,7 +150,7 @@ func TestRunStart(t *testing.T) {
 			Err:      exec.ErrNotFound,
 		}
 
-		got := cmd.Start()
+		got := cmd.Exec()
 
 		if errors.Unwrap(got.Err) != want.Err {
 			t.Errorf("error: got %s, want %s", errors.Unwrap(got.Err), want.Err)
@@ -188,7 +172,7 @@ func TestRunStart(t *testing.T) {
 			Err:      syscall.EACCES,
 		}
 
-		got := cmd.Start()
+		got := cmd.Exec()
 
 		if errors.Unwrap(got.Err) != want.Err {
 			t.Errorf("error: got %s, want %s", errors.Unwrap(got.Err), want.Err)

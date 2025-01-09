@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/jonhiggs/flamingzombies/lib/command"
-	"github.com/jonhiggs/flamingzombies/lib/trace"
 )
 
 // A Task is a command that is executed on a schedule. The struct contains the
@@ -34,7 +33,6 @@ type Task struct {
 	retries               int        // number of retries before changing the state
 	retryFrequencySeconds int        // how quickly to retry when state unknown
 	timeoutSeconds        int        // how long an execution may run
-	traceID               string     // the ID of the task execution to help with tracing
 }
 
 func (t *Task) Command() command.Cmd {
@@ -43,7 +41,6 @@ func (t *Task) Command() command.Cmd {
 		Args:    t.args,
 		Envs:    t.envs,
 		Dir:     Directory,
-		TraceID: trace.ID(),
 		Timeout: t.timeout(),
 	}
 }
@@ -54,6 +51,17 @@ func (t *Task) Description() string {
 
 func (t *Task) ErrorNotifiers() []Notifier {
 	return []Notifier{}
+}
+
+func (t *Task) Exec() bool {
+	result := t.Command().Exec()
+
+	if result.Err != nil {
+		// TODO(jh) 20250110: handle the error
+		return false
+	}
+
+	return result.ExitCode == 0
 }
 
 func (t *Task) Frequency() time.Duration {

@@ -19,13 +19,24 @@ func (g Gate) Name() string {
 	return g.name
 }
 
-func (g Gate) Command(t string) command.Cmd {
+func (g Gate) Command() command.Cmd {
 	return command.Cmd{
 		Command: g.command,
 		Args:    g.args,
 		Envs:    g.envs,
 		Dir:     Directory,
-		TraceID: t,
 		Timeout: GATE_TIMEOUT,
 	}
+}
+
+// return true of the gate is open
+func (g *Gate) Exec() bool {
+	result := g.Command().Exec()
+
+	if result.Err != nil {
+		// TODO(jh) 20250110: handle the error
+		return false
+	}
+
+	return result.ExitCode == 0
 }
