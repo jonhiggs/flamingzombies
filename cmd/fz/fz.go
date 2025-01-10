@@ -8,16 +8,13 @@ import (
 
 	"github.com/jonhiggs/flamingzombies/lib/config"
 	"github.com/jonhiggs/flamingzombies/lib/core"
-	"github.com/jonhiggs/flamingzombies/lib/fz"
 	"nullprogram.com/x/optparse"
 )
-
-var cfg *fz.Config
 
 func init() {
 	var configFile = "/etc/flamingzombies.toml"
 	var configTest = false
-	var dir, logLevel, logFile string
+	var directory, logLevel string
 
 	options := []optparse.Option{
 		{"config", 'f', optparse.KindRequired},
@@ -45,7 +42,7 @@ func init() {
 		case "loglevel":
 			logLevel = result.Optarg
 		case "directory":
-			dir = result.Optarg
+			directory = result.Optarg
 		case "pidfile":
 			err := os.WriteFile(result.Optarg, []byte(fmt.Sprintf("%d\n", os.Getpid())), 0644)
 			if err != nil {
@@ -56,7 +53,7 @@ func init() {
 			usage()
 			return
 		case "version":
-			fmt.Printf("fz %s\n", fz.VERSION)
+			fmt.Printf("fz %s\n", config.VERSION)
 			os.Exit(0)
 		}
 	}
@@ -66,37 +63,46 @@ func init() {
 	}
 
 	if os.Getenv("FZ_DIRECTORY") != "" {
-		dir = os.Getenv("FZ_DIRECTORY")
+		config.Directory = os.Getenv("FZ_DIRECTORY")
 	}
 
 	if os.Getenv("FZ_LOG_LEVEL") != "" {
 		logLevel = os.Getenv("FZ_LOG_LEVEL")
 	}
 
-	config.Load(configFile)
+	cfgFh, err := os.Open(configFile)
+	if err != nil {
+		panic(err)
+	}
+	if err := config.Load(cfgFh); err != nil {
+		panic(err)
+	}
 
 	// when there is an override to the log level
 	if len(logLevel) > 0 {
 		if err := config.SetLogLevel(logLevel); err != nil {
+			// TODO(jh) 20250111: convert to an fatal error
 			panic(err)
 		}
 	}
 
 	config.StartLogger()
 
-	fz.StartLogger(config.LogLevel)
+	// when there is an override to the directory
+	if len(directory) > 0 {
+		// TODO(jh) 20250111: error if the directory is invalid
+		config.Directory = directory
+	}
 
 	// validation
-	if err = config.Validate(); err != nil {
-		log.Fatal(err)
-	}
+	//if err = config.Validate(); err != nil {
+	//	log.Fatal(err)
+	//}
 	if configTest {
 		// break out if we're in config test mode.
 		fmt.Println("The configuration is valid")
 		os.Exit(0)
 	}
-
-	fz.ProcessNotifications()
 }
 
 func main() {

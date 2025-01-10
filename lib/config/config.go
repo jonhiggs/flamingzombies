@@ -11,6 +11,8 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+const VERSION = "v0.1.0"
+
 var Directory = "/usr/lib/flamingzombies"
 var LogFile = "-"
 

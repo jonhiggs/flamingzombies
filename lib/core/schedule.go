@@ -2,6 +2,8 @@ package core
 
 import (
 	"time"
+
+	"github.com/jonhiggs/flamingzombies/lib/config"
 )
 
 // queue work to be processed
@@ -14,9 +16,9 @@ func ScheduleTasks() {
 	for {
 		select {
 		case ts := <-ticker.C:
-			for i, t := range cfg.Tasks {
+			for _, t := range config.Tasks {
 				if t.Ready(ts) {
-					taskQueue <- t
+					taskQueue <- &t
 				}
 			}
 		}

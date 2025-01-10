@@ -21,5 +21,6 @@ func executeTask(t *config.Task) {
 	// TODO(jh) 20250110: add locking
 	// TODO(jh) 20250110: record the result
 	// TODO(jh) 20250110: update the last* timestamps
-	// TODO(jh) 20250110: trigger the notifier
+	// TODO(jh) 20250111: check the gates
+	// TODO(jh) 20250110: trigger the notifier if allowed
 }
