@@ -13,7 +13,6 @@ import (
 
 var Directory = "/usr/lib/flamingzombies"
 var LogFile = "-"
-var LogLevel = "info"
 
 // The default values to insert into the task, gate, and notifier resources
 // when needed.
@@ -92,7 +91,7 @@ func Load(f *os.File) error {
 	}
 
 	if cfg.LogLevel != "" {
-		LogLevel = cfg.LogLevel
+		SetLogLevel(cfg.LogLevel)
 	}
 
 	Tasks, err = tasksFromToml(b, def)

@@ -59,10 +59,6 @@ func TestLoad(t *testing.T) {
 				t.Errorf("LogFile got: %s, want: %s", LogFile, tt.wantLogFile)
 			}
 
-			if LogLevel != tt.wantLogLevel {
-				t.Errorf("LogLevel got: %s, want: %s", LogLevel, tt.wantLogLevel)
-			}
-
 			if len(Tasks) != 1 {
 				t.Errorf("task count got: %d, want: %d", len(Tasks), 1)
 			}

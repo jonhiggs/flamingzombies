@@ -74,6 +74,16 @@ func init() {
 	}
 
 	config.Load(configFile)
+
+	// when there is an override to the log level
+	if len(logLevel) > 0 {
+		if err := config.SetLogLevel(logLevel); err != nil {
+			panic(err)
+		}
+	}
+
+	config.StartLogger()
+
 	fz.StartLogger(config.LogLevel)
 
 	// validation
