@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
+	"sync"
 
 	"github.com/jonhiggs/flamingzombies/lib/config"
+	"github.com/jonhiggs/flamingzombies/lib/core"
 	"github.com/jonhiggs/flamingzombies/lib/fz"
 	"nullprogram.com/x/optparse"
 )
@@ -89,19 +90,13 @@ func init() {
 }
 
 func main() {
-	ticker := time.NewTicker(time.Second)
-	defer ticker.Stop()
+	var wg sync.WaitGroup
+	go core.ScheduleTasks()
+	wg.Add(1)
+	go core.ProcessTasks()
+	wg.Add(1)
 
-	for {
-		select {
-		case ts := <-ticker.C:
-			for i, t := range cfg.Tasks {
-				if t.Ready(ts) {
-					go cfg.Tasks[i].Run()
-				}
-			}
-		}
-	}
+	wg.Wait()
 }
 
 func usage() {

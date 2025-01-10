@@ -11,7 +11,6 @@ func ProcessTasks() {
 		select {
 		case t := <-taskQueue:
 			executeTask(t)
-			// TODO(jh) 20250110: the work
 		}
 	}
 }
