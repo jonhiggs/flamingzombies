@@ -14,7 +14,6 @@ func TestLoad(t *testing.T) {
 	var tests = []struct {
 		fh           *os.File
 		wantDir      string
-		wantLogFile  string
 		wantLogLevel string
 		wantDef      defaultConfig
 		wantErr      error
@@ -22,7 +21,6 @@ func TestLoad(t *testing.T) {
 		{ // A
 			fh:           fhA,
 			wantDir:      "/usr/lib/flamingzombies",
-			wantLogFile:  "-",
 			wantLogLevel: "info",
 			wantDef: defaultConfig{
 				Retries:        5,
@@ -53,10 +51,6 @@ func TestLoad(t *testing.T) {
 
 			if Directory != tt.wantDir {
 				t.Errorf("Directory got: %s, want: %s", Directory, tt.wantDir)
-			}
-
-			if LogFile != tt.wantLogFile {
-				t.Errorf("LogFile got: %s, want: %s", LogFile, tt.wantLogFile)
 			}
 
 			if len(Tasks) != 1 {

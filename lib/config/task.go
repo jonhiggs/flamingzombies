@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jonhiggs/flamingzombies/lib/command"
+	"github.com/jonhiggs/flamingzombies/lib/log"
 )
 
 // A Task is a command that is executed on a schedule. The struct contains the
@@ -54,6 +55,7 @@ func (t *Task) ErrorNotifiers() []Notifier {
 }
 
 func (t *Task) Exec() bool {
+	t.debug("execution began")
 	result := t.Command().Exec()
 
 	if result.Err != nil {
@@ -258,4 +260,12 @@ func (t *Task) retryMask() uint32 {
 
 func (t *Task) timeout() time.Duration {
 	return time.Duration(t.timeoutSeconds) * time.Second
+}
+
+// print a debug log with this tasks metadata included
+func (t *Task) debug(msg string) {
+	log.Debug(msg,
+		"type", "task",
+		"name", t.Name(),
+	)
 }

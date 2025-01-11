@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/jonhiggs/flamingzombies/lib/log"
 )
 
 const GRACE_TIME = 500 * time.Millisecond
@@ -78,4 +80,14 @@ func (r Result) Stdout() string {
 
 func (r Result) Stderr() string {
 	return strings.TrimSuffix(string(r.StderrBytes), "\n")
+}
+
+func (r Result) debug(msg string) {
+	log.Debug(msg,
+		"type", "command_result",
+		"exit_code", r.ExitCode,
+		"stderr", string(r.StderrBytes),
+		"stdout", string(r.StdoutBytes),
+		"duration", r.Duration.Milliseconds(),
+	)
 }

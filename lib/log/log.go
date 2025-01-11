@@ -1,4 +1,4 @@
-package config
+package log
 
 import (
 	"fmt"
@@ -7,12 +7,12 @@ import (
 	"log/slog"
 )
 
-var Logger *slog.Logger
+var logger *slog.Logger
 var logLevel = new(slog.LevelVar)
 
-func StartLogger() {
+func init() {
 	h := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel})
-	Logger = slog.New(h)
+	logger = slog.New(h)
 }
 
 // Log an error and trigger the error_notifiers
@@ -36,7 +36,7 @@ func StartLogger() {
 //	os.Exit(1)
 //}
 
-func SetLogLevel(l string) error {
+func SetLevel(l string) error {
 	switch l {
 	case "debug":
 		logLevel.Set(slog.LevelDebug)
@@ -51,4 +51,9 @@ func SetLogLevel(l string) error {
 	}
 
 	return nil
+}
+
+// a wrapper for slog.Debug()
+func Debug(msg string, args ...any) {
+	logger.Debug(msg, args...)
 }

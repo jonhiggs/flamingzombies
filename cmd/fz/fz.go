@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"sync"
 
 	"github.com/jonhiggs/flamingzombies/lib/config"
 	"github.com/jonhiggs/flamingzombies/lib/core"
+	"github.com/jonhiggs/flamingzombies/lib/log"
 	"nullprogram.com/x/optparse"
 )
 
@@ -80,13 +80,16 @@ func init() {
 
 	// when there is an override to the log level
 	if len(logLevel) > 0 {
-		if err := config.SetLogLevel(logLevel); err != nil {
+		if err := log.SetLevel(logLevel); err != nil {
+			// TODO(jh) 20250111: convert to an fatal error
+			panic(err)
+		}
+	} else {
+		if err := log.SetLevel(config.LogLevel); err != nil {
 			// TODO(jh) 20250111: convert to an fatal error
 			panic(err)
 		}
 	}
-
-	config.StartLogger()
 
 	// when there is an override to the directory
 	if len(directory) > 0 {

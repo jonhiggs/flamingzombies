@@ -14,7 +14,7 @@ import (
 const VERSION = "v0.1.0"
 
 var Directory = "/usr/lib/flamingzombies"
-var LogFile = "-"
+var LogLevel = "info"
 
 // The default values to insert into the task, gate, and notifier resources
 // when needed.
@@ -26,7 +26,6 @@ var Notifiers []Notifier
 
 type tomlConfig struct {
 	Directory string        `toml:"directory"`
-	LogFile   string        `toml:"log_file"`
 	LogLevel  string        `toml:"log_level"`
 	Default   defaultConfig `toml:"default"`
 }
@@ -88,12 +87,8 @@ func Load(f *os.File) error {
 		Directory = cfg.Directory
 	}
 
-	if cfg.LogFile != "" {
-		LogFile = cfg.LogFile
-	}
-
 	if cfg.LogLevel != "" {
-		SetLogLevel(cfg.LogLevel)
+		LogLevel = cfg.LogLevel
 	}
 
 	Tasks, err = tasksFromToml(b, def)

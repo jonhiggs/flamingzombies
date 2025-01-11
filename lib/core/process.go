@@ -1,6 +1,8 @@
 package core
 
-import "github.com/jonhiggs/flamingzombies/lib/config"
+import (
+	"github.com/jonhiggs/flamingzombies/lib/config"
+)
 
 // Process the scheduled tasks
 
@@ -18,6 +20,9 @@ func ProcessTasks() {
 /// PRIVATE ///////////////////////////////////////////////////////////////////
 
 func executeTask(t *config.Task) {
+
+	r := t.Exec()
+
 	// TODO(jh) 20250110: add locking
 	// TODO(jh) 20250110: record the result
 	// TODO(jh) 20250110: update the last* timestamps
