@@ -36,6 +36,7 @@ func init() {
 //	os.Exit(1)
 //}
 
+// Adjust the log level
 func SetLevel(l string) error {
 	switch l {
 	case "debug":
@@ -53,7 +54,27 @@ func SetLevel(l string) error {
 	return nil
 }
 
-// a wrapper for slog.Debug()
+// A wrapper for slog.Debug()
 func Debug(msg string, args ...any) {
 	logger.Debug(msg, args...)
+}
+
+// A wrapper for slog.Info()
+func Info(msg string, args ...any) {
+	logger.Info(msg, args...)
+}
+
+// A wrapper for slog.Info()
+func Warn(msg string, args ...any) {
+	logger.Warn(msg, args...)
+}
+
+// A wrapper for slog.Error()
+func Error(msg string, args ...any) {
+	logger.Info(msg, args...)
+}
+
+// Log a system error
+func SystemError(err error) {
+	Error(fmt.Sprint(err))
 }

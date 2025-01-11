@@ -1,9 +1,11 @@
 package config
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/jonhiggs/flamingzombies/lib/command"
+	"github.com/jonhiggs/flamingzombies/lib/trace"
 )
 
 type Notifier struct {
@@ -50,6 +52,26 @@ func (n *Notifier) Exec() bool {
 	}
 
 	return result.ExitCode == 0
+}
+
+func (n *Notifier) SetDescription(s string) {
+	n.envs = mergeEnvVars([]string{fmt.Sprintf("DESCRIPTION=%s", s)}, n.envs)
+}
+
+func (n *Notifier) SetMessage(s string) {
+	n.envs = mergeEnvVars([]string{fmt.Sprintf("MESSAGE=%s", s)}, n.envs)
+}
+
+func (n *Notifier) SetPriority(i int) {
+	n.envs = mergeEnvVars([]string{fmt.Sprintf("PRIORITY=%d", i)}, n.envs)
+}
+
+func (n *Notifier) SetSubject(s string) {
+	n.envs = mergeEnvVars([]string{fmt.Sprintf("SUBJECT=%s", s)}, n.envs)
+}
+
+func (n *Notifier) SetTraceID(id trace.ID) {
+	n.envs = mergeEnvVars([]string{fmt.Sprintf("TRACE_ID=%s", id)}, n.envs)
 }
 
 // the gates attached to the notifier

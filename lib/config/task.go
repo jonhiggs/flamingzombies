@@ -55,7 +55,7 @@ func (t *Task) ErrorNotifiers() []Notifier {
 }
 
 func (t *Task) Exec() bool {
-	t.debug("execution began")
+	t.LogDebug("begin execution")
 	result := t.Command().Exec()
 
 	if result.Err != nil {
@@ -262,10 +262,32 @@ func (t *Task) timeout() time.Duration {
 	return time.Duration(t.timeoutSeconds) * time.Second
 }
 
-// print a debug log with this tasks metadata included
-func (t *Task) debug(msg string) {
-	log.Debug(msg,
+/// LOGGGING //////////////////////////////////////////////////////////////////
+
+// Print a debug log.
+func (t *Task) LogDebug(msg string) {
+	log.Debug(msg, t.logData())
+}
+
+// Print an info log.
+func (t *Task) LogInfo(msg string) {
+	log.Info(msg, t.logData())
+}
+
+// Print an warn log.
+func (t *Task) LogWarn(msg string) {
+	log.Warn(msg, t.logData())
+}
+
+// Print an error log and call the error_notifiers
+func (t *Task) LogError(msg string) {
+	log.Error(msg, t.logData)
+}
+
+// The metadata to attach to all the logs
+func (t *Task) logData() []any {
+	return []any{
 		"type", "task",
 		"name", t.Name(),
-	)
+	}
 }
