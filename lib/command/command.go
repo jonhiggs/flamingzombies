@@ -6,8 +6,6 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-
-	"github.com/jonhiggs/flamingzombies/lib/log"
 )
 
 const GRACE_TIME = 500 * time.Millisecond
@@ -82,12 +80,15 @@ func (r Result) Stderr() string {
 	return strings.TrimSuffix(string(r.StderrBytes), "\n")
 }
 
-func (r Result) debug(msg string) {
-	log.Debug(msg,
+/// LOGGING ///////////////////////////////////////////////////////////////////
+
+// The metadata to attach to all the logs
+func (r *Result) LogData() []any {
+	return []any{
 		"type", "command_result",
 		"exit_code", r.ExitCode,
 		"stderr", string(r.StderrBytes),
 		"stdout", string(r.StdoutBytes),
 		"duration", r.Duration.Milliseconds(),
-	)
+	}
 }

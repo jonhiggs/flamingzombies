@@ -43,15 +43,18 @@ func (n Notifier) EvaluateGates() bool {
 	return false
 }
 
-func (n *Notifier) Exec() bool {
+func (n *Notifier) Exec() (command.Result, error) {
 	result := n.Command().Exec()
 
 	if result.Err != nil {
-		// TODO(jh) 20250110: handle the error
-		return false
+		return result, result.Err
 	}
 
-	return result.ExitCode == 0
+	if result.ExitCode != 0 {
+		return result, ErrNonZero
+	}
+
+	return result, nil
 }
 
 func (n *Notifier) SetDescription(s string) {
@@ -82,3 +85,5 @@ func (n Notifier) GateSets() [][]Gate {
 func (n Notifier) Name() string {
 	return n.name
 }
+
+/// LOGGING ///////////////////////////////////////////////////////////////////
