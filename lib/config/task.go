@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"hash/fnv"
+	"os"
 	"regexp"
 	"time"
 
@@ -77,9 +78,9 @@ func (t *Task) IsValid() error {
 		return fmt.Errorf("name '%s': %w", t.name, ErrInvalidName)
 	}
 
-	// The command string cannot be blank. When loading the configuration, a
-	// better test is performed to make sure that the file actually exists.
-	if len(t.command) < 1 {
+	fh, err := os.Open(t.command)
+	fh.Close()
+	if err != nil {
 		return fmt.Errorf("command '%s': %w", t.command, ErrCommandNotExist)
 	}
 

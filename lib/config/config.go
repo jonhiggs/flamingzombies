@@ -3,7 +3,6 @@ package config
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -119,9 +118,9 @@ func Load(f *os.File) error {
 func SetDirectory(s string) error {
 	Directory = s
 
-	_, err := os.Stat(Directory)
+	err := os.Chdir(Directory)
 	if err != nil {
-		return fmt.Errorf("setting working directory: %w", errors.Unwrap(err))
+		return fmt.Errorf("changing the working directory: %w", err)
 	}
 
 	return nil

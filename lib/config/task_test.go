@@ -22,7 +22,7 @@ func TestTaskIsValid(t *testing.T) {
 		{
 			Task{
 				name:                  "fast_retry",
-				command:               "true",
+				command:               "/usr/bin/true",
 				frequencySeconds:      5,
 				retryFrequencySeconds: 0,
 			},
@@ -31,7 +31,7 @@ func TestTaskIsValid(t *testing.T) {
 		{
 			Task{
 				name:                  "too_frequent",
-				command:               "true",
+				command:               "/usr/bin/true",
 				frequencySeconds:      0,
 				retryFrequencySeconds: 5,
 			},
@@ -40,7 +40,7 @@ func TestTaskIsValid(t *testing.T) {
 		{
 			Task{
 				name:                  "zero_retry_frequency",
-				command:               "true",
+				command:               "/usr/bin/true",
 				frequencySeconds:      60,
 				retryFrequencySeconds: 0,
 			},
@@ -49,6 +49,7 @@ func TestTaskIsValid(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		SetDirectory("./libexec")
 		t.Run(tt.task.Name(), func(t *testing.T) {
 			got := errors.Unwrap(tt.task.IsValid())
 			if got != tt.want {

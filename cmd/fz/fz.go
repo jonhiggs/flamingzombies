@@ -98,6 +98,11 @@ func init() {
 		}
 	}
 
+	for _, t := range config.Tasks {
+		if err := t.IsValid(); err != nil {
+			log.Fatal(err)
+		}
+	}
 	// validation
 	//if err = config.Validate(); err != nil {
 	//	log.Fatal(err)
