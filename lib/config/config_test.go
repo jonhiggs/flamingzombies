@@ -10,6 +10,7 @@ import (
 
 func TestLoad(t *testing.T) {
 	fhA, _ := os.Open("./examples/task_simple.toml")
+	dir, _ := os.Getwd()
 
 	var tests = []struct {
 		fh           *os.File
@@ -20,7 +21,7 @@ func TestLoad(t *testing.T) {
 	}{
 		{ // A
 			fh:           fhA,
-			wantDir:      "/usr/lib/flamingzombies",
+			wantDir:      dir,
 			wantLogLevel: "info",
 			wantDef: defaultConfig{
 				Retries:        5,

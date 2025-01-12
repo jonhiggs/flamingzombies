@@ -63,7 +63,9 @@ func init() {
 	}
 
 	if os.Getenv("FZ_DIRECTORY") != "" {
-		config.Directory = os.Getenv("FZ_DIRECTORY")
+		if err := config.SetDirectory(os.Getenv("FZ_DIRECTORY")); err != nil {
+			log.Fatal(fmt.Sprint(err))
+		}
 	}
 
 	if os.Getenv("FZ_LOG_LEVEL") != "" {
@@ -93,8 +95,9 @@ func init() {
 
 	// when there is an override to the directory
 	if len(directory) > 0 {
-		// TODO(jh) 20250111: error if the directory is invalid
-		config.Directory = directory
+		if err := config.SetDirectory(directory); err != nil {
+			log.Fatal(fmt.Sprint(err))
+		}
 	}
 
 	// validation

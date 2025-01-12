@@ -13,7 +13,7 @@ import (
 
 const VERSION = "v0.1.0"
 
-var Directory = "/usr/lib/flamingzombies"
+var Directory string
 var LogLevel = "info"
 
 // The default values to insert into the task, gate, and notifier resources
@@ -64,6 +64,10 @@ func (s State) String() string {
 	}
 }
 
+func init() {
+	Directory, _ = os.Getwd()
+}
+
 // A Task is a command that is executed on a schedule. The struct contains the
 // static configuration of the task which is read from the configuration file,
 // and it's metadata and history which are generated over the course of the
@@ -84,7 +88,9 @@ func Load(f *os.File) error {
 	def = cfg.Default
 
 	if cfg.Directory != "" {
-		Directory = cfg.Directory
+		if err := SetDirectory(cfg.Directory); err != nil {
+			return err
+		}
 	}
 
 	if cfg.LogLevel != "" {
@@ -108,6 +114,16 @@ func Load(f *os.File) error {
 
 	return nil
 }
+
+func SetDirectory(s string) error {
+	Directory = s
+
+	_, err := os.Stat(Directory)
+	panic(err)
+	return err
+}
+
+/// PRIVATE ///////////////////////////////////////////////////////////////////
 
 // Extract the named toml blocks from a configuration file. This is needed so
 // that the default values can be applied to anything unset during the
