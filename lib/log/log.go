@@ -29,10 +29,8 @@ func init() {
 //	}
 //}
 
-func Fatal(msgs ...string) {
-	for _, m := range msgs {
-		fmt.Fprintln(os.Stderr, m)
-	}
+func Fatal(err error) {
+	fmt.Fprintf(os.Stderr, "FATAL: %s\n", err)
 	os.Exit(1)
 }
 

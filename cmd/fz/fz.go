@@ -30,7 +30,7 @@ func init() {
 
 	results, _, err := optparse.Parse(options, os.Args)
 	if err != nil {
-		log.Fatal(fmt.Sprint(err))
+		log.Fatal(err)
 	}
 
 	for _, result := range results {
@@ -64,7 +64,7 @@ func init() {
 
 	if os.Getenv("FZ_DIRECTORY") != "" {
 		if err := config.SetDirectory(os.Getenv("FZ_DIRECTORY")); err != nil {
-			log.Fatal(fmt.Sprint(err))
+			log.Fatal(err)
 		}
 	}
 
@@ -74,29 +74,27 @@ func init() {
 
 	cfgFh, err := os.Open(configFile)
 	if err != nil {
-		panic(err)
+		log.Fatal(fmt.Errorf("opening configuration file: %w", err))
 	}
 	if err := config.Load(cfgFh); err != nil {
-		panic(err)
+		log.Fatal(fmt.Errorf("loading configuration: %w", err))
 	}
 
 	// when there is an override to the log level
 	if len(logLevel) > 0 {
 		if err := log.SetLevel(logLevel); err != nil {
-			// TODO(jh) 20250111: convert to an fatal error
-			panic(err)
+			log.Fatal(err)
 		}
 	} else {
 		if err := log.SetLevel(config.LogLevel); err != nil {
-			// TODO(jh) 20250111: convert to an fatal error
-			panic(err)
+			log.Fatal(err)
 		}
 	}
 
 	// when there is an override to the directory
 	if len(directory) > 0 {
 		if err := config.SetDirectory(directory); err != nil {
-			log.Fatal(fmt.Sprint(err))
+			log.Fatal(err)
 		}
 	}
 
