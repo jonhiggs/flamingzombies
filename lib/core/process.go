@@ -1,7 +1,10 @@
 package core
 
 import (
+	"fmt"
+
 	"github.com/jonhiggs/flamingzombies/lib/config"
+	"github.com/jonhiggs/flamingzombies/lib/trace"
 )
 
 // Process the scheduled tasks
@@ -20,12 +23,25 @@ func ProcessTasks() {
 /// PRIVATE ///////////////////////////////////////////////////////////////////
 
 func executeTask(t *config.Task) {
-
-	r := t.Exec()
-
 	// TODO(jh) 20250110: add locking
-	// TODO(jh) 20250110: record the result
-	// TODO(jh) 20250110: update the last* timestamps
-	// TODO(jh) 20250111: check the gates
-	// TODO(jh) 20250110: trigger the notifier if allowed
+
+	id = trace.New()
+
+	ok := t.Exec(id)
+	t.RecordStatus(ok)
+
+	for _, n := range t.Notifiers() {
+		if n.IsUngated {
+			n.SetDescription("the description")
+			n.SetMessage("the message")
+			n.SetPriority(1)
+			n.SetSubject("the subject")
+			n.SetTraceID(id)
+
+			_, err := n.Exec()
+			if err != nil {
+				t.LogError(fmt.Sprintf("%s", err), id)
+			}
+		}
+	}
 }

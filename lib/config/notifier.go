@@ -27,7 +27,7 @@ func (n Notifier) Command() command.Cmd {
 	}
 }
 
-func (n Notifier) EvaluateGates() bool {
+func (n Notifier) IsUngated() bool {
 	for _, gs := range n.GateSets() {
 		for _, g := range gs {
 			if !g.Exec() {

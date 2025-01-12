@@ -75,6 +75,7 @@ func Error(msg string, args ...any) {
 }
 
 // Log a system error
+// XXX(jh) 20250112: not sure if this will actually be needed...
 func SystemError(err error) {
 	Error(fmt.Sprint(err))
 }

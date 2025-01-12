@@ -55,12 +55,11 @@ func (t *Task) ErrorNotifiers() []Notifier {
 	return []Notifier{}
 }
 
-func (t *Task) Exec() bool {
-	t.LogDebug("begin execution")
+func (t *Task) Exec(id trace.ID) bool {
 	result := t.Command().Exec()
 
 	if result.Err != nil {
-		// TODO(jh) 20250110: handle the error
+		t.LogError("todo", id)
 		return false
 	}
 
