@@ -29,12 +29,12 @@ func init() {
 //	}
 //}
 
-//func Fatal(ss ...string) {
-//	for _, s := range ss {
-//		fmt.Fprintln(os.Stderr, s)
-//	}
-//	os.Exit(1)
-//}
+func Fatal(msgs ...string) {
+	for _, m := range msgs {
+		fmt.Fprintln(os.Stderr, m)
+	}
+	os.Exit(1)
+}
 
 // Adjust the log level
 func SetLevel(l string) error {

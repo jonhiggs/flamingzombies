@@ -30,7 +30,7 @@ func init() {
 
 	results, _, err := optparse.Parse(options, os.Args)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Sprint(err))
 	}
 
 	for _, result := range results {

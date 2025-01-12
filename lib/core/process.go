@@ -25,13 +25,13 @@ func ProcessTasks() {
 func executeTask(t *config.Task) {
 	// TODO(jh) 20250110: add locking
 
-	id = trace.New()
+	id := trace.New()
 
 	ok := t.Exec(id)
 	t.RecordStatus(ok)
 
 	for _, n := range t.Notifiers() {
-		if n.IsUngated {
+		if n.IsUngated() {
 			n.SetDescription("the description")
 			n.SetMessage("the message")
 			n.SetPriority(1)
