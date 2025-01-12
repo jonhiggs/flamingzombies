@@ -59,7 +59,7 @@ func (t *Task) Exec(id trace.ID) bool {
 	result := t.Command().Exec()
 
 	if result.Err != nil {
-		t.LogError("todo", id)
+		t.LogError(fmt.Sprint(result.Err), id)
 		return false
 	}
 
@@ -266,22 +266,22 @@ func (t *Task) timeout() time.Duration {
 
 // Print a debug log.
 func (t *Task) LogDebug(msg string) {
-	log.Debug(msg, t.LogData())
+	log.Debug(msg, t.LogData()...)
 }
 
 // Print an info log.
 func (t *Task) LogInfo(msg string) {
-	log.Info(msg, t.LogData())
+	log.Info(msg, t.LogData()...)
 }
 
 // Print an warn log.
 func (t *Task) LogWarn(msg string) {
-	log.Warn(msg, t.LogData())
+	log.Warn(msg, t.LogData()...)
 }
 
 // Print an error log and call the error_notifiers
 func (t *Task) LogError(msg string, id trace.ID) {
-	log.Error(msg, t.LogData)
+	log.Error(msg, t.LogData()...)
 
 	for _, n := range t.ErrorNotifiers() {
 		n.SetDescription("the description")

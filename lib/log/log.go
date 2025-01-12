@@ -71,7 +71,7 @@ func Warn(msg string, args ...any) {
 
 // A wrapper for slog.Error()
 func Error(msg string, args ...any) {
-	logger.Info(msg, args...)
+	logger.Error(msg, args...)
 }
 
 // Log a system error
