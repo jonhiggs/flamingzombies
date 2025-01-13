@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+	"os"
+	"regexp"
 	"time"
 
 	"github.com/jonhiggs/flamingzombies/lib/command"
@@ -42,5 +45,16 @@ func (g *Gate) Exec() bool {
 }
 
 func (g *Gate) IsValid() error {
+	re := regexp.MustCompile(`^.+$`)
+	if !re.Match([]byte(g.name)) {
+		return fmt.Errorf("name '%s': %w", g.name, ErrInvalidName)
+	}
+
+	fh, err := os.Open(g.command)
+	fh.Close()
+	if err != nil {
+		return fmt.Errorf("command '%s': %w", g.command, ErrCommandNotExist)
+	}
+
 	return nil
 }

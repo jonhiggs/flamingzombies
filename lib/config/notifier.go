@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"regexp"
 	"time"
 
 	"github.com/jonhiggs/flamingzombies/lib/command"
@@ -45,6 +47,21 @@ func (n *Notifier) IsUngated() bool {
 }
 
 func (n *Notifier) IsValid() error {
+	re := regexp.MustCompile(`^.+$`)
+	if !re.Match([]byte(n.name)) {
+		return fmt.Errorf("name '%s': %w", n.name, ErrInvalidName)
+	}
+
+	fh, err := os.Open(n.command)
+	fh.Close()
+	if err != nil {
+		return fmt.Errorf("command '%s': %w", n.command, ErrCommandNotExist)
+	}
+
+	if n.timeoutSeconds < 1 {
+		return fmt.Errorf("timeout_seconds '%d': %w", n.timeoutSeconds, ErrLessThan1)
+	}
+
 	return nil
 }
 
