@@ -5,7 +5,7 @@ name = "simple task"
 description = """
 this is a simple task
 """
-command = "task/command"
+command = "/usr/bin/true"
 frequency = 20
 retry_frequency = 20
 envs = [

@@ -17,25 +17,24 @@ import (
 // and it's metadata and history which are generated over the course of the
 // daemons lifecycle.
 type Task struct {
-	args                  []string   // command arguments
-	command               string     // command
-	description           string     // description of the task
-	envs                  []string   // environment variables supplied to task
-	errorNotifierNames    []string   // notifiers to trigger upon state change
-	frequencySeconds      int        // how often to run
-	history               uint32     // represented in binary. Successes are high
-	historyMask           uint32     // the bits in the history with a recorded value. Needed to understand a history of 0
-	lastFail              time.Time  // the time of the last failed execution
-	lastNotification      time.Time  // the time of the last notification
-	lastOk                time.Time  // the time of the last successful execution
-	lastRun               time.Time  // the time of the last execution
-	name                  string     // friendly name
-	notifierNames         []string   // notifiers to trigger upon state change
-	notifiers             []Notifier // the child notifiers of this task
-	priority              int        // the priority of the notifications
-	retries               int        // number of retries before changing the state
-	retryFrequencySeconds int        // how quickly to retry when state unknown
-	timeoutSeconds        int        // how long an execution may run
+	args                  []string  // command arguments
+	command               string    // command
+	description           string    // description of the task
+	envs                  []string  // environment variables supplied to task
+	errorNotifierNames    []string  // notifiers to trigger upon state change
+	frequencySeconds      int       // how often to run
+	history               uint32    // represented in binary. Successes are high
+	historyMask           uint32    // the bits in the history with a recorded value. Needed to understand a history of 0
+	lastFail              time.Time // the time of the last failed execution
+	lastNotification      time.Time // the time of the last notification
+	lastOk                time.Time // the time of the last successful execution
+	lastRun               time.Time // the time of the last execution
+	name                  string    // friendly name
+	notifierNames         []string  // notifiers to trigger upon state change
+	priority              int       // the priority of the notifications
+	retries               int       // number of retries before changing the state
+	retryFrequencySeconds int       // how quickly to retry when state unknown
+	timeoutSeconds        int       // how long an execution may run
 }
 
 func (t *Task) Command() command.Cmd {
@@ -52,8 +51,15 @@ func (t *Task) Description() string {
 	return t.description
 }
 
-func (t *Task) ErrorNotifiers() []Notifier {
-	return []Notifier{}
+func (t *Task) ErrorNotifiers() []*Notifier {
+	var res []*Notifier
+	for _, name := range t.errorNotifierNames {
+		found, ok := findNotifierByName(name)
+		if ok {
+			res = append(res, found)
+		}
+	}
+	return res
 }
 
 func (t *Task) Exec(id trace.ID) bool {
@@ -111,6 +117,20 @@ func (t *Task) IsValid() error {
 		return fmt.Errorf("priority '%d': %w", t.priority, ErrGreaterThan99)
 	}
 
+	for _, name := range t.notifierNames {
+		_, ok := findNotifierByName(name)
+		if !ok {
+			return fmt.Errorf("notifier '%s': %w", name, ErrUnknownResource)
+		}
+	}
+
+	for _, name := range t.errorNotifierNames {
+		_, ok := findNotifierByName(name)
+		if !ok {
+			return fmt.Errorf("notifier '%s': %w", name, ErrUnknownResource)
+		}
+	}
+
 	return nil
 }
 
@@ -141,8 +161,15 @@ func (t *Task) Name() string {
 	return t.name
 }
 
-func (t *Task) Notifiers() []Notifier {
-	return []Notifier{}
+func (t *Task) Notifiers() []*Notifier {
+	var res []*Notifier
+	for _, name := range t.notifierNames {
+		found, ok := findNotifierByName(name)
+		if ok {
+			res = append(res, found)
+		}
+	}
+	return res
 }
 
 func (t *Task) Priority() int {

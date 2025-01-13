@@ -18,7 +18,7 @@ type Notifier struct {
 	timeoutSeconds int
 }
 
-func (n Notifier) Command() command.Cmd {
+func (n *Notifier) Command() command.Cmd {
 	return command.Cmd{
 		Command: n.command,
 		Args:    n.args,
@@ -28,7 +28,7 @@ func (n Notifier) Command() command.Cmd {
 	}
 }
 
-func (n Notifier) IsUngated() bool {
+func (n *Notifier) IsUngated() bool {
 	for _, gs := range n.GateSets() {
 		for _, g := range gs {
 			if !g.Exec() {
@@ -42,6 +42,10 @@ func (n Notifier) IsUngated() bool {
 
 	// no more gatesets to check
 	return false
+}
+
+func (n *Notifier) IsValid() error {
+	return nil
 }
 
 func (n *Notifier) Exec() (command.Result, error) {

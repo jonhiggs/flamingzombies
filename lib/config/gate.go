@@ -40,3 +40,7 @@ func (g *Gate) Exec() bool {
 
 	return result.ExitCode == 0
 }
+
+func (g *Gate) IsValid() error {
+	return nil
+}

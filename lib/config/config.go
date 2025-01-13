@@ -198,6 +198,16 @@ func defaultConfigFromToml(b []byte) (defaultConfig, error) {
 	return c, nil
 }
 
+func findNotifierByName(s string) (*Notifier, bool) {
+	for _, n := range Notifiers {
+		if n.Name() == s {
+			return &n, true
+		}
+	}
+
+	return &Notifier{}, false
+}
+
 func tasksFromToml(b []byte, d defaultConfig) ([]Task, error) {
 	var r []Task
 

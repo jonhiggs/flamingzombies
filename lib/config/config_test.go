@@ -58,6 +58,10 @@ func TestLoad(t *testing.T) {
 				t.Errorf("task count got: %d, want: %d", len(Tasks), 1)
 			}
 
+			//if len(Tasks[0].Notifiers()) != 2 {
+			//	t.Errorf("task[0] notifier count got: %d, want: %d", len(Tasks[0].Notifiers()), 2)
+			//}
+
 			if len(Gates) != 2 {
 				t.Errorf("gate count got: %d, want: %d", len(Gates), 2)
 			}
@@ -187,8 +191,8 @@ func TestTasksFromToml(t *testing.T) {
 		}
 
 		gotCmd := got[0].Command()
-		if gotCmd.Command != "task/command" {
-			t.Errorf("got: %s, want: %s", gotCmd.Command, "task/command")
+		if gotCmd.Command != "/usr/bin/true" {
+			t.Errorf("got: %s, want: %s", gotCmd.Command, "/usr/bin/true")
 		}
 
 		envs := []string{
@@ -200,6 +204,11 @@ func TestTasksFromToml(t *testing.T) {
 
 		if fmt.Sprintf("%s", gotCmd.Envs) != fmt.Sprintf("%s", envs) {
 			t.Errorf("got: %s, want: %s", gotCmd.Envs, envs)
+		}
+
+		errValid := got[0].IsValid()
+		if errValid != nil {
+			t.Errorf("task not valid: %s", errValid)
 		}
 
 		// unset global state
@@ -237,6 +246,11 @@ func TestTasksFromToml(t *testing.T) {
 
 		if got[0].RetryFrequency() != 0 {
 			t.Errorf("got: %d, want: %d", got[0].RetryFrequency(), 0)
+		}
+
+		errValid := got[0].IsValid()
+		if errValid != nil {
+			t.Errorf("task not valid: %s", errValid)
 		}
 
 		// unset global state
@@ -328,6 +342,17 @@ func TestGatesFromToml(t *testing.T) {
 				t.Errorf("got: %s, want: %s", gotCmd.Envs, wantEnvs)
 			}
 		}
+
+		errValid := got[0].IsValid()
+		if errValid != nil {
+			t.Errorf("gate not valid: %s", errValid)
+		}
+
+		errValid = got[1].IsValid()
+		if errValid != nil {
+			t.Errorf("gate not valid: %s", errValid)
+		}
+
 	})
 }
 
@@ -386,6 +411,11 @@ func TestNotifiersFromToml(t *testing.T) {
 			if fmt.Sprintf("%s", gotCmd.Envs) != fmt.Sprintf("%s", wantEnvs) {
 				t.Errorf("got: %s, want: %s", gotCmd.Envs, wantEnvs)
 			}
+		}
+
+		errValid := got[0].IsValid()
+		if errValid != nil {
+			t.Errorf("notifier not valid: %s", errValid)
 		}
 	})
 }
