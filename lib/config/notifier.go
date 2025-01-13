@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/jonhiggs/flamingzombies/lib/command"
+	"github.com/jonhiggs/flamingzombies/lib/log"
 	"github.com/jonhiggs/flamingzombies/lib/trace"
 )
 
@@ -87,3 +88,17 @@ func (n Notifier) Name() string {
 }
 
 /// LOGGING ///////////////////////////////////////////////////////////////////
+
+// Print a debug log.
+func (n *Notifier) LogDebug(msg string, id trace.ID) {
+	log.Debug(msg, n.LogData(id)...)
+}
+
+// The metadata to attach to all the logs
+func (n *Notifier) LogData(id trace.ID) []any {
+	return []any{
+		"name", n.Name(),
+		"trace_id", id,
+		"type", "task",
+	}
+}

@@ -27,14 +27,19 @@ func executeTask(t *config.Task) {
 
 	id := trace.New()
 
+	t.LogDebug("executing task", id)
 	ok := t.Exec(id)
 	t.RecordStatus(ok)
+	t.LogDebug("recording result", id)
 
 	for _, n := range t.Notifiers() {
+
+		n.LogDebug("checking gates", id)
+
 		if n.IsUngated() {
-			n.SetDescription("the description")
+			n.SetDescription(t.Description())
 			n.SetMessage("the message")
-			n.SetPriority(1)
+			n.SetPriority(t.Priority())
 			n.SetSubject("the subject")
 			n.SetTraceID(id)
 

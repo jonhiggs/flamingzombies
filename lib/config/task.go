@@ -266,23 +266,23 @@ func (t *Task) timeout() time.Duration {
 /// LOGGGING //////////////////////////////////////////////////////////////////
 
 // Print a debug log.
-func (t *Task) LogDebug(msg string) {
-	log.Debug(msg, t.LogData()...)
+func (t *Task) LogDebug(msg string, id trace.ID) {
+	log.Debug(msg, t.LogData(id)...)
 }
 
 // Print an info log.
-func (t *Task) LogInfo(msg string) {
-	log.Info(msg, t.LogData()...)
+func (t *Task) LogInfo(msg string, id trace.ID) {
+	log.Info(msg, t.LogData(id)...)
 }
 
 // Print an warn log.
-func (t *Task) LogWarn(msg string) {
-	log.Warn(msg, t.LogData()...)
+func (t *Task) LogWarn(msg string, id trace.ID) {
+	log.Warn(msg, t.LogData(id)...)
 }
 
 // Print an error log and call the error_notifiers
 func (t *Task) LogError(msg string, id trace.ID) {
-	log.Error(msg, t.LogData()...)
+	log.Error(msg, t.LogData(id)...)
 
 	for _, n := range t.ErrorNotifiers() {
 		n.SetDescription("the description")
@@ -299,9 +299,11 @@ func (t *Task) LogError(msg string, id trace.ID) {
 }
 
 // The metadata to attach to all the logs
-func (t *Task) LogData() []any {
+func (t *Task) LogData(id trace.ID) []any {
 	return []any{
-		"type", "task",
 		"name", t.Name(),
+		"state", t.State(),
+		"trace_id", id,
+		"type", "task",
 	}
 }
