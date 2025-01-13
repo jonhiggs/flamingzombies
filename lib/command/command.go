@@ -34,7 +34,6 @@ func (c Cmd) Exec() Result {
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, c.Command, c.Args...)
-	cmd.Dir = c.Dir
 	cmd.Env = c.Envs
 
 	stderr, _ := cmd.StderrPipe()
