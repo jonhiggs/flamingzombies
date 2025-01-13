@@ -94,20 +94,21 @@ func (t *Task) IsValid() error {
 		return fmt.Errorf("freqency '%d': %w", t.frequencySeconds, ErrLessThan1)
 	}
 
-	if t.retryFrequencySeconds < 1 {
-		return fmt.Errorf("retry_freqency '%d': %w", t.retryFrequencySeconds, ErrLessThan1)
-	}
-
 	if t.timeoutSeconds < 1 {
 		return fmt.Errorf("timeout_seconds '%d': %w", t.timeoutSeconds, ErrLessThan1)
 	}
 
-	if t.timeoutSeconds > t.retryFrequencySeconds {
-		return fmt.Errorf("timeout_seconds '%d': %w", t.retryFrequencySeconds, ErrTimeoutSlowerThanRetry)
-	}
+	if t.retries > 0 {
+		if t.timeoutSeconds > t.retryFrequencySeconds {
+			return fmt.Errorf("retry_frequency '%d': %w", t.retryFrequencySeconds, ErrTimeoutSlowerThanRetry)
+		}
+		if t.retryFrequencySeconds < 1 {
+			return fmt.Errorf("retry_freqency '%d': %w", t.retryFrequencySeconds, ErrLessThan1)
+		}
 
-	if t.retries > 0 && t.retryFrequencySeconds > t.frequencySeconds {
-		return fmt.Errorf("retry_requency '%d': %w", t.retryFrequencySeconds, ErrRetriesSlowerThanFrequency)
+		if t.retryFrequencySeconds > t.frequencySeconds {
+			return fmt.Errorf("retry_requency '%d': %w", t.retryFrequencySeconds, ErrRetriesSlowerThanFrequency)
+		}
 	}
 
 	if t.priority < 1 {
@@ -128,6 +129,12 @@ func (t *Task) IsValid() error {
 		_, ok := findNotifierByName(name)
 		if !ok {
 			return fmt.Errorf("notifier '%s': %w", name, ErrUnknownResource)
+		}
+	}
+
+	for _, notifier := range t.Notifiers() {
+		if err := notifier.IsValid(); err != nil {
+			return err
 		}
 	}
 

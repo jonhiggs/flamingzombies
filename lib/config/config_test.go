@@ -248,6 +248,10 @@ func TestTasksFromToml(t *testing.T) {
 			t.Errorf("got: %d, want: %d", got[0].RetryFrequency(), 0)
 		}
 
+		if got[0].timeout() != 1*time.Second {
+			t.Errorf("got: %f, want: %d", got[0].timeout().Seconds(), 1)
+		}
+
 		errValid := got[0].IsValid()
 		if errValid != nil {
 			t.Errorf("task not valid: %s", errValid)

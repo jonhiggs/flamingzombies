@@ -76,6 +76,8 @@ func (n *Notifier) Exec() (command.Result, error) {
 		return result, ErrNonZero
 	}
 
+	// TODO(jh) 20250114: validate each of the gates
+
 	return result, nil
 }
 
@@ -101,6 +103,7 @@ func (n *Notifier) SetTraceID(id trace.ID) {
 
 // the gates attached to the notifier
 func (n Notifier) GateSets() [][]Gate {
+	// TODO(jh) 20250114: return gates
 	return [][]Gate{}
 }
 

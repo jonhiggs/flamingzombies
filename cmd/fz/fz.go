@@ -103,10 +103,7 @@ func init() {
 			log.Fatal(err)
 		}
 	}
-	// validation
-	//if err = config.Validate(); err != nil {
-	//	log.Fatal(err)
-	//}
+
 	if configTest {
 		// break out if we're in config test mode.
 		fmt.Println("The configuration is valid")
