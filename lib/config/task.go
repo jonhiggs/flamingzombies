@@ -77,7 +77,9 @@ func (t *Task) Frequency() time.Duration {
 	return time.Duration(t.frequencySeconds) * time.Second
 }
 
-// Check that the task is in a valid state.
+// Check that the task is in a valid state. It does not traverse into the
+// dependencies and check their validity. To check everything, use
+// config.IsValid().
 func (t *Task) IsValid() error {
 	re := regexp.MustCompile(`^.+$`)
 	if !re.Match([]byte(t.name)) {
@@ -116,26 +118,6 @@ func (t *Task) IsValid() error {
 	}
 	if t.priority > 99 {
 		return fmt.Errorf("priority '%d': %w", t.priority, ErrGreaterThan99)
-	}
-
-	for _, name := range t.notifierNames {
-		_, ok := findNotifierByName(name)
-		if !ok {
-			return fmt.Errorf("notifier '%s': %w", name, ErrUnknownResource)
-		}
-	}
-
-	for _, name := range t.errorNotifierNames {
-		_, ok := findNotifierByName(name)
-		if !ok {
-			return fmt.Errorf("notifier '%s': %w", name, ErrUnknownResource)
-		}
-	}
-
-	for _, notifier := range t.Notifiers() {
-		if err := notifier.IsValid(); err != nil {
-			return err
-		}
 	}
 
 	return nil

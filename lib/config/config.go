@@ -68,10 +68,36 @@ func init() {
 	Directory, _ = os.Getwd()
 }
 
-// A Task is a command that is executed on a schedule. The struct contains the
-// static configuration of the task which is read from the configuration file,
-// and it's metadata and history which are generated over the course of the
-// daemons lifecycle.
+// Check validity of all items in []Tasks, []Gates and []Notifiers.
+func IsValid() error {
+
+	for _, t := range Tasks {
+		if err := t.IsValid(); err != nil {
+			return fmt.Errorf("config validator: task %s: %w", t.Name(), err)
+		}
+
+		for _, name := range t.notifierNames {
+			if _, ok := findNotifierByName(name); !ok {
+				return fmt.Errorf("config validator: task %s: %w", t.Name(), ErrUnknownResource)
+			}
+		}
+
+		for _, name := range t.errorNotifierNames {
+			if _, ok := findNotifierByName(name); !ok {
+				return fmt.Errorf("config validator: task '%s': %w", t.Name(), ErrUnknownResource)
+			}
+		}
+
+		for _, notifier := range t.Notifiers() {
+			if err := notifier.IsValid(); err != nil {
+				return fmt.Errorf("config validator: notifier '%s': %w", notifier.Name(), ErrUnknownResource)
+			}
+		}
+
+	}
+
+	return nil
+}
 
 // populate the package variables from the content of the TOML
 func Load(f *os.File) error {

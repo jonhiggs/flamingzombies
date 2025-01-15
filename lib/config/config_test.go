@@ -70,6 +70,10 @@ func TestLoad(t *testing.T) {
 				t.Errorf("gate count got: %d, want: %d", len(Notifiers), 1)
 			}
 
+			if err := IsValid(); err != nil {
+				t.Errorf("is valid got: %s", err)
+			}
+
 			// unset the global state
 			def = defaultConfig{}
 			Tasks = []Task{}
